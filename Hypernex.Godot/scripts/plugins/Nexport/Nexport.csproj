@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="MessagePack">
+      <HintPath>scripts\plugins\Nexport\MessagePack.dll</HintPath>
+    </Reference>
+    <Reference Include="MessagePack.Annotations">
+      <HintPath>scripts\plugins\Nexport\MessagePack.Annotations.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

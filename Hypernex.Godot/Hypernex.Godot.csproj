@@ -1,0 +1,34 @@
+<Project Sdk="Godot.NET.Sdk/4.1.2">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="scripts\plugins\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="scripts\plugins\Nexport\Nexport.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="HypernexSharp">
+      <HintPath>scripts\plugins\HypernexSharp\HypernexSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Hypernex.CCK">
+      <HintPath>scripts\plugins\Hypernex.CCK\Hypernex.CCK.dll</HintPath>
+    </Reference>
+    <Reference Include="Nexbox">
+      <HintPath>scripts\plugins\Nexbox\Nexbox.dll</HintPath>
+    </Reference>
+    <Reference Include="Hypernex.Networking">
+      <HintPath>scripts\plugins\Hypernex.Networking\Hypernex.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="Tomlet">
+      <HintPath>scripts\plugins\Tomlet\Tomlet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
