@@ -1,6 +1,55 @@
-[gd_scene load_steps=2 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=3 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
+[ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
 
-[node name="Init" type="Node"]
+[node name="Init" type="Node" node_paths=PackedStringArray("login")]
 script = ExtResource("1_07r2y")
+login = NodePath("UI/Login/LoginScreen")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Login" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoginScreen" type="Node" parent="UI/Login" node_paths=PackedStringArray("usernameEdit", "passwordEdit", "twoFactorEdit", "loginButton", "messagePopup")]
+script = ExtResource("2_qliqn")
+usernameEdit = NodePath("../Username")
+passwordEdit = NodePath("../Password")
+twoFactorEdit = NodePath("../2FA")
+loginButton = NodePath("../LoginBtn")
+messagePopup = NodePath("../../AcceptDialog")
+
+[node name="Username" type="LineEdit" parent="UI/Login"]
+layout_mode = 2
+placeholder_text = "Username"
+alignment = 1
+
+[node name="Password" type="LineEdit" parent="UI/Login"]
+layout_mode = 2
+placeholder_text = "Password"
+alignment = 1
+secret = true
+
+[node name="2FA" type="LineEdit" parent="UI/Login"]
+layout_mode = 2
+placeholder_text = "2FA Code (optional)"
+alignment = 1
+
+[node name="LoginBtn" type="Button" parent="UI/Login"]
+layout_mode = 2
+text = "Login"
+
+[node name="AcceptDialog" type="AcceptDialog" parent="UI"]
+initial_position = 2

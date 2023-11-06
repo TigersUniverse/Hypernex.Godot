@@ -1,13 +1,18 @@
 using Godot;
 using Hypernex.CCK;
 using Hypernex.CCK.Godot;
+using Hypernex.Configuration;
 using Hypernex.Tools;
+using Hypernex.UI;
 using System;
 using System.IO;
 
 public partial class Init : Node
 {
     public static Init Instance;
+    public ConfigManager config;
+    [Export]
+    public LoginScreen login;
 
     public override void _Ready()
     {
@@ -21,7 +26,10 @@ public partial class Init : Node
         Telepathy.Log.Warning = s => logger.Warn(s);
         Telepathy.Log.Error = s => logger.Error(s);
 
+
         AddChild(new QuickInvoke());
+        config = new ConfigManager();
+        AddChild(config);
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
 
         int pluginsLoaded;
@@ -35,5 +43,7 @@ public partial class Init : Node
         }
         Logger.CurrentLogger.Log($"Loaded {pluginsLoaded} Plugins!");
         AddChild(new PluginLoader());
+
+        login.TryLoginWith();
     }
 }

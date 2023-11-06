@@ -19,13 +19,13 @@ namespace Hypernex.Configuration
         public static Action<Config> OnConfigSaved = config => { };
         public static Action<Config> OnConfigLoaded = config => { };
 
-        public void Start()
+        public override void _Ready()
         {
             persistentAppData = OS.GetUserDataDir();
             LoadConfigFromFile();
         }
 
-        public void OnApplicationQuit()
+        public override void _ExitTree()
         {
             SaveConfigToFile(LoadedConfig);
         }
