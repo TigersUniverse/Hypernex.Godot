@@ -6,7 +6,6 @@ using Hypernex.CCK;
 
 namespace Hypernex.Tools
 {
-    // TODO: check if this class actually works
     public partial class QuickInvoke : Node
     {
         public static QuickInvoke Instance;
