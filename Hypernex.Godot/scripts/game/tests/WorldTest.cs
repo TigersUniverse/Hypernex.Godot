@@ -20,6 +20,7 @@ namespace Hypernex.Game.Tests
                 WorldData data = WorldManager.Instance.SaveWorld(this);
                 sw.Stop();
                 GD.Print($"SaveWorld took {sw.ElapsedMilliseconds} ms");
+                sw.Reset();
                 sw.Start();
                 WorldManager.SaveToFile(data);
                 sw.Stop();
@@ -32,6 +33,7 @@ namespace Hypernex.Game.Tests
                 WorldData data = WorldManager.LoadFromFile();
                 sw.Stop();
                 GD.Print($"LoadFromFile took {sw.ElapsedMilliseconds} ms");
+                sw.Reset();
                 sw.Start();
                 Node node = WorldManager.Instance.LoadWorld(data);
                 sw.Stop();
