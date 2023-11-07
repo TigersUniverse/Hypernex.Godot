@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://blqal6vcg8rus"]
+
+[ext_resource type="Script" path="res://scripts/game/WorldManager.cs" id="1_d4dsn"]
+[ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
+[ext_resource type="Script" path="res://scripts/game/classes/WorldDescriptor.cs" id="3_73irx"]
+
+[node name="WorldTest" type="Node"]
+script = ExtResource("1_d4dsn")
+
+[node name="Test" type="Node" parent="."]
+script = ExtResource("1_hscsn")
+save = true
+load = true
+
+[node name="Node3D" type="Node3D" parent="Test"]
+script = ExtResource("3_73irx")
+Data = "HI"

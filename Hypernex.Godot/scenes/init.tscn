@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=4 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
+[ext_resource type="Script" path="res://scripts/ui/MainOverlay.cs" id="3_yxb3m"]
 
-[node name="Init" type="Node" node_paths=PackedStringArray("login")]
+[node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay")]
 script = ExtResource("1_07r2y")
 login = NodePath("UI/Login/LoginScreen")
+overlay = NodePath("UI/PanelContainer/Overlay")
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
@@ -15,6 +17,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="AcceptDialog" type="AcceptDialog" parent="UI"]
+initial_position = 2
+
 [node name="Login" type="VBoxContainer" parent="UI"]
 layout_mode = 1
 anchors_preset = 15
@@ -23,8 +28,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LoginScreen" type="Node" parent="UI/Login" node_paths=PackedStringArray("usernameEdit", "passwordEdit", "twoFactorEdit", "loginButton", "messagePopup")]
+[node name="LoginScreen" type="Node" parent="UI/Login" node_paths=PackedStringArray("root", "usernameEdit", "passwordEdit", "twoFactorEdit", "loginButton", "messagePopup")]
 script = ExtResource("2_qliqn")
+root = NodePath("..")
 usernameEdit = NodePath("../Username")
 passwordEdit = NodePath("../Password")
 twoFactorEdit = NodePath("../2FA")
@@ -51,5 +57,14 @@ alignment = 1
 layout_mode = 2
 text = "Login"
 
-[node name="AcceptDialog" type="AcceptDialog" parent="UI"]
-initial_position = 2
+[node name="PanelContainer" type="PanelContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="Node" parent="UI/PanelContainer" node_paths=PackedStringArray("root")]
+script = ExtResource("3_yxb3m")
+root = NodePath("..")

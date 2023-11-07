@@ -13,6 +13,8 @@ namespace Hypernex.UI
     public partial class LoginScreen : Node
     {
         [Export]
+        public VBoxContainer root;
+        [Export]
         public LineEdit usernameEdit;
         [Export]
         public LineEdit passwordEdit;
@@ -22,7 +24,7 @@ namespace Hypernex.UI
         public Button loginButton;
         [Export]
         public AcceptDialog messagePopup;
-        public HypernexObject hypernex;
+        public event EventHandler OnUser;
 
         public override void _Ready()
         {
@@ -34,6 +36,11 @@ namespace Hypernex.UI
             loginButton.Pressed -= TryLogin;
         }
 
+        private void OnLogin()
+        {
+            OnUser?.Invoke(this, EventArgs.Empty);
+        }
+
         public void TryLoginWith()
         {
             if (ConfigManager.LoadedConfig.SavedAccounts.Any())
@@ -41,7 +48,7 @@ namespace Hypernex.UI
                 ConfigUser user = ConfigManager.LoadedConfig.SavedAccounts.First();
                 HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
                 {
-                    TargetDomain = "play.hypernex.dev",
+                    TargetDomain = user.Server,
                     IsHTTP = false,
                 };
                 TryLogin(settings);
@@ -60,8 +67,9 @@ namespace Hypernex.UI
 
         public void TryLogin(HypernexSettings settings)
         {
-            hypernex = new HypernexObject(settings);
-            hypernex.Login(r =>
+            Init.Instance.hypernex = new HypernexObject(settings);
+            loginButton.Disabled = true;
+            Init.Instance.hypernex.Login(r =>
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>
                 {
@@ -69,7 +77,7 @@ namespace Hypernex.UI
                     {
                         if (r.result.Result == LoginResult.Correct)
                         {
-                            hypernex.GetUser(r.result.Token, userR =>
+                            Init.Instance.hypernex.GetUser(r.result.Token, userR =>
                             {
                                 QuickInvoke.InvokeActionOnMainThread(() =>
                                 {
@@ -92,15 +100,19 @@ namespace Hypernex.UI
                                                 UserId = userR.result.UserData.Id,
                                                 Username = userR.result.UserData.Username,
                                                 TokenContent = r.result.Token.content,
+                                                Server = settings.TargetDomain,
                                             });
                                         }
-                                        messagePopup.DialogText = $"Welcome back {userR.result.UserData.Username}!";
+                                        messagePopup.DialogText = $"Welcome {userR.result.UserData.Username}!";
                                         messagePopup.Show();
+                                        loginButton.Disabled = false;
+                                        OnLogin();
                                     }
                                     else
                                     {
                                         messagePopup.DialogText = "Failed to get login user!";
                                         messagePopup.Show();
+                                        loginButton.Disabled = false;
                                     }
                                 });
                             });
@@ -109,12 +121,14 @@ namespace Hypernex.UI
                         {
                             messagePopup.DialogText = $"Error logging in: {r.result.Result}";
                             messagePopup.Show();
+                            loginButton.Disabled = false;
                         }
                     }
                     else
                     {
                         messagePopup.DialogText = $"API error: {r.message}";
                         messagePopup.Show();
+                        loginButton.Disabled = false;
                     }
                 });
             });
