@@ -1,11 +1,13 @@
 using System;
 using System.Text;
 using Godot;
+using Hypernex.Tools;
 using Newtonsoft.Json;
 
 namespace Hypernex.Game.Classes
 {
-    public partial class WorldDescriptor : Node3D, IWorldClass
+    [GlobalClass]
+    public partial class WorldDescriptor : Node, IWorldClass
     {
         public static string ClassName => "World";
 
@@ -15,12 +17,12 @@ namespace Hypernex.Game.Classes
 
         public void LoadFromData(string data)
         {
-            JsonConvert.PopulateObject(Encoding.UTF8.GetString(Convert.FromBase64String(data)), this);
+            JsonTools.JsonPopulate(data, this);
         }
 
         public string SaveToData()
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this)));
+            return JsonTools.JsonSerialize(this);
         }
     }
 }

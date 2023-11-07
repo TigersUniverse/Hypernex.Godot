@@ -5,8 +5,10 @@ using System.Linq;
 using System.Reflection;
 using Godot;
 using Hypernex.Game.Classes;
+using Hypernex.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Linq;
 
 namespace Hypernex.Game
 {
@@ -46,7 +48,8 @@ namespace Hypernex.Game
             obj.ClassName = classes.FirstOrDefault(x => x.Value == node.GetType()).Key;
             if (!string.IsNullOrEmpty(obj.ClassName) && node is IWorldClass cl)
             {
-                obj.ClassData = cl.SaveToData();
+                // obj.ClassData = cl.SaveToData();
+                obj.ClassData2 = JObject.Parse(cl.SaveToData());
             }
             foreach (var child in node.GetChildren())
             {
@@ -68,7 +71,8 @@ namespace Hypernex.Game
                 {
                     node = cl as Node;
                     node.Name = obj.Name;
-                    cl.LoadFromData(obj.ClassData);
+                    // cl.LoadFromData(obj.ClassData);
+                    cl.LoadFromData(obj.ClassData2.ToString(Formatting.None));
                     foreach (var child in obj.ChildObjects)
                     {
                         node.AddChild(FromWorldObject(child));
@@ -104,39 +108,17 @@ namespace Hypernex.Game
         public static WorldData LoadFromFile()
         {
             string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves");
-
-            JsonSerializer serializer = new JsonSerializer();
-            using MemoryStream ms2 = new MemoryStream(File.ReadAllBytes(Path.Combine(dir, "world.json")));
-            using StreamReader sw = new StreamReader(ms2);
-            using (JsonTextReader reader = new JsonTextReader(sw))
-            {
-                return serializer.Deserialize<WorldData>(reader);
-            }
+            return JsonTools.MsgPackDeserialize<WorldData>(File.ReadAllText(Path.Combine(dir, "world.msgpack")));
         }
 
         public static void SaveToFile(WorldData data)
         {
             string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves");
-
-            JsonSerializer serializer = new JsonSerializer();
-            using MemoryStream ms = new MemoryStream();
-            using (BsonDataWriter writer = new BsonDataWriter(ms))
-            {
-                serializer.Serialize(writer, data);
-            }
-            using MemoryStream ms2 = new MemoryStream();
-            using StreamWriter sw = new StreamWriter(ms2);
-            using (JsonTextWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, data);
-            }
-
             if (!Directory.Exists(dir))
             {
                 Directory.CreateDirectory(dir);
             }
-            File.WriteAllBytes(Path.Combine(dir, "world.json"), ms2.ToArray());
-            File.WriteAllBytes(Path.Combine(dir, "world.bson"), ms.ToArray());
+            File.WriteAllText(Path.Combine(dir, "world.msgpack"), JsonTools.MsgPackSerialize(data));
         }
     }
 }

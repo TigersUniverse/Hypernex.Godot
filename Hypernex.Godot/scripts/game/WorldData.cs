@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Hypernex.Game
 {
@@ -12,6 +13,7 @@ namespace Hypernex.Game
     {
         public string Name { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
+        public JObject ClassData2 { get; set; } = null;
         public string ClassData { get; set; } = string.Empty;
         public List<WorldComponent> Components { get; set; } = new List<WorldComponent>();
         public List<WorldObject> ChildObjects { get; set; } = new List<WorldObject>();

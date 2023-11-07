@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=6 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/WorldManager.cs" id="1_d4dsn"]
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="Script" path="res://scripts/game/classes/WorldDescriptor.cs" id="3_73irx"]
+[ext_resource type="ArrayMesh" uid="uid://563yko74k3mj" path="res://models/cube.obj" id="4_3rgyl"]
+[ext_resource type="Script" path="res://scripts/game/classes/WorldMesh.cs" id="4_tw6kn"]
 
 [node name="WorldTest" type="Node"]
 script = ExtResource("1_d4dsn")
@@ -12,6 +14,13 @@ script = ExtResource("1_hscsn")
 save = true
 load = true
 
-[node name="Node3D" type="Node3D" parent="Test"]
+[node name="WorldDescriptor" type="Node" parent="Test"]
 script = ExtResource("3_73irx")
 Data = "HI"
+
+[node name="WorldMesh" type="MeshInstance3D" parent="Test/WorldDescriptor"]
+mesh = ExtResource("4_3rgyl")
+script = ExtResource("4_tw6kn")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)

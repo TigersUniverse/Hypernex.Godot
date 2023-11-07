@@ -6,10 +6,10 @@
 
   <ItemGroup>
     <Reference Include="MessagePack">
-      <HintPath>scripts\plugins\Nexport\MessagePack.dll</HintPath>
+      <HintPath>.\MessagePack.dll</HintPath>
     </Reference>
     <Reference Include="MessagePack.Annotations">
-      <HintPath>scripts\plugins\Nexport\MessagePack.Annotations.dll</HintPath>
+      <HintPath>.\MessagePack.Annotations.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Godot;
 
 namespace Hypernex.Game.Tests
@@ -13,9 +14,30 @@ namespace Hypernex.Game.Tests
         {
             await ToSignal(GetTree().CreateTimer(0.25f), "timeout");
             if (save)
-                WorldManager.SaveToFile(WorldManager.Instance.SaveWorld(this));
-            else
-                AddChild(WorldManager.Instance.LoadWorld(WorldManager.LoadFromFile()));
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                WorldData data = WorldManager.Instance.SaveWorld(this);
+                sw.Stop();
+                GD.Print($"SaveWorld took {sw.ElapsedMilliseconds} ms");
+                sw.Start();
+                WorldManager.SaveToFile(data);
+                sw.Stop();
+                GD.Print($"SaveToFile took {sw.ElapsedMilliseconds} ms");
+            }
+            if (load)
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                WorldData data = WorldManager.LoadFromFile();
+                sw.Stop();
+                GD.Print($"LoadFromFile took {sw.ElapsedMilliseconds} ms");
+                sw.Start();
+                Node node = WorldManager.Instance.LoadWorld(data);
+                sw.Stop();
+                GD.Print($"LoadWorld took {sw.ElapsedMilliseconds} ms");
+                AddChild(node);
+            }
         }
     }
 }

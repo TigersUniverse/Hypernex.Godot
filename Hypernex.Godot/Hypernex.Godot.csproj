@@ -29,6 +29,12 @@
     <Reference Include="Tomlet">
       <HintPath>scripts\plugins\Tomlet\Tomlet.dll</HintPath>
     </Reference>
+    <Reference Include="MessagePack">
+      <HintPath>scripts\plugins\Nexport\MessagePack.dll</HintPath>
+    </Reference>
+    <Reference Include="MessagePack.Annotations">
+      <HintPath>scripts\plugins\Nexport\MessagePack.Annotations.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
