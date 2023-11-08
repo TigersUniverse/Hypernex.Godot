@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/CardTemplate.cs" id="1_41cr0"]
 [ext_resource type="Texture2D" uid="uid://dome6nkl687io" path="res://icon.svg" id="1_v15dn"]
 
-[node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label")]
+[node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoBackground")]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 3
 anchors_preset = 8
@@ -21,6 +21,7 @@ script = ExtResource("1_41cr0")
 icon = NodePath("PFP")
 background = NodePath("BG")
 label = NodePath("Name")
+videoBackground = NodePath("BG2")
 
 [node name="BG" type="TextureRect" parent="."]
 layout_mode = 1
@@ -31,7 +32,16 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_v15dn")
 expand_mode = 1
-stretch_mode = 6
+
+[node name="BG2" type="VideoStreamPlayer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+volume_db = -80.0
+expand = true
 
 [node name="PFP" type="TextureRect" parent="."]
 layout_mode = 1
