@@ -51,6 +51,8 @@ namespace Hypernex.UI
             {
                 node.QueueFree();
             }
+            if (!label.Visible)
+                return;
             foreach (var friend in friends)
             {
                 CardTemplate node = friendUI.Instantiate<CardTemplate>();

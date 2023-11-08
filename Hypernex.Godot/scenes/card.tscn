@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://ct7xyaxn1p1cf"]
+[gd_scene load_steps=4 format=3 uid="uid://ct7xyaxn1p1cf"]
 
 [ext_resource type="Script" path="res://scripts/ui/CardTemplate.cs" id="1_41cr0"]
-[ext_resource type="Texture2D" uid="uid://dome6nkl687io" path="res://icon.svg" id="1_v15dn"]
+[ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="2_raub8"]
+[ext_resource type="Texture2D" uid="uid://pr14mfjw31m7" path="res://textures/defaults/defaultpfp.jpg" id="3_pb736"]
 
-[node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoBackground")]
+[node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoIcon", "videoBackground")]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 3
 anchors_preset = 8
@@ -21,6 +22,7 @@ script = ExtResource("1_41cr0")
 icon = NodePath("PFP")
 background = NodePath("BG")
 label = NodePath("Name")
+videoIcon = NodePath("PFP2")
 videoBackground = NodePath("BG2")
 
 [node name="BG" type="TextureRect" parent="."]
@@ -30,7 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_v15dn")
+texture = ExtResource("2_raub8")
 expand_mode = 1
 
 [node name="BG2" type="VideoStreamPlayer" parent="."]
@@ -44,6 +46,7 @@ volume_db = -80.0
 expand = true
 
 [node name="PFP" type="TextureRect" parent="."]
+clip_contents = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -51,9 +54,19 @@ anchor_bottom = 1.0
 offset_top = -50.0
 offset_right = 50.0
 grow_vertical = 0
-texture = ExtResource("1_v15dn")
+texture = ExtResource("3_pb736")
 expand_mode = 1
-stretch_mode = 4
+
+[node name="PFP2" type="VideoStreamPlayer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+offset_right = 50.0
+grow_vertical = 0
+volume_db = -80.0
+expand = true
 
 [node name="Name" type="RichTextLabel" parent="."]
 layout_mode = 1
