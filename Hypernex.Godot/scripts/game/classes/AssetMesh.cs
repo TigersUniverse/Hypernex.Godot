@@ -72,5 +72,13 @@ namespace Hypernex.Game.Classes
         {
             return JsonTools.JsonSerialize(this);
         }
+
+        public void PostLoad()
+        {
+        }
+
+        public void PreSave()
+        {
+        }
     }
 }

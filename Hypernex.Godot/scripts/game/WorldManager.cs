@@ -92,6 +92,18 @@ namespace Hypernex.Game
             return worldRoot;
         }
 
+        public void PostLoad(Node worldRoot)
+        {
+            foreach (var node in worldRoot.GetChildren())
+            {
+                if (IsValidWorldObject(node) && node is IWorldClass wc)
+                {
+                    wc.PostLoad();
+                    PostLoad(node);
+                }
+            }
+        }
+
         public WorldData SaveWorld(Node worldRoot)
         {
             WorldData data = new WorldData();
@@ -105,13 +117,25 @@ namespace Hypernex.Game
             return data;
         }
 
+        public void PreSave(Node worldRoot)
+        {
+            foreach (var node in worldRoot.GetChildren())
+            {
+                if (IsValidWorldObject(node) && node is IWorldClass wc)
+                {
+                    wc.PreSave();
+                    PreSave(node);
+                }
+            }
+        }
+
         public static WorldData LoadFromFile()
         {
             string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves");
             return JsonTools.MsgPackDeserialize<WorldData>(File.ReadAllText(Path.Combine(dir, "world.msgpack")));
         }
 
-        public static void SaveToFile(WorldData data)
+        public static void SaveToFile(WorldData data, bool json = false)
         {
             string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves");
             if (!Directory.Exists(dir))
@@ -119,6 +143,8 @@ namespace Hypernex.Game
                 Directory.CreateDirectory(dir);
             }
             File.WriteAllText(Path.Combine(dir, "world.msgpack"), JsonTools.MsgPackSerialize(data));
+            if (json)
+                File.WriteAllText(Path.Combine(dir, "world.json"), JsonTools.JsonSerialize(data));
         }
     }
 }

@@ -5,6 +5,7 @@ using Hypernex.Configuration;
 using Hypernex.Tools;
 using Hypernex.UI;
 using HypernexSharp;
+using HypernexSharp.APIObjects;
 using System;
 using System.IO;
 
@@ -12,6 +13,8 @@ public partial class Init : Node
 {
     public static Init Instance;
     public HypernexObject hypernex;
+    public User user;
+    internal Token token;
     [Export]
     public LoginScreen login;
     [Export]
@@ -48,8 +51,11 @@ public partial class Init : Node
 
         login.OnUser += (s, e) =>
         {
+            user = e.Item1;
+            token = e.Item2;
             login.root.Hide();
             overlay.root.Show();
+            overlay.ShowHome();
         };
         overlay.OnLogout += (s, e) =>
         {

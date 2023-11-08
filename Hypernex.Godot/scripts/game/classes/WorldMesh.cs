@@ -15,6 +15,9 @@ namespace Hypernex.Game.Classes
         public static string ClassName => "WorldMesh";
 
         [JsonProperty]
+        public float[] JsonTransform { get; set; }
+
+        [JsonProperty]
         public AssetMesh Source { get; set; }
 
         public override void _Ready()
@@ -62,6 +65,16 @@ namespace Hypernex.Game.Classes
         public string SaveToData()
         {
             return JsonTools.JsonSerialize(this);
+        }
+
+        public void PostLoad()
+        {
+            Transform = JsonTransform.ToGodot3D();
+        }
+
+        public void PreSave()
+        {
+            JsonTransform = Transform.ToFloats();
         }
     }
 }

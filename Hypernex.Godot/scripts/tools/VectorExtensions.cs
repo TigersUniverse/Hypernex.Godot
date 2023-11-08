@@ -39,5 +39,26 @@ namespace Hypernex.Tools.Godot
         {
             return new Plane(v.X, v.Y, v.Z, v.W);
         }
+
+        public static float[] ToFloats(this Transform3D v)
+        {
+            return new float[]
+            {
+                v.Basis.Row0.X, v.Basis.Row0.Y, v.Basis.Row0.Z,
+                v.Basis.Row1.X, v.Basis.Row1.Y, v.Basis.Row1.Z,
+                v.Basis.Row2.X, v.Basis.Row2.Y, v.Basis.Row2.Z,
+                v.Origin.X, v.Origin.Y, v.Origin.Z,
+            };
+        }
+
+        public static Transform3D ToGodot3D(this float[] v)
+        {
+            return new Transform3D(
+                new Vector3(v[0], v[1], v[2]),
+                new Vector3(v[3], v[4], v[5]),
+                new Vector3(v[6], v[7], v[8]),
+                new Vector3(v[9], v[10], v[11])
+            );
+        }
     }
 }

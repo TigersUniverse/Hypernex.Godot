@@ -1,19 +1,21 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Godot;
 using Hypernex.Tools;
+using Hypernex.Tools.Godot;
 using Newtonsoft.Json;
 
 namespace Hypernex.Game.Classes
 {
     [GlobalClass]
-    public partial class WorldDescriptor : Node, IWorldClass
+    public partial class WorldStaticBody : StaticBody3D, IWorldClass
     {
-        public static string ClassName => "World";
+        public static string ClassName => "StaticBody";
 
         [JsonProperty]
-        [Export]
-        public string Data { get; set; }
+        public float[] JsonTransform { get; set; }
 
         public void LoadFromData(string data)
         {
@@ -27,10 +29,12 @@ namespace Hypernex.Game.Classes
 
         public void PostLoad()
         {
+            Transform = JsonTransform.ToGodot3D();
         }
 
         public void PreSave()
         {
+            JsonTransform = Transform.ToFloats();
         }
     }
 }

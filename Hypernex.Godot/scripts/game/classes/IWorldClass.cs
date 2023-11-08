@@ -9,5 +9,7 @@ namespace Hypernex.Game.Classes
         public const string ClassNameName = "ClassName";
         void LoadFromData(string data);
         string SaveToData();
+        void PostLoad();
+        void PreSave();
     }
 }

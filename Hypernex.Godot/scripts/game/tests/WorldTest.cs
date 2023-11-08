@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Threading;
 using Godot;
 
 namespace Hypernex.Game.Tests
@@ -13,6 +14,12 @@ namespace Hypernex.Game.Tests
         public override async void _Ready()
         {
             await ToSignal(GetTree().CreateTimer(0.25f), "timeout");
+            // new Thread(() => RunTest()).Start();
+            RunTest();
+        }
+
+        public void RunTest()
+        {
             if (save)
             {
                 Stopwatch sw = new Stopwatch();
@@ -22,7 +29,7 @@ namespace Hypernex.Game.Tests
                 GD.Print($"SaveWorld took {sw.ElapsedMilliseconds} ms");
                 sw.Reset();
                 sw.Start();
-                WorldManager.SaveToFile(data);
+                WorldManager.SaveToFile(data, true);
                 sw.Stop();
                 GD.Print($"SaveToFile took {sw.ElapsedMilliseconds} ms");
             }
@@ -38,8 +45,15 @@ namespace Hypernex.Game.Tests
                 Node node = WorldManager.Instance.LoadWorld(data);
                 sw.Stop();
                 GD.Print($"LoadWorld took {sw.ElapsedMilliseconds} ms");
-                AddChild(node);
+                // CallDeferred(nameof(SpawnWorld), node);
+                SpawnWorld(node);
             }
+        }
+
+        public void SpawnWorld(Node world)
+        {
+            WorldManager.Instance.PostLoad(world);
+            AddChild(world);
         }
     }
 }

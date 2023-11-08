@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Tasks;
 using Hypernex.Configuration;
 using Logger = Hypernex.CCK.Logger;
 
@@ -17,8 +19,10 @@ namespace Hypernex.Tools
         private static readonly Queue<DownloadMeta> Queue = new();
         private static readonly Dictionary<DownloadMeta, Thread> RunningThreads = new();
 
-        public static void DownloadBytes(string url, Action<byte[]> OnDownload, Action<DownloadProgressChangedEventArgs> DownloadProgress = null, bool skipCache = false)
+        public static void DownloadBytes(string url, Action<byte[]> OnDownload, Action<float> DownloadProgress = null, bool skipCache = false)
         {
+            if (string.IsNullOrWhiteSpace(url))
+                return;
             try
             {
                 if (Cache.ContainsKey(url) && !skipCache)
@@ -60,7 +64,7 @@ namespace Hypernex.Tools
             bool isHashSame = false;
             if (fileExists && !string.IsNullOrEmpty(knownFileHash))
                 isHashSame = GetFileHash(fileOutput) == knownFileHash;
-            if(fileExists && isHashSame)
+            if (fileExists && isHashSame)
                 QuickInvoke.InvokeActionOnMainThread(OnDownload, fileOutput);
             else
             {
@@ -98,22 +102,47 @@ namespace Hypernex.Tools
             Logger.CurrentLogger.Debug("Beginning Download for " + downloadMeta.url);
             Thread t = new Thread(async () =>
             {
-                using WebClient wc = new WebClient();
-                if(downloadMeta.progress != null)
-                    wc.DownloadProgressChanged += (sender, args) =>
-                        QuickInvoke.InvokeActionOnMainThread(downloadMeta.progress, args);
-                wc.DownloadDataCompleted += (sender, args) =>
+                using HttpClient wc = new HttpClient();
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, downloadMeta.url);
+                using var sendTask = wc.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                using var result = sendTask.Result.EnsureSuccessStatusCode();
+                using var httpStream = await result.Content.ReadAsStreamAsync();
+                long? leng = result.Content.Headers.ContentLength;
+                using MemoryStream ms = new MemoryStream();
+                if (leng.HasValue)
                 {
-                    Logger.CurrentLogger.Debug("Finished download for " + downloadMeta.url);
-                    if(!downloadMeta.skipCache)
-                        AttemptAddToCache(downloadMeta.url, args.Result);
-                    QuickInvoke.InvokeActionOnMainThread(downloadMeta.done, args.Result);
-                    RunningThreads.Remove(downloadMeta);
-                };
-                await wc.DownloadDataTaskAsync(new Uri(downloadMeta.url));
+                    var prog = new Progress<long>(total =>
+                    {
+                        if (downloadMeta.progress != null)
+                            QuickInvoke.InvokeActionOnMainThread(downloadMeta.progress, total);
+                    });
+                    await CopyAsync(httpStream, ms, 81920, prog);
+                }
+                else
+                {
+                    await httpStream.CopyToAsync(ms);
+                }
+                Logger.CurrentLogger.Debug("Finished download for " + downloadMeta.url);
+                if (!downloadMeta.skipCache)
+                    AttemptAddToCache(downloadMeta.url, ms.ToArray());
+                QuickInvoke.InvokeActionOnMainThread(downloadMeta.done, ms.ToArray());
+                RunningThreads.Remove(downloadMeta);
             });
             RunningThreads.Add(downloadMeta, t);
             t.Start();
+        }
+
+        private static async Task CopyAsync(Stream source, Stream dest, int bufferSize, IProgress<long> progress)
+        {
+            var buffer = new byte[bufferSize];
+            long total = 0;
+            int read;
+            while ((read = await source.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) != 0)
+            {
+                await dest.WriteAsync(buffer, 0, read).ConfigureAwait(false);
+                total += read;
+                progress.Report(total);
+            }
         }
 
         private static void AttemptAddToCache(string url, byte[] data)
@@ -144,7 +173,7 @@ namespace Hypernex.Tools
     public class DownloadMeta
     {
         public string url;
-        public Action<DownloadProgressChangedEventArgs> progress;
+        public Action<float> progress;
         public Action<byte[]> done;
         public bool skipCache;
     }

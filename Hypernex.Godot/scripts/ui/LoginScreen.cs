@@ -24,7 +24,7 @@ namespace Hypernex.UI
         public Button loginButton;
         [Export]
         public AcceptDialog messagePopup;
-        public event EventHandler OnUser;
+        public event EventHandler<(User, Token)> OnUser;
 
         public override void _Ready()
         {
@@ -36,9 +36,9 @@ namespace Hypernex.UI
             loginButton.Pressed -= TryLogin;
         }
 
-        private void OnLogin()
+        private void OnLogin(User user, Token token)
         {
-            OnUser?.Invoke(this, EventArgs.Empty);
+            OnUser?.Invoke(this, (user, token));
         }
 
         public void TryLoginWith()
@@ -106,7 +106,7 @@ namespace Hypernex.UI
                                         messagePopup.DialogText = $"Welcome {userR.result.UserData.Username}!";
                                         messagePopup.Show();
                                         loginButton.Disabled = false;
-                                        OnLogin();
+                                        OnLogin(userR.result.UserData, r.result.Token);
                                     }
                                     else
                                     {
