@@ -2,11 +2,17 @@ using System;
 using System.IO;
 using Godot;
 using Hypernex.Tools;
+using HypernexSharp.APIObjects;
 
 namespace Hypernex.UI
 {
     public partial class CardTemplate : Control
     {
+        public static Vector2 baseSize = new Vector2(1280, 720);
+        [Export]
+        public Vector2 scaleSize = new Vector2(250, 100);
+        [Export]
+        public bool scaleWithScreen = false;
         [Export]
         public TextureRect icon;
         [Export]
@@ -26,8 +32,22 @@ namespace Hypernex.UI
 
         public override void _ExitTree()
         {
+            videoIcon.Stream = null;
+            videoBackground.Stream = null;
             videoIcon.Finished -= IconVidDone;
             videoBackground.Finished -= VidDone;
+        }
+
+        public override void _Process(double delta)
+        {
+            if (scaleWithScreen)
+            {
+                var rect = GetViewportRect();
+                var ratio = scaleSize / baseSize;
+                var baseRatio = baseSize.X / baseSize.Y;
+                var size = new Vector2(rect.Size.Y * baseRatio, rect.Size.Y);
+                CustomMinimumSize = size * ratio;
+            }
         }
 
         private void IconVidDone()
@@ -40,6 +60,25 @@ namespace Hypernex.UI
         {
             videoBackground.StreamPosition = 0;
             videoBackground.Play();
+        }
+
+        public static string GetColor(Status status)
+        {
+            switch (status)
+            {
+                case Status.Offline:
+                    return Colors.Gray.ToHtml();
+                case Status.Online:
+                    return Colors.Green.ToHtml();
+                case Status.Absent:
+                    return Colors.Yellow.ToHtml();
+                case Status.Party:
+                    return Colors.Cyan.ToHtml();
+                case Status.DoNotDisturb:
+                    return Colors.Red.ToHtml();
+                default:
+                    return Colors.White.ToHtml();
+            }
         }
 
         public void SetUserId(string userid)
@@ -58,7 +97,7 @@ namespace Hypernex.UI
                     {
                         if (!IsInstanceValid(label))
                             return;
-                        label.Text = r.result.UserData.Username;
+                        label.Text = $"{r.result.UserData.Username.Replace("[", "[lb]")} [color={GetColor(r.result.UserData.Bio.Status)}]{r.result.UserData.Bio.Status}[/color]";
                         DownloadTools.DownloadBytes(r.result.UserData.Bio.PfpURL, b =>
                         {
                             if (!IsInstanceValid(icon))

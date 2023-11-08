@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=7 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
 [ext_resource type="Script" path="res://scripts/ui/MainOverlay.cs" id="3_yxb3m"]
 [ext_resource type="Script" path="res://scripts/ui/FriendsController.cs" id="4_1wv3s"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="5_m63s1"]
+[ext_resource type="Script" path="res://scripts/ui/RequestsController.cs" id="6_0f1ly"]
 
 [node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay")]
 script = ExtResource("1_07r2y")
@@ -97,11 +98,34 @@ friendUI = ExtResource("5_m63s1")
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Home"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Home/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="Requests" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Home"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Friend Requests"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Controller" type="Node" parent="UI/PanelContainer/TabContainer/Home/Requests" node_paths=PackedStringArray("label", "container")]
+script = ExtResource("6_0f1ly")
+label = NodePath("..")
+container = NodePath("../../ScrollContainer2/HBoxContainer")
+friendUI = ExtResource("5_m63s1")
+
+[node name="ScrollContainer2" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Home"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
 size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Home/ScrollContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Settings" type="VBoxContainer" parent="UI/PanelContainer/TabContainer"]
 visible = false

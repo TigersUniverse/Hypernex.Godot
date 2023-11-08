@@ -7,21 +7,14 @@
 [node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoIcon", "videoBackground")]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -125.0
-offset_top = -50.0
-offset_right = 125.0
-offset_bottom = 50.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
+offset_right = 250.0
+offset_bottom = 100.0
 script = ExtResource("1_41cr0")
+scaleWithScreen = true
 icon = NodePath("PFP")
 background = NodePath("BG")
-label = NodePath("Name")
+label = NodePath("PanelContainer/Name")
 videoIcon = NodePath("PFP2")
 videoBackground = NodePath("BG2")
 
@@ -68,7 +61,7 @@ grow_vertical = 0
 volume_db = -80.0
 expand = true
 
-[node name="Name" type="RichTextLabel" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -76,6 +69,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="Name" type="RichTextLabel" parent="PanelContainer"]
+layout_mode = 2
+bbcode_enabled = true
 fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
