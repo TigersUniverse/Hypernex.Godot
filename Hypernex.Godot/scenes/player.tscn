@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4nrx2xxp1xio"]
+
+[ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_e3jbc"]
+[ext_resource type="Script" path="res://scripts/player/PlayerInputs.cs" id="2_777if"]
+[ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_4k47x"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_i7wyo"]
+
+[node name="Player" type="Node3D" node_paths=PackedStringArray("view")]
+script = ExtResource("1_e3jbc")
+view = NodePath("CharacterBody3D/View")
+parts = [NodePath("Inputs"), NodePath("CharacterBody3D")]
+
+[node name="Inputs" type="Node" parent="." node_paths=PackedStringArray("root")]
+script = ExtResource("2_777if")
+root = NodePath("..")
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("root")]
+script = ExtResource("3_4k47x")
+root = NodePath("..")
+accel = 100.0
+speed = 5.0
+
+[node name="View" type="Node3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/View"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("CapsuleShape3D_wyrxg")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
+mesh = SubResource("CapsuleMesh_i7wyo")

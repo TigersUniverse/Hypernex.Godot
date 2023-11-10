@@ -6,6 +6,7 @@ using Hypernex.Tools;
 using Hypernex.UI;
 using HypernexSharp;
 using HypernexSharp.APIObjects;
+using HypernexSharp.Socketing;
 using System;
 using System.IO;
 
@@ -13,6 +14,7 @@ public partial class Init : Node
 {
     public static Init Instance;
     public HypernexObject hypernex;
+    public UserSocket socket;
     public User user;
     internal Token token;
     [Export]
@@ -56,9 +58,11 @@ public partial class Init : Node
             login.root.Hide();
             overlay.root.Show();
             overlay.ShowHome();
+            socket = hypernex.OpenUserSocket(user, token);
         };
         overlay.OnLogout += (s, e) =>
         {
+            hypernex.CloseUserSocket();
             overlay.root.Hide();
             login.root.Show();
         };
