@@ -30,13 +30,13 @@ namespace Hypernex.UI
         private void OnClick(Variant meta)
         {
             label.Text = string.Format(labelFormat, "...");
-            Init.Instance.hypernex.GetUser(Init.Instance.token, r =>
+            APITools.APIObject.GetUser(APITools.CurrentToken, r =>
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>
                 {
                     if (r.success)
                     {
-                        Init.Instance.user = r.result.UserData;
+                        APITools.CurrentUser = r.result.UserData;
                         OnVisible();
                     }
                 });
@@ -45,7 +45,7 @@ namespace Hypernex.UI
 
         private void OnVisible()
         {
-            var friends = Init.Instance.user.Friends;
+            var friends = APITools.CurrentUser.Friends;
             label.Text = string.Format(labelFormat, friends.Count);
             foreach (var node in container.GetChildren())
             {

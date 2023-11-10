@@ -1,22 +1,19 @@
 using Godot;
+using Hypernex;
 using Hypernex.CCK;
 using Hypernex.CCK.Godot;
 using Hypernex.Configuration;
 using Hypernex.Tools;
+using Hypernex.Tools.Godot;
 using Hypernex.UI;
-using HypernexSharp;
-using HypernexSharp.APIObjects;
-using HypernexSharp.Socketing;
 using System;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 public partial class Init : Node
 {
     public static Init Instance;
-    public HypernexObject hypernex;
-    public UserSocket socket;
-    public User user;
-    internal Token token;
     [Export]
     public LoginScreen login;
     [Export]
@@ -35,6 +32,8 @@ public partial class Init : Node
         Telepathy.Log.Warning = s => logger.Warn(s);
         Telepathy.Log.Error = s => logger.Error(s);
 
+        NativeLibrary.SetDllImportResolver(typeof(Discord.Discord).Assembly, DiscordResolver);
+
         AddChild(new QuickInvoke());
         AddChild(new ConfigManager());
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
@@ -51,23 +50,45 @@ public partial class Init : Node
         Logger.CurrentLogger.Log($"Loaded {pluginsLoaded} Plugins!");
         AddChild(new PluginLoader());
 
-        login.OnUser += (s, e) =>
+        AddChild(new DiscordGDTools());
+
+        APITools.OnUserRefresh += user =>
         {
-            user = e.Item1;
-            token = e.Item2;
             login.root.Hide();
             overlay.root.Show();
             overlay.ShowHome();
-            socket = hypernex.OpenUserSocket(user, token);
+            APITools.CreateUserSocket(SocketManager.InitSocket);
         };
-        overlay.OnLogout += (s, e) =>
+        APITools.OnLogout += () =>
         {
-            hypernex.CloseUserSocket();
+            APITools.DisposeUserSocket();
             overlay.root.Hide();
             login.root.Show();
         };
 
         SetupAndRun();
+    }
+
+    private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    {
+        if (libraryName != "discord_game_sdk")
+        {
+            return IntPtr.Zero;
+        }
+        string dir = Directory.GetCurrentDirectory();
+        if (EngineDebugger.IsActive())
+        {
+            dir = Path.Combine(dir, "scripts", "plugins", "DiscordGameSDK");
+        }
+        switch (OS.GetName().ToLower())
+        {
+            case "windows":
+                return NativeLibrary.Load(Path.Combine(dir, "discord_game_sdk.dll"));
+            case "linux":
+                return NativeLibrary.Load(Path.Combine(dir, "discord_game_sdk.so"));
+            default:
+                return IntPtr.Zero;
+        }
     }
 
     public void SetupAndRun()

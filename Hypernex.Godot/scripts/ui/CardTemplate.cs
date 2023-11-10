@@ -89,7 +89,7 @@ namespace Hypernex.UI
             background.Show();
             videoBackground.Stream = null;
             videoBackground.Stop();
-            Init.Instance.hypernex.GetUser(r =>
+            APITools.APIObject.GetUser(r =>
             {
                 if (r.success)
                 {

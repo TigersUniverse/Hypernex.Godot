@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="scripts\plugins\Nexport\Nexport.csproj" />
+    <ProjectReference Include="scripts\plugins\DiscordGameSDK\DiscordGameSDK.csproj" />
   </ItemGroup>
 
   <ItemGroup>
