@@ -16,7 +16,7 @@ script = ExtResource("1_d4dsn")
 
 [node name="Test" type="Node" parent="."]
 script = ExtResource("1_hscsn")
-load = true
+save = true
 
 [node name="WorldDescriptor" type="Node" parent="Test"]
 script = ExtResource("3_73irx")

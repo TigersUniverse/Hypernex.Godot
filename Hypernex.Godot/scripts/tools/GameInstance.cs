@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Godot;
 using Hypernex.CCK;
+using Hypernex.Game;
 using Hypernex.Networking;
 using Hypernex.Networking.Messages;
 using Hypernex.Player;
@@ -85,14 +87,13 @@ namespace Hypernex.Tools
         public string instanceId;
         public string userIdToken;
         public WorldMeta worldMeta;
-        // public World World;
+        public WorldRoot World;
         public User host;
-        // public Texture2D Thumbnail;
+        public Texture2D Thumbnail;
         public InstancePublicity Publicity;
         public bool lockAvatarSwitching;
 
         private HypernexInstanceClient client;
-        // internal Scene loadedScene;
         internal bool authed;
         // internal List<Sandbox> sandboxes = new ();
         public readonly string instanceCreatorId;
@@ -172,10 +173,10 @@ namespace Hypernex.Tools
                 QuickInvoke.InvokeActionOnMainThread(OnDisconnect);
             };
             // OnClientConnect += user => ScriptEvents?.OnUserJoin.Invoke(user.Id);
-            // OnMessage += (meta, channel) => MessageHandler.HandleMessage(this, meta, channel);
-            // OnClientDisconnect += user => PlayerManagement.PlayerLeave(this, user);
+            OnMessage += (meta, channel) => MessageHandler.HandleMessage(this, meta, channel);
+            OnClientDisconnect += user => PlayerManagement.PlayerLeave(this, user);
             OnDisconnect += Dispose;
-            // PlayerManagement.CreateGameInstance(this);
+            PlayerManagement.CreateGameInstance(this);
             APITools.UserSocket.OnOpen += () =>
             {
                 // Socket probably reconnected, rejoin instance
@@ -196,13 +197,13 @@ namespace Hypernex.Tools
         public void Close()
         {
             DiscordTools.UnfocusInstance(gameServerId + "/" + instanceId);
-            // PlayerManagement.DestroyGameInstance(this);
+            PlayerManagement.DestroyGameInstance(this);
             if (IsOpen)
                 client?.Stop();
         }
 
         /// <summary>
-        /// Sends a message over the client. If this is multithreaded, DO NOT PASS UNITY OBJECTS.
+        /// Sends a message over the client. If this is multithreaded, DO NOT PASS GODOT OBJECTS.
         /// </summary>
         /// <param name="message">message to send</param>
         /// <param name="messageChannel">channel to send message over</param>
@@ -331,7 +332,24 @@ namespace Hypernex.Tools
             SocketConnectedUsers = new List<string>(updatedInstance.instanceMeta.ConnectedUsers);
         }
 
-        private void LoadScene(bool open, string s) => throw new NotImplementedException("TODO");
+        private void LoadScene(bool open, string s)
+        {
+            World = new WorldRoot();
+            try
+            {
+                WorldManager.LoadWorld(WorldManager.LoadFromFile(s), root =>
+                {
+                    World.AddChild(root);
+                });
+                if (open)
+                    Open();
+                OnGameInstanceLoaded?.Invoke(this, worldMeta);
+            }
+            catch (Exception)
+            {
+                Dispose();
+            }
+        }
 
         private void Load(bool open = true)
         {
@@ -339,14 +357,10 @@ namespace Hypernex.Tools
                 File.Exists(SocketManager.DownloadedWorlds[worldMeta.Id]))
             {
                 string o = SocketManager.DownloadedWorlds[worldMeta.Id];
-                throw new NotImplementedException("TODO");
-                /*CoroutineRunner.Instance.Run(AssetBundleTools.LoadSceneFromFile(o, s =>
-                {
-                    if (!string.IsNullOrEmpty(s))
-                        LoadScene(open, s);
-                    else
-                        Dispose();
-                }, this));*/
+                if (!string.IsNullOrEmpty(o))
+                    LoadScene(open, o);
+                else
+                    Dispose();
             }
             else
             {
@@ -364,19 +378,15 @@ namespace Hypernex.Tools
                 string fileURL = $"{APITools.APIObject.Settings.APIURL}file/{worldMeta.OwnerId}/{fileId}";
                 APITools.APIObject.GetFileMeta(fileMetaResult =>
                 {
-                    string knownHash = String.Empty;
+                    string knownHash = string.Empty;
                     if (fileMetaResult.success)
                         knownHash = fileMetaResult.result.FileMeta.Hash;
                     DownloadTools.DownloadFile(fileURL, $"{worldMeta.Id}.hnw", o =>
                     {
-                        throw new NotImplementedException("TODO");
-                        /*CoroutineRunner.Instance.Run(AssetBundleTools.LoadSceneFromFile(o, s =>
-                        {
-                            if (!string.IsNullOrEmpty(s))
-                                LoadScene(open, s);
-                            else
-                                Dispose();
-                        }, this));*/
+                        if (!string.IsNullOrEmpty(o))
+                            LoadScene(open, o);
+                        else
+                            Dispose();
                     }, knownHash);
                 }, worldMeta.OwnerId, fileId);
             }
@@ -418,6 +428,7 @@ namespace Hypernex.Tools
                 return;
             isDisposed = true;
             FocusedInstance = null;
+            World?.QueueFree();
             // Physics.gravity = new Vector3(0, LocalPlayer.Instance.Gravity, 0);
             // sandboxes.ForEach(x => x.Dispose());
             // sandboxes.Clear();

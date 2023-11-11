@@ -5,7 +5,6 @@
 [node name="PlayerTets" type="Node3D"]
 
 [node name="Player" parent="." instance=ExtResource("1_yglas")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)

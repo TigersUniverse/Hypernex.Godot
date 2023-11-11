@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="2_raub8"]
 [ext_resource type="Texture2D" uid="uid://pr14mfjw31m7" path="res://textures/defaults/defaultpfp.jpg" id="3_pb736"]
 
-[node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoIcon", "videoBackground")]
+[node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoIcon", "videoBackground", "button")]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 3
 anchors_preset = 0
@@ -17,6 +17,7 @@ background = NodePath("BG")
 label = NodePath("PanelContainer/Name")
 videoIcon = NodePath("PFP2")
 videoBackground = NodePath("BG2")
+button = NodePath("Button")
 
 [node name="BG" type="TextureRect" parent="."]
 layout_mode = 1
@@ -76,3 +77,12 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true

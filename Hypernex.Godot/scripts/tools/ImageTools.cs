@@ -1,3 +1,4 @@
+using System.IO;
 using Godot;
 
 namespace Hypernex.Tools
@@ -20,6 +21,20 @@ namespace Hypernex.Tools
                 if (err == Error.Ok)
                     return img;
             }
+            return null;
+        }
+
+        public static VideoStream LoadFFmpeg(byte[] buffer)
+        {
+            string path = Path.GetTempFileName();
+            File.WriteAllBytes(path, buffer);
+            var asset = ClassDB.Instantiate("FFmpegVideoStream").AsGodotObject();
+            if (asset is VideoStream vid)
+            {
+                vid.File = path;
+                return vid;
+            }
+            // This should never happen.
             return null;
         }
 

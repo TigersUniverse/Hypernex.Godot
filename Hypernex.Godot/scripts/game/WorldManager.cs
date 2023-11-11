@@ -84,7 +84,7 @@ namespace Hypernex.Game
 
         public Node LoadWorld(WorldData data)
         {
-            Node worldRoot = new Node();
+            WorldRoot worldRoot = new WorldRoot();
             foreach (var child in data.RootObjects)
             {
                 worldRoot.AddChild(FromWorldObject(child));
@@ -129,13 +129,34 @@ namespace Hypernex.Game
             }
         }
 
-        public static WorldData LoadFromFile()
+        public static Node LoadWorld(WorldData worldData, Action<Node> spawnCallback = null)
+        {
+            try
+            {
+                Node node = Instance.LoadWorld(worldData);
+                spawnCallback?.Invoke(node);
+                Instance.PostLoad(node);
+                return node;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public static WorldData LoadFromFile(string path)
+        {
+            return DebugLoadFromFile();
+            return JsonTools.MsgPackDeserialize<WorldData>(path);
+        }
+
+        public static WorldData DebugLoadFromFile()
         {
             string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves");
             return JsonTools.MsgPackDeserialize<WorldData>(File.ReadAllText(Path.Combine(dir, "world.msgpack")));
         }
 
-        public static void SaveToFile(WorldData data, bool json = false)
+        public static void DebugSaveToFile(WorldData data, bool json = false)
         {
             string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves");
             if (!Directory.Exists(dir))

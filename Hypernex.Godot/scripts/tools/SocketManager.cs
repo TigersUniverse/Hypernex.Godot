@@ -110,7 +110,36 @@ namespace Hypernex.Tools
         private static void ContinueCreateInstance(WorldMeta worldMeta, InstancePublicity instancePublicity,
             InstanceProtocol instanceProtocol, GameServer gameServer, string token)
         {
-            throw new NotImplementedException("TODO");
+            Builds targetBuild = null;
+            foreach (Builds worldMetaBuild in worldMeta.Builds)
+            {
+                {
+                    targetBuild = worldMetaBuild;
+                    break;
+                }
+            }
+            if (targetBuild == null)
+            {
+                Logger.CurrentLogger.Error("No Build supported for your Platform for world " + worldMeta.Name);
+                return;
+            }
+            string fileURL = $"{APITools.APIObject.Settings.APIURL}file/{worldMeta.OwnerId}/{targetBuild.FileId}";
+            if (!string.IsNullOrEmpty(token))
+                fileURL += "/" + token;
+            APITools.APIObject.GetFileMeta(fileMetaResult =>
+            {
+                string knownHash = String.Empty;
+                if (fileMetaResult.success)
+                    knownHash = fileMetaResult.result.FileMeta.Hash;
+                DownloadTools.DownloadFile(fileURL, $"{worldMeta.Id}.hnw", o =>
+                {
+                    if (DownloadedWorlds.ContainsKey(worldMeta.Id))
+                        DownloadedWorlds.Remove(worldMeta.Id);
+                    DownloadedWorlds.Add(worldMeta.Id, o);
+                    if (APITools.IsFullReady)
+                        APITools.UserSocket.RequestNewInstance(worldMeta, instancePublicity, instanceProtocol, gameServer);
+                }, knownHash);
+            }, worldMeta.OwnerId, targetBuild.FileId);
         }
 
         public static void CreateInstance(WorldMeta worldMeta, InstancePublicity instancePublicity = InstancePublicity.Anyone,

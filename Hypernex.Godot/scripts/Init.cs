@@ -3,9 +3,11 @@ using Hypernex;
 using Hypernex.CCK;
 using Hypernex.CCK.Godot;
 using Hypernex.Configuration;
+using Hypernex.Game;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
 using Hypernex.UI;
+using HypernexSharp.APIObjects;
 using System;
 using System.IO;
 using System.Reflection;
@@ -18,6 +20,10 @@ public partial class Init : Node
     public LoginScreen login;
     [Export]
     public MainOverlay overlay;
+    [Export]
+    public PackedScene localPlayerScene;
+    [Export]
+    public PackedScene remotePlayerScene;
 
     public override void _Ready()
     {
@@ -34,8 +40,9 @@ public partial class Init : Node
 
         NativeLibrary.SetDllImportResolver(typeof(Discord.Discord).Assembly, DiscordResolver);
 
-        AddChild(new QuickInvoke());
-        AddChild(new ConfigManager());
+        AddChild(new QuickInvoke() { Name = "QuickInvoke" });
+        AddChild(new ConfigManager() { Name = "ConfigManager" });
+        AddChild(NewWorldManager());
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
 
         int pluginsLoaded;
@@ -48,9 +55,9 @@ public partial class Init : Node
             pluginsLoaded = 0;
         }
         Logger.CurrentLogger.Log($"Loaded {pluginsLoaded} Plugins!");
-        AddChild(new PluginLoader());
+        AddChild(new PluginLoader() { Name = "PluginLoader" });
 
-        AddChild(new DiscordGDTools());
+        AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
 
         APITools.OnUserRefresh += user =>
         {
@@ -67,6 +74,27 @@ public partial class Init : Node
         };
 
         SetupAndRun();
+    }
+
+    private static WorldManager NewWorldManager()
+    {
+        var node = new WorldManager();
+        node.Name = "Worlds";
+        GameInstance.OnGameInstanceLoaded = GameInstanceLoaded;
+        return node;
+    }
+
+    private static void GameInstanceLoaded(GameInstance instance, WorldMeta meta)
+    {
+        WorldManager.Instance.AddChild(instance.World);
+    }
+
+    public static PlayerRoot NewPlayer(bool isLocal)
+    {
+        if (isLocal)
+            return Instance.localPlayerScene.Instantiate<PlayerRoot>();
+        else
+            return Instance.remotePlayerScene.Instantiate<PlayerRoot>();
     }
 
     private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)

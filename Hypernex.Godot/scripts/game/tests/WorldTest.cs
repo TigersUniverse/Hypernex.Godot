@@ -24,12 +24,17 @@ namespace Hypernex.Game.Tests
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
+                WorldManager.Instance.PreSave(this);
+                sw.Stop();
+                GD.Print($"PreSave took {sw.ElapsedMilliseconds} ms");
+                sw.Reset();
+                sw.Start();
                 WorldData data = WorldManager.Instance.SaveWorld(this);
                 sw.Stop();
                 GD.Print($"SaveWorld took {sw.ElapsedMilliseconds} ms");
                 sw.Reset();
                 sw.Start();
-                WorldManager.SaveToFile(data, true);
+                WorldManager.DebugSaveToFile(data, true);
                 sw.Stop();
                 GD.Print($"SaveToFile took {sw.ElapsedMilliseconds} ms");
             }
@@ -37,7 +42,7 @@ namespace Hypernex.Game.Tests
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                WorldData data = WorldManager.LoadFromFile();
+                WorldData data = WorldManager.DebugLoadFromFile();
                 sw.Stop();
                 GD.Print($"LoadFromFile took {sw.ElapsedMilliseconds} ms");
                 sw.Reset();
