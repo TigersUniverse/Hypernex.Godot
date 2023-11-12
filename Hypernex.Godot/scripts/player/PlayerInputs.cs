@@ -23,7 +23,7 @@ namespace Hypernex.Player
         {
             if (Input.IsActionJustPressed("ui_cancel"))
             {
-                Input.MouseMode = (Input.MouseMode == Input.MouseModeEnum.Visible) ? Input.MouseModeEnum.Hidden : Input.MouseModeEnum.Visible;
+                Input.MouseMode = (Input.MouseMode == Input.MouseModeEnum.Visible) ? Input.MouseModeEnum.Captured : Input.MouseModeEnum.Visible;
             }
             if (Input.MouseMode == Input.MouseModeEnum.Visible)
                 return;
