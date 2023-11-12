@@ -33,11 +33,16 @@ namespace Hypernex.Game
                 return;
             GameInstance.FocusedInstance.SendMessage(new PlayerObjectUpdate()
             {
+                Auth = new JoinAuth()
+                {
+                    TempToken = GameInstance.FocusedInstance.userIdToken,
+                    UserId = APITools.CurrentUser.Id,
+                },
                 Object = new Networking.Messages.Data.NetworkedObject()
                 {
                     ObjectLocation = "root",
                     Position = Position.ToFloat3(),
-                }
+                },
             });
             oldPosition = Position;
         }
