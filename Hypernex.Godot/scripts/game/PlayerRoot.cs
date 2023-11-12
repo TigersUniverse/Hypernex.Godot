@@ -36,7 +36,7 @@ namespace Hypernex.Game
         {
             if (Local != this)
                 return;
-            float tolerance = 1f;
+            float tolerance = 0.05f;
             if (Mathf.IsEqualApprox(Pos.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Pos.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Pos.Z, oldPosition.Z, tolerance))
                 return;
             GameInstance.FocusedInstance.SendMessage(new PlayerObjectUpdate()
