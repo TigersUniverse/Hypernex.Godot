@@ -28,7 +28,7 @@ namespace Hypernex.Game
 
         public override void _PhysicsProcess(double delta)
         {
-            float tolerance = 0.1f;
+            float tolerance = 1f;
             if (Mathf.IsEqualApprox(Position.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Position.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Position.Z, oldPosition.Z, tolerance))
                 return;
             GameInstance.FocusedInstance.SendMessage(new PlayerObjectUpdate()
@@ -43,7 +43,7 @@ namespace Hypernex.Game
                     ObjectLocation = "root",
                     Position = Position.ToFloat3(),
                 },
-            });
+            }, Nexport.MessageChannel.Unreliable);
             oldPosition = Position;
         }
 
@@ -57,6 +57,7 @@ namespace Hypernex.Game
 
         public void NetworkObjectUpdate(PlayerObjectUpdate playerObjectUpdate)
         {
+            GD.Print(playerObjectUpdate.Object.Position);
             if (playerObjectUpdate.Object.ObjectLocation.ToLower() == "root")
             {
                 Position = playerObjectUpdate.Object.Position.ToGodot3();

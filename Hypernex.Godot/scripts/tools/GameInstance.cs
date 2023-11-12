@@ -38,6 +38,14 @@ namespace Hypernex.Tools
                 GameInstance gameInstance = new GameInstance(instance, meta);
                 gameInstance.Load();
             };
+            SocketManager.OnInstanceLeft += instance =>
+            {
+                if (FocusedInstance != null && FocusedInstance.gameServerId == instance.gameServerId &&
+                    FocusedInstance.instanceId == instance.instanceId)
+                {
+                    FocusedInstance.Dispose();
+                }
+            };
             SocketManager.OnInstanceOpened += (opened, meta) =>
             {
                 GameInstance gameInstance = new GameInstance(opened, meta);
