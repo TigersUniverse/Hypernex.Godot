@@ -32,6 +32,7 @@ namespace Hypernex.Tools
                     FocusedInstance.instanceId == instance.instanceId)
                 {
                     // Reconnect Socket
+                    Logger.CurrentLogger.Debug("Instance reconnected.");
                     return;
                 }
                 GameInstance gameInstance = new GameInstance(instance, meta);

@@ -14,6 +14,7 @@ namespace Hypernex.UI
             None,
             User,
             World,
+            Instance,
         }
 
         public static Vector2 baseSize = new Vector2(1280, 720);
@@ -36,6 +37,7 @@ namespace Hypernex.UI
         public CardType type = CardType.None;
         public string cardInfoId = string.Empty;
         public WorldMeta worldMeta = null;
+        public SafeInstance safeInstance;
 
         public override void _Ready()
         {
@@ -73,6 +75,9 @@ namespace Hypernex.UI
                     break;
                 case CardType.World:
                     SocketManager.CreateInstance(worldMeta, InstancePublicity.ClosedRequest, InstanceProtocol.KCP);
+                    break;
+                case CardType.Instance:
+                    SocketManager.JoinInstance(safeInstance);
                     break;
             }
         }
@@ -118,6 +123,41 @@ namespace Hypernex.UI
             background.Show();
             videoBackground.Stream = null;
             videoBackground.Stop();
+        }
+
+        public void SetSafeInstance(SafeInstance instance)
+        {
+            Reset();
+            APITools.APIObject.GetWorldMeta(r =>
+            {
+                if (r.success)
+                {
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        if (!IsInstanceValid(label))
+                            return;
+                        type = CardType.Instance;
+                        cardInfoId = instance.InstanceId;
+                        safeInstance = instance;
+                        worldMeta = r.result.Meta;
+                        label.Text = $"{r.result.Meta.Name.Replace("[", "[lb]")} ({instance.ConnectedUsers.Count} Users)";
+                        DownloadTools.DownloadBytes(r.result.Meta.ThumbnailURL, b =>
+                        {
+                            if (!IsInstanceValid(background))
+                                return;
+                            Image img = ImageTools.LoadImage(b);
+                            if (img != null)
+                                background.Texture = ImageTexture.CreateFromImage(img);
+                            else
+                            {
+                                videoBackground.Stream = ImageTools.LoadFFmpeg(b);
+                                videoBackground.Play();
+                                background.Hide();
+                            }
+                        });
+                    });
+                }
+            }, instance.WorldId);
         }
 
         public void SetWorldId(string worldId)

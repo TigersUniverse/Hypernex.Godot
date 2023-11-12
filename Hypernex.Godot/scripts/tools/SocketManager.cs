@@ -194,7 +194,7 @@ namespace Hypernex.Tools
                 fileURL += "/" + token;
             APITools.APIObject.GetFileMeta(fileMetaResult =>
             {
-                string knownHash = String.Empty;
+                string knownHash = string.Empty;
                 if (fileMetaResult.success)
                     knownHash = fileMetaResult.result.FileMeta.Hash;
                 DownloadTools.DownloadFile(fileURL, $"{worldMeta.Id}.hnw", o =>

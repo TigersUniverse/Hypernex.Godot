@@ -86,6 +86,7 @@ public partial class Init : Node
 
     private static void GameInstanceLoaded(GameInstance instance, WorldMeta meta)
     {
+        instance.World.Load();
         WorldManager.Instance.AddChild(instance.World);
     }
 

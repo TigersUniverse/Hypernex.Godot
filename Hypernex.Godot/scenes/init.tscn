@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=10 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="5_m63s1"]
 [ext_resource type="Script" path="res://scripts/ui/RequestsController.cs" id="6_0f1ly"]
 [ext_resource type="Script" path="res://scripts/ui/WorldsController.cs" id="7_yw38d"]
+[ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_exjdl"]
 [ext_resource type="PackedScene" uid="uid://b4nrx2xxp1xio" path="res://scenes/player.tscn" id="9_cj1hm"]
 
 [node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay")]
@@ -135,6 +136,28 @@ size_flags_horizontal = 3
 visible = false
 layout_mode = 2
 
+[node name="Instances" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Worlds"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Active Instances"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Controller" type="Node" parent="UI/PanelContainer/TabContainer/Worlds/Instances" node_paths=PackedStringArray("label", "container")]
+script = ExtResource("8_exjdl")
+label = NodePath("..")
+container = NodePath("../../ScrollContainer2")
+worldUI = ExtResource("5_m63s1")
+
+[node name="ScrollContainer2" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Worlds"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Worlds/ScrollContainer2"]
+layout_mode = 2
+
 [node name="MyWorlds" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Worlds"]
 layout_mode = 2
 bbcode_enabled = true
@@ -153,6 +176,7 @@ worldUI = ExtResource("5_m63s1")
 [node name="ScrollContainer" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Worlds"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Worlds/ScrollContainer"]
 layout_mode = 2
