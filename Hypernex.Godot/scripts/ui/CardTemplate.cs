@@ -34,16 +34,25 @@ namespace Hypernex.UI
         public VideoStreamPlayer videoBackground;
         [Export]
         public Button button;
+        [Export]
+        public MenuButton menu;
+
         public CardType type = CardType.None;
         public string cardInfoId = string.Empty;
+        public User userData = null;
         public WorldMeta worldMeta = null;
-        public SafeInstance safeInstance;
+        public SafeInstance safeInstance = null;
 
         public override void _Ready()
         {
             videoIcon.Finished += IconVidDone;
             videoBackground.Finished += VidDone;
-            button.Pressed += Clicked;
+            if (button != null)
+                button.Pressed += Clicked;
+            if (menu != null)
+                menu.AboutToPopup += MenuClicked;
+            if (menu != null)
+                menu.GetPopup().IndexPressed += MenuSelected;
         }
 
         public override void _ExitTree()
@@ -52,7 +61,12 @@ namespace Hypernex.UI
             videoBackground.Stream = null;
             videoIcon.Finished -= IconVidDone;
             videoBackground.Finished -= VidDone;
-            button.Pressed -= Clicked;
+            if (button != null)
+                button.Pressed -= Clicked;
+            if (menu != null)
+                menu.AboutToPopup -= MenuClicked;
+            if (menu != null)
+                menu.GetPopup().IndexPressed -= MenuSelected;
         }
 
         public override void _Process(double delta)
@@ -64,6 +78,65 @@ namespace Hypernex.UI
                 var baseRatio = baseSize.X / baseSize.Y;
                 var size = new Vector2(rect.Size.Y * baseRatio, rect.Size.Y);
                 CustomMinimumSize = size * ratio;
+            }
+        }
+
+        private void MenuSelected(long index)
+        {
+            var popup = menu.GetPopup();
+            var id = popup.GetItemId((int)index);
+            switch (type)
+            {
+                case CardType.User:
+                    switch (id)
+                    {
+                        case 1:
+                            SocketManager.InviteUser(GameInstance.FocusedInstance, userData);
+                            break;
+                    }
+                    break;
+                case CardType.World:
+                    switch (id)
+                    {
+                        case 1:
+                            SocketManager.CreateInstance(worldMeta, InstancePublicity.Friends, InstanceProtocol.KCP);
+                            break;
+                        case 2:
+                            SocketManager.CreateInstance(worldMeta, InstancePublicity.Anyone, InstanceProtocol.KCP);
+                            break;
+                        case 3:
+                            SocketManager.CreateInstance(worldMeta, InstancePublicity.ClosedRequest, InstanceProtocol.KCP);
+                            break;
+                    }
+                    break;
+                case CardType.Instance:
+                    switch (id)
+                    {
+                        case 1:
+                            SocketManager.JoinInstance(safeInstance);
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        private void MenuClicked()
+        {
+            var popup = menu.GetPopup();
+            popup.Clear();
+            switch (type)
+            {
+                case CardType.User:
+                    popup.AddItem("Invite", 1);
+                    break;
+                case CardType.World:
+                    popup.AddItem("Create Instance (Friends)", 1);
+                    popup.AddItem("Create Instance (Anyone)", 2);
+                    popup.AddItem("Create Instance (Closed Request)", 3);
+                    break;
+                case CardType.Instance:
+                    popup.AddItem("Join Instance", 1);
+                    break;
             }
         }
 
@@ -116,13 +189,17 @@ namespace Hypernex.UI
         public void Reset()
         {
             cardInfoId = string.Empty;
+            userData = null;
             worldMeta = null;
+            safeInstance = null;
             icon.Show();
             videoIcon.Stream = null;
             videoIcon.Stop();
             background.Show();
             videoBackground.Stream = null;
             videoBackground.Stop();
+            if (menu != null)
+                menu.GetPopup().Clear();
         }
 
         public void SetSafeInstance(SafeInstance instance)
@@ -207,6 +284,7 @@ namespace Hypernex.UI
                             return;
                         type = CardType.User;
                         cardInfoId = userId;
+                        userData = r.result.UserData;
                         label.Text = $"{r.result.UserData.Username.Replace("[", "[lb]")} [color={GetColor(r.result.UserData.Bio.Status)}]{r.result.UserData.Bio.Status}[/color]";
                         DownloadTools.DownloadBytes(r.result.UserData.Bio.PfpURL, b =>
                         {

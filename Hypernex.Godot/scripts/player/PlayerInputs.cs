@@ -19,6 +19,11 @@ namespace Hypernex.Player
             lastMousePosition = GetViewport().GetMousePosition();
         }
 
+        public override void _ExitTree()
+        {
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+        }
+
         public override void _Input(InputEvent @event)
         {
             if (@event is InputEventMouseMotion mouseMotion)
@@ -32,6 +37,7 @@ namespace Hypernex.Player
             if (Input.IsActionJustPressed("ui_cancel"))
             {
                 Input.MouseMode = (Input.MouseMode == Input.MouseModeEnum.Visible) ? Input.MouseModeEnum.Captured : Input.MouseModeEnum.Visible;
+                Init.Instance.ui.Visible = Input.MouseMode == Input.MouseModeEnum.Visible;
             }
             if (Input.MouseMode == Input.MouseModeEnum.Visible)
                 return;

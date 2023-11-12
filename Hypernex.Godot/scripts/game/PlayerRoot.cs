@@ -19,33 +19,74 @@ namespace Hypernex.Game
         public NodePath[] parts = Array.Empty<NodePath>();
         public Node[] Parts => parts.Select(x => GetNode(x)).ToArray();
         public string UserId { get; private set; }
+        public GameInstance Instance { get; private set; }
         public Vector3 Pos { get => GetPart<PlayerController>().Position; set => GetPart<PlayerController>().Position = value; }
         private Vector3 oldPosition;
+        public bool IsLocal => Local == this;
+        public string AvatarId;
+        public Action OnUserSet = () => { };
 
         public T GetPart<T>() where T : Node
         {
             return (T)Parts.FirstOrDefault(x => x is T);
         }
 
+        public void SetUser(string userid, GameInstance instance)
+        {
+            UserId = userid;
+            Instance = instance;
+            if (UserId == APITools.CurrentUser.Id)
+            {
+                Local = this;
+            }
+        }
+
+        public JoinAuth GetJoinAuth()
+        {
+            return new JoinAuth()
+            {
+                TempToken = Instance.userIdToken,
+                UserId = UserId,
+            };
+        }
+
         public override void _Ready()
         {
             Position = Vector3.Zero;
+            UpdateLoop();
+        }
+
+        private async void UpdateLoop()
+        {
+            while (IsInstanceValid(this))
+            {
+                if (Instance.IsOpen)
+                {
+                    Instance.SendMessage(new PlayerUpdate()
+                    {
+                        Auth = GetJoinAuth(),
+                        AvatarId = AvatarId,
+                        IsSpeaking = GetPart<PlayerChat>()?.IsSpeaking ?? false,
+                        IsPlayerVR = false, // TODO: vr
+                        PlayerAssignedTags = new List<string>(),
+                        ExtraneousData = new Dictionary<string, object>(),
+                        WeightedObjects = new Dictionary<string, float>(),
+                    });
+                }
+                await ToSignal(GetTree().CreateTimer(0.05f), SceneTreeTimer.SignalName.Timeout);
+            }
         }
 
         public override void _PhysicsProcess(double delta)
         {
-            if (Local != this)
+            if (!IsLocal)
                 return;
             float tolerance = 0.05f;
             if (Mathf.IsEqualApprox(Pos.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Pos.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Pos.Z, oldPosition.Z, tolerance))
                 return;
-            GameInstance.FocusedInstance.SendMessage(new PlayerObjectUpdate()
+            Instance.SendMessage(new PlayerObjectUpdate()
             {
-                Auth = new JoinAuth()
-                {
-                    TempToken = GameInstance.FocusedInstance.userIdToken,
-                    UserId = APITools.CurrentUser.Id,
-                },
+                Auth = GetJoinAuth(),
                 Object = new Networking.Messages.Data.NetworkedObject()
                 {
                     ObjectLocation = "root",
@@ -61,6 +102,7 @@ namespace Hypernex.Game
 
         public void VoiceUpdate(PlayerVoice playerVoice)
         {
+            GetPart<PlayerChat>()?.HandleVoice(playerVoice);
         }
 
         public void NetworkObjectUpdate(PlayerObjectUpdate playerObjectUpdate)
@@ -77,15 +119,6 @@ namespace Hypernex.Game
 
         public void WeightedObject(WeightedObjectUpdate weightedObjectUpdate)
         {
-        }
-
-        public void SetUser(string userid, GameInstance instance)
-        {
-            UserId = userid;
-            if (UserId == APITools.CurrentUser.Id)
-            {
-                Local = this;
-            }
         }
 
         public void ResetWeights()

@@ -27,7 +27,7 @@ glow_enabled = true
 [node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay", "ui")]
 script = ExtResource("1_07r2y")
 login = NodePath("UI/Login/LoginScreen")
-overlay = NodePath("UI/PanelContainer/Overlay")
+overlay = NodePath("UI/MainOverlay/Overlay")
 ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
 remotePlayerScene = ExtResource("3_gx5fr")
@@ -87,7 +87,7 @@ alignment = 1
 layout_mode = 2
 text = "Login"
 
-[node name="PanelContainer" type="PanelContainer" parent="UI"]
+[node name="MainOverlay" type="PanelContainer" parent="UI"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -95,20 +95,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Overlay" type="Node" parent="UI/PanelContainer" node_paths=PackedStringArray("root", "tabs", "logoutButton", "exitButton")]
+[node name="Overlay" type="Node" parent="UI/MainOverlay" node_paths=PackedStringArray("root", "tabs", "logoutButton", "exitButton")]
 script = ExtResource("3_yxb3m")
 root = NodePath("..")
 tabs = NodePath("../TabContainer")
 logoutButton = NodePath("../TabContainer/Settings/LogoutBtn")
 exitButton = NodePath("../TabContainer/Settings/ExitBtn")
 
-[node name="TabContainer" type="TabContainer" parent="UI/PanelContainer"]
+[node name="TabContainer" type="TabContainer" parent="UI/MainOverlay"]
 layout_mode = 2
 
-[node name="Home" type="VBoxContainer" parent="UI/PanelContainer/TabContainer"]
+[node name="Home" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
 layout_mode = 2
 
-[node name="Friends" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Home"]
+[node name="Friends" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Home"]
 layout_mode = 2
 bbcode_enabled = true
 text = "Friends"
@@ -116,22 +116,22 @@ fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
 
-[node name="Controller" type="Node" parent="UI/PanelContainer/TabContainer/Home/Friends" node_paths=PackedStringArray("label", "container")]
+[node name="Controller" type="Node" parent="UI/MainOverlay/TabContainer/Home/Friends" node_paths=PackedStringArray("label", "container")]
 script = ExtResource("4_1wv3s")
 label = NodePath("..")
 container = NodePath("../../ScrollContainer/HBoxContainer")
 friendUI = ExtResource("5_m63s1")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Home"]
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/MainOverlay/TabContainer/Home"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Home/ScrollContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Home/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Requests" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Home"]
+[node name="Requests" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Home"]
 layout_mode = 2
 bbcode_enabled = true
 text = "Friend Requests"
@@ -139,26 +139,26 @@ fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
 
-[node name="Controller" type="Node" parent="UI/PanelContainer/TabContainer/Home/Requests" node_paths=PackedStringArray("label", "container")]
+[node name="Controller" type="Node" parent="UI/MainOverlay/TabContainer/Home/Requests" node_paths=PackedStringArray("label", "container")]
 script = ExtResource("6_0f1ly")
 label = NodePath("..")
 container = NodePath("../../ScrollContainer2/HBoxContainer")
 friendUI = ExtResource("5_m63s1")
 
-[node name="ScrollContainer2" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Home"]
+[node name="ScrollContainer2" type="ScrollContainer" parent="UI/MainOverlay/TabContainer/Home"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Home/ScrollContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Home/ScrollContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Worlds" type="VBoxContainer" parent="UI/PanelContainer/TabContainer"]
+[node name="Worlds" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
 visible = false
 layout_mode = 2
 
-[node name="Instances" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Worlds"]
+[node name="Instances" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Worlds"]
 layout_mode = 2
 bbcode_enabled = true
 text = "Active Instances"
@@ -166,21 +166,21 @@ fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
 
-[node name="Controller" type="Node" parent="UI/PanelContainer/TabContainer/Worlds/Instances" node_paths=PackedStringArray("label", "container")]
+[node name="Controller" type="Node" parent="UI/MainOverlay/TabContainer/Worlds/Instances" node_paths=PackedStringArray("label", "container")]
 script = ExtResource("8_exjdl")
 label = NodePath("..")
 container = NodePath("../../ScrollContainer2")
 worldUI = ExtResource("5_m63s1")
 
-[node name="ScrollContainer2" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Worlds"]
+[node name="ScrollContainer2" type="ScrollContainer" parent="UI/MainOverlay/TabContainer/Worlds"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Worlds/ScrollContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Worlds/ScrollContainer2"]
 layout_mode = 2
 
-[node name="MyWorlds" type="RichTextLabel" parent="UI/PanelContainer/TabContainer/Worlds"]
+[node name="MyWorlds" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Worlds"]
 layout_mode = 2
 bbcode_enabled = true
 text = "My Worlds"
@@ -188,29 +188,29 @@ fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
 
-[node name="Controller" type="Node" parent="UI/PanelContainer/TabContainer/Worlds/MyWorlds" node_paths=PackedStringArray("label", "container")]
+[node name="Controller" type="Node" parent="UI/MainOverlay/TabContainer/Worlds/MyWorlds" node_paths=PackedStringArray("label", "container")]
 script = ExtResource("7_yw38d")
 labelFormat = "[center]My Worlds ({0})[/center][right][url]Refresh[/url][/right]"
 label = NodePath("..")
 container = NodePath("../../ScrollContainer/HBoxContainer")
 worldUI = ExtResource("5_m63s1")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/PanelContainer/TabContainer/Worlds"]
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/MainOverlay/TabContainer/Worlds"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/PanelContainer/TabContainer/Worlds/ScrollContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Worlds/ScrollContainer"]
 layout_mode = 2
 
-[node name="Settings" type="VBoxContainer" parent="UI/PanelContainer/TabContainer"]
+[node name="Settings" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
 visible = false
 layout_mode = 2
 
-[node name="LogoutBtn" type="Button" parent="UI/PanelContainer/TabContainer/Settings"]
+[node name="LogoutBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
 layout_mode = 2
 text = "Logout"
 
-[node name="ExitBtn" type="Button" parent="UI/PanelContainer/TabContainer/Settings"]
+[node name="ExitBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
 layout_mode = 2
 text = "Exit :("

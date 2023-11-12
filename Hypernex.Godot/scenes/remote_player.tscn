@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://dyvx634j6ne8i"]
+[gd_scene load_steps=6 format=3 uid="uid://dyvx634j6ne8i"]
 
 [ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_2jxjk"]
+[ext_resource type="Script" path="res://scripts/player/PlayerChat.cs" id="3_hirej"]
 [ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_xjfqe"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
@@ -10,7 +11,7 @@
 [node name="Player" type="Node3D" node_paths=PackedStringArray("view")]
 script = ExtResource("1_2jxjk")
 view = NodePath("CharacterBody3D/View")
-parts = [NodePath("CharacterBody3D")]
+parts = [NodePath("CharacterBody3D"), NodePath("Chat")]
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("root")]
 script = ExtResource("3_xjfqe")
@@ -27,3 +28,7 @@ disabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 mesh = SubResource("CapsuleMesh_i7wyo")
+
+[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root")]
+script = ExtResource("3_hirej")
+root = NodePath("..")

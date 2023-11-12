@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://b4nrx2xxp1xio"]
+[gd_scene load_steps=7 format=3 uid="uid://b4nrx2xxp1xio"]
 
 [ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_e3jbc"]
 [ext_resource type="Script" path="res://scripts/player/PlayerInputs.cs" id="2_777if"]
 [ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_4k47x"]
+[ext_resource type="Script" path="res://scripts/player/PlayerChat.cs" id="4_r7ubo"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
 
@@ -11,7 +12,7 @@
 [node name="Player" type="Node3D" node_paths=PackedStringArray("view")]
 script = ExtResource("1_e3jbc")
 view = NodePath("CharacterBody3D/View")
-parts = [NodePath("Inputs"), NodePath("CharacterBody3D")]
+parts = [NodePath("Inputs"), NodePath("CharacterBody3D"), NodePath("Chat")]
 
 [node name="Inputs" type="Node" parent="." node_paths=PackedStringArray("root")]
 script = ExtResource("2_777if")
@@ -33,3 +34,7 @@ shape = SubResource("CapsuleShape3D_wyrxg")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 mesh = SubResource("CapsuleMesh_i7wyo")
+
+[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root")]
+script = ExtResource("4_r7ubo")
+root = NodePath("..")
