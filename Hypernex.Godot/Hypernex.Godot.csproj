@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="scripts\plugins\Nexport\Nexport.csproj" />
     <ProjectReference Include="scripts\plugins\DiscordGameSDK\DiscordGameSDK.csproj" />
-    <ProjectReference Include="scripts\plugins\OpusWrapper\OpusWrapper.csproj" />
     <ProjectReference Include="scripts\plugins\VoiceChat\VoiceChat.csproj" />
   </ItemGroup>
 

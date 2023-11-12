@@ -35,6 +35,7 @@ namespace Hypernex.UI
 
         public void TryLoginWith()
         {
+            return;
             if (ConfigManager.LoadedConfig.SavedAccounts.Any())
             {
                 ConfigUser user = ConfigManager.LoadedConfig.SavedAccounts.First();
@@ -49,12 +50,25 @@ namespace Hypernex.UI
 
         private void TryLogin()
         {
-            HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
+            if (ConfigManager.LoadedConfig.SavedAccounts.Any(x => x.Username == usernameEdit.Text) && string.IsNullOrEmpty(passwordEdit.Text))
             {
-                TargetDomain = "play.hypernex.dev",
-                IsHTTP = false,
-            };
-            TryLogin(settings);
+                ConfigUser user = ConfigManager.LoadedConfig.SavedAccounts.First(x => x.Username == usernameEdit.Text);
+                HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
+                {
+                    TargetDomain = user.Server,
+                    IsHTTP = false,
+                };
+                TryLogin(settings);
+            }
+            else
+            {
+                HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
+                {
+                    TargetDomain = "play.hypernex.dev",
+                    IsHTTP = false,
+                };
+                TryLogin(settings);
+            }
         }
 
         public void TryLogin(HypernexSettings settings)

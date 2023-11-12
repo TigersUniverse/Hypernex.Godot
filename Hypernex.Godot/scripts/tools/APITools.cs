@@ -92,7 +92,8 @@ namespace Hypernex.Tools
 
         public static void Logout()
         {
-            APIObject.Logout(r => QuickInvoke.InvokeActionOnMainThread(OnLogout), CurrentUser, CurrentToken);
+            OnLogout.Invoke();
+            // APIObject.Logout(r => QuickInvoke.InvokeActionOnMainThread(OnLogout), CurrentUser, CurrentToken);
         }
 
         public static void CreateUserSocket(Action callback)

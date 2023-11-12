@@ -11,11 +11,10 @@ namespace Hypernex.Player
         [Export]
         public PlayerRoot root;
         public VoiceChat voice;
-        public bool IsSpeaking => voice?.Recording ?? false;
+        public bool IsSpeaking => voice?.IsSpeaking ?? false;
 
         public override void _Ready()
         {
-            root.OnUserSet = UserSet;
         }
 
         public void UserSet()

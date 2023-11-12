@@ -39,6 +39,8 @@ namespace Hypernex.Game
             {
                 Local = this;
             }
+            GetPart<PlayerChat>()?.UserSet();
+            OnUserSet?.Invoke();
         }
 
         public JoinAuth GetJoinAuth()

@@ -76,7 +76,7 @@ public partial class VoiceChat : Node
         string dir = Directory.GetCurrentDirectory();
         if (EngineDebugger.IsActive())
         {
-            dir = Path.Combine(dir, "scripts", "plugins", "OpusWrapper");
+            dir = Path.Combine(dir, "scripts", "plugins");
         }
         switch (OS.GetName().ToLower())
         {
@@ -99,6 +99,7 @@ public partial class VoiceChat : Node
         audioThread = new Thread(() => AudioThreadLoop());
         audioThread.Name = "VoiceChat Thread";
         audioThread.Start();
+        GD.Print("VoiceChat Ready!");
     }
 
     public override void _ExitTree()
@@ -309,6 +310,8 @@ public partial class VoiceChat : Node
 
     private void ProcessMic(double delta)
     {
+        if (!IsLocalPlayer)
+            return;
         if (Recording)
         {
             if (!prev_frame_recording)
