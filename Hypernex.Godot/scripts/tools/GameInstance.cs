@@ -161,9 +161,8 @@ namespace Hypernex.Tools
 
         private void SetupClient(string ip, int port, InstanceProtocol instanceProtocol)
         {
-            FocusedInstance = this;
             // ScriptEvents = new ScriptEvents(this);
-            ClientSettings clientSettings = new ClientSettings(ip, port, true/*instanceProtocol == InstanceProtocol.UDP*/, 10);
+            ClientSettings clientSettings = new ClientSettings(ip, port, instanceProtocol == InstanceProtocol.UDP, 1);
             client = new HypernexInstanceClient(APITools.APIObject, APITools.CurrentUser, instanceProtocol,
                 clientSettings);
             client.OnConnect += () =>
