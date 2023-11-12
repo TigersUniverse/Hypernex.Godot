@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=13 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -10,6 +10,19 @@
 [ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_exjdl"]
 [ext_resource type="PackedScene" uid="uid://b4nrx2xxp1xio" path="res://scenes/player.tscn" id="9_cj1hm"]
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mgffp"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_t3dit"]
+sky_material = SubResource("ProceduralSkyMaterial_mgffp")
+
+[sub_resource type="Environment" id="Environment_ukjnl"]
+background_mode = 2
+sky = SubResource("Sky_t3dit")
+tonemap_mode = 2
+glow_enabled = true
+
 [node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay", "ui")]
 script = ExtResource("1_07r2y")
 login = NodePath("UI/Login/LoginScreen")
@@ -17,6 +30,13 @@ overlay = NodePath("UI/PanelContainer/Overlay")
 ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
 remotePlayerScene = ExtResource("9_cj1hm")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ukjnl")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3

@@ -10,6 +10,7 @@ namespace Hypernex.Game
     public partial class WorldRoot : Node
     {
         public GameInstance gameInstance;
+        public WorldDescriptor descriptor;
         public List<WorldObject> Objects = new List<WorldObject>();
         public List<Node> Components = new List<Node>();
         public List<WorldAsset> Assets = new List<WorldAsset>();
@@ -26,6 +27,7 @@ namespace Hypernex.Game
 
         public void AddPlayer(PlayerRoot player)
         {
+            player.Position = descriptor.StartPosition;
             AddChild(player);
         }
 
@@ -37,6 +39,8 @@ namespace Hypernex.Game
 
         public void AddComponent(Node worldObject)
         {
+            if (worldObject is WorldDescriptor desc)
+                descriptor = desc;
             Components.Add(worldObject);
         }
 

@@ -2,19 +2,28 @@ using System;
 using System.Text;
 using Godot;
 using Hypernex.Tools;
+using Hypernex.Tools.Godot;
 using Newtonsoft.Json;
 
 namespace Hypernex.Game.Classes
 {
     [GlobalClass]
     [JsonObject(MemberSerialization.OptIn)]
-    public partial class WorldDescriptor : Node
+    public partial class WorldDescriptor : Node3D
     {
-        public static string ClassName => "World";
-
         [JsonProperty]
         [Export]
         public string Data { get; set; }
+
+        [JsonProperty(nameof(StartPosition))]
+        public float[] JsonStartPosition
+        {
+            get => StartPosition.ToFloats();
+            set => StartPosition = value.ToGodot3();
+        }
+
+        [Export]
+        public Vector3 StartPosition { get; set; }
 
         public void LoadFromData(string data)
         {

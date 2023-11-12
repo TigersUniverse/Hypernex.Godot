@@ -92,6 +92,7 @@ public partial class Init : Node
     {
         instance.World.Load();
         WorldManager.Instance.AddChild(instance.World);
+        instance.World.AddPlayer(Instance.localPlayerScene.Instantiate<PlayerRoot>());
         Instance.ui.Hide();
     }
 
