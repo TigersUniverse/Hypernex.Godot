@@ -161,8 +161,9 @@ namespace Hypernex.Tools
 
         private void SetupClient(string ip, int port, InstanceProtocol instanceProtocol)
         {
+            FocusedInstance = this;
             // ScriptEvents = new ScriptEvents(this);
-            ClientSettings clientSettings = new ClientSettings(ip, port, instanceProtocol == InstanceProtocol.UDP, 1);
+            ClientSettings clientSettings = new ClientSettings(ip, port, true/*instanceProtocol == InstanceProtocol.UDP*/, 10);
             client = new HypernexInstanceClient(APITools.APIObject, APITools.CurrentUser, instanceProtocol,
                 clientSettings);
             client.OnConnect += () =>
@@ -214,7 +215,7 @@ namespace Hypernex.Tools
 
         public void SendMessage<T>(T message, MessageChannel messageChannel = MessageChannel.Reliable)
         {
-            SendMessage(Msg.Serialize(message));
+            SendMessage(Msg.Serialize(message), messageChannel);
         }
 
         /// <summary>
@@ -334,6 +335,11 @@ namespace Hypernex.Tools
             SendMessage(Msg.Serialize(removeModerator));
         }
 
+        internal void __SendMessage<T>(T message, MessageChannel messageChannel = MessageChannel.Reliable)
+        {
+            __SendMessage(Msg.Serialize(message), messageChannel);
+        }
+
         internal void __SendMessage(byte[] message, MessageChannel messageChannel = MessageChannel.Reliable)
         {
             if (IsOpen)
@@ -416,6 +422,14 @@ namespace Hypernex.Tools
 
         internal void Update()
         {
+            if (!authed && IsOpen)
+            {
+                __SendMessage(new JoinAuth()
+                {
+                    TempToken = userIdToken,
+                    UserId = APITools.CurrentUser.Id,
+                });
+            }
             if (!string.IsNullOrEmpty(hostId) && (host == null || (host != null && host.Id != hostId)))
             {
                 if (hostId == APITools.CurrentUser.Id)

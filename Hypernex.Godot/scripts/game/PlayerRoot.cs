@@ -19,6 +19,7 @@ namespace Hypernex.Game
         public NodePath[] parts = Array.Empty<NodePath>();
         public Node[] Parts => parts.Select(x => GetNode(x)).ToArray();
         public string UserId { get; private set; }
+        public Vector3 Pos { get => GetPart<PlayerController>().Position; set => GetPart<PlayerController>().Position = value; }
         private Vector3 oldPosition;
 
         public T GetPart<T>() where T : Node
@@ -28,8 +29,8 @@ namespace Hypernex.Game
 
         public override void _PhysicsProcess(double delta)
         {
-            float tolerance = 1f;
-            if (Mathf.IsEqualApprox(Position.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Position.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Position.Z, oldPosition.Z, tolerance))
+            float tolerance = 0.1f;
+            if (Mathf.IsEqualApprox(Pos.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Pos.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Pos.Z, oldPosition.Z, tolerance))
                 return;
             GameInstance.FocusedInstance.SendMessage(new PlayerObjectUpdate()
             {
@@ -41,10 +42,10 @@ namespace Hypernex.Game
                 Object = new Networking.Messages.Data.NetworkedObject()
                 {
                     ObjectLocation = "root",
-                    Position = Position.ToFloat3(),
+                    Position = Pos.ToFloat3(),
                 },
             }, Nexport.MessageChannel.Unreliable);
-            oldPosition = Position;
+            oldPosition = Pos;
         }
 
         public void NetworkUpdate(PlayerUpdate playerUpdate)
@@ -60,7 +61,7 @@ namespace Hypernex.Game
             GD.Print(playerObjectUpdate.Object.Position);
             if (playerObjectUpdate.Object.ObjectLocation.ToLower() == "root")
             {
-                Position = playerObjectUpdate.Object.Position.ToGodot3();
+                Pos = playerObjectUpdate.Object.Position.ToGodot3();
             }
         }
 
