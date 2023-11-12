@@ -23,12 +23,16 @@ namespace Hypernex.Player
 
         public override void _Process(double delta)
         {
+            if (inputs == null)
+                return;
             Rotation = new Vector3(0f, inputs.totalMousePosition.X, 0f);
             root.view.Rotation = new Vector3(inputs.totalMousePosition.Y, 0f, 0f);
         }
 
         public override void _PhysicsProcess(double delta)
         {
+            if (inputs == null)
+                return;
             Vector3 vel = Velocity;
 
             if (!IsOnFloor())
