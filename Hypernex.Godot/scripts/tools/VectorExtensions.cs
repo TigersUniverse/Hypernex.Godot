@@ -25,6 +25,16 @@ namespace Hypernex.Tools.Godot
             return new Vector3(v[0], v[1], v[2]);
         }
 
+        public static float3 ToFloat3(this Vector3 v)
+        {
+            return new float3(v.X, v.Y, v.Z);
+        }
+
+        public static Vector3 ToGodot3(this float3 v)
+        {
+            return new Vector3(v.x, v.y, v.z);
+        }
+
         public static float[] ToFloats(this Vector4 v)
         {
             return new float[] { v.X, v.Y, v.Z, v.W };

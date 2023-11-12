@@ -195,12 +195,18 @@ namespace Hypernex.Tools
             if (!client.IsOpen)
                 client.Open();
         }
+
         public void Close()
         {
             DiscordTools.UnfocusInstance(gameServerId + "/" + instanceId);
             PlayerManagement.DestroyGameInstance(this);
             if (IsOpen)
                 client?.Stop();
+        }
+
+        public void SendMessage<T>(T message, MessageChannel messageChannel = MessageChannel.Reliable)
+        {
+            SendMessage(Msg.Serialize(message));
         }
 
         /// <summary>
@@ -345,6 +351,7 @@ namespace Hypernex.Tools
                 }
                 if (open)
                     Open();
+                FocusedInstance = this;
                 OnGameInstanceLoaded?.Invoke(this, worldMeta);
             }
             catch (Exception)

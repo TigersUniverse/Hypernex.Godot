@@ -21,6 +21,12 @@ namespace Hypernex.Player
 
         public override void _Process(double delta)
         {
+            if (Input.IsActionJustPressed("ui_cancel"))
+            {
+                Input.MouseMode = (Input.MouseMode == Input.MouseModeEnum.Visible) ? Input.MouseModeEnum.Hidden : Input.MouseModeEnum.Visible;
+            }
+            if (Input.MouseMode == Input.MouseModeEnum.Visible)
+                return;
             var position = GetViewport().GetMousePosition();
             lastMouseDelta = lastMousePosition - position;
             lastMousePosition = position;

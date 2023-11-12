@@ -80,6 +80,17 @@ public partial class Init : Node
         SetupAndRun();
     }
 
+    public override void _Process(double delta)
+    {
+        GameInstance.FocusedInstance?.Update();
+        GameInstance.FocusedInstance?.LateUpdate();
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        GameInstance.FocusedInstance?.FixedUpdate();
+    }
+
     private static WorldManager NewWorldManager()
     {
         var node = new WorldManager();
