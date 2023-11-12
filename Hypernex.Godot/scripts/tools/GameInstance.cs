@@ -99,7 +99,7 @@ namespace Hypernex.Tools
         // internal List<Sandbox> sandboxes = new ();
         public readonly string instanceCreatorId;
 
-        private string hostId => client?.HostId ?? String.Empty;
+        private string hostId => client?.HostId ?? string.Empty;
         internal bool isHost
         {
             get

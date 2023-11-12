@@ -19,6 +19,14 @@ namespace Hypernex.Player
             lastMousePosition = GetViewport().GetMousePosition();
         }
 
+        public override void _Input(InputEvent @event)
+        {
+            if (@event is InputEventMouseMotion mouseMotion)
+            {
+                lastMouseDelta -= mouseMotion.Relative;
+            }
+        }
+
         public override void _Process(double delta)
         {
             if (Input.IsActionJustPressed("ui_cancel"))
@@ -28,9 +36,10 @@ namespace Hypernex.Player
             if (Input.MouseMode == Input.MouseModeEnum.Visible)
                 return;
             var position = GetViewport().GetMousePosition();
-            lastMouseDelta = lastMousePosition - position;
+            // lastMouseDelta = lastMousePosition - position;
             lastMousePosition = position;
             totalMousePosition += lastMouseDelta * 0.005f;
+            lastMouseDelta = Vector2.Zero;
             ReadInput();
         }
 

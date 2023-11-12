@@ -74,7 +74,7 @@ namespace Hypernex.UI
                 case CardType.User:
                     break;
                 case CardType.World:
-                    SocketManager.CreateInstance(worldMeta, InstancePublicity.Friends, InstanceProtocol.KCP);
+                    SocketManager.CreateInstance(worldMeta, InstancePublicity.Friends, InstanceProtocol.UDP);
                     break;
                 case CardType.Instance:
                     SocketManager.JoinInstance(safeInstance);

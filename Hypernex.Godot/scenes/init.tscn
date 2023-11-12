@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=14 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
+[ext_resource type="PackedScene" uid="uid://dyvx634j6ne8i" path="res://scenes/remote_player.tscn" id="3_gx5fr"]
 [ext_resource type="Script" path="res://scripts/ui/MainOverlay.cs" id="3_yxb3m"]
 [ext_resource type="Script" path="res://scripts/ui/FriendsController.cs" id="4_1wv3s"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="5_m63s1"]
@@ -29,7 +30,7 @@ login = NodePath("UI/Login/LoginScreen")
 overlay = NodePath("UI/PanelContainer/Overlay")
 ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
-remotePlayerScene = ExtResource("9_cj1hm")
+remotePlayerScene = ExtResource("3_gx5fr")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_ukjnl")
