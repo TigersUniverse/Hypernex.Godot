@@ -334,13 +334,14 @@ namespace Hypernex.Tools
 
         private void LoadScene(bool open, string s)
         {
-            World = new WorldRoot();
             try
             {
-                WorldManager.LoadWorld(WorldManager.LoadFromFile(s), root =>
+                World = WorldManager.LoadWorld(WorldManager.LoadFromFile(s));
+                if (World == null)
                 {
-                    World.AddChild(root);
-                });
+                    Dispose();
+                    return;
+                }
                 if (open)
                     Open();
                 OnGameInstanceLoaded?.Invoke(this, worldMeta);

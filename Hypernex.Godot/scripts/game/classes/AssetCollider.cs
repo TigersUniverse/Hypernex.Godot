@@ -10,11 +10,8 @@ using Newtonsoft.Json;
 
 namespace Hypernex.Game.Classes
 {
-    [GlobalClass]
-    public partial class AssetCollider : Resource, IWorldClass
+    public partial class AssetCollider : WorldAsset
     {
-        public static string ClassName => "AssetCollider";
-
         [JsonProperty]
         [Export]
         public Vector3[] Position { get; set; } = Array.Empty<Vector3>();
@@ -26,22 +23,26 @@ namespace Hypernex.Game.Classes
             set => Position = value.Select(x => x.ToGodot3()).ToArray();
         }
 
-        public void LoadFromData(string data)
+        public ConcavePolygonShape3D ToShape3D()
         {
-            JsonTools.JsonPopulate(data, this);
+            ConcavePolygonShape3D mesh = new ConcavePolygonShape3D();
+            mesh.Data = Position.ToArray();
+            return mesh;
         }
 
-        public string SaveToData()
+        public AssetCollider FromShape(Shape3D shape)
         {
-            return JsonTools.JsonSerialize(this);
-        }
-
-        public void PostLoad()
-        {
-        }
-
-        public void PreSave()
-        {
+            Name = shape.ResourceName;
+            Path = shape.ResourcePath;
+            if (shape is ConcavePolygonShape3D mesh)
+            {
+                Position = mesh.Data;
+            }
+            else
+            {
+                return null;
+            }
+            return this;
         }
     }
 }

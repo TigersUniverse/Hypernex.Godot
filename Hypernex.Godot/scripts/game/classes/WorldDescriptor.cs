@@ -7,7 +7,8 @@ using Newtonsoft.Json;
 namespace Hypernex.Game.Classes
 {
     [GlobalClass]
-    public partial class WorldDescriptor : Node, IWorldClass
+    [JsonObject(MemberSerialization.OptIn)]
+    public partial class WorldDescriptor : Node
     {
         public static string ClassName => "World";
 

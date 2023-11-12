@@ -5,6 +5,7 @@ using Godot;
 using MessagePack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Linq;
 
 namespace Hypernex.Tools
 {
@@ -12,6 +13,21 @@ namespace Hypernex.Tools
     {
         public static JsonSerializer Serializer { get; set; } = new JsonSerializer();
         public static MessagePackSerializerOptions MsgPackOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+
+        public static JObject SerializeObject(object data)
+        {
+            return JObject.FromObject(data, Serializer);
+        }
+
+        public static T DeserializeObject<T>(JObject data)
+        {
+            return data.ToObject<T>();
+        }
+
+        public static void PopulateObject(JObject data, object target)
+        {
+            Serializer.Populate(data.CreateReader(), target);
+        }
 
         public static string JsonSerialize(object data)
         {

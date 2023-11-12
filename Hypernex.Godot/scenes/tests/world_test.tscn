@@ -1,12 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=5 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/WorldManager.cs" id="1_d4dsn"]
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
-[ext_resource type="Script" path="res://scripts/game/classes/WorldDescriptor.cs" id="3_73irx"]
 [ext_resource type="ArrayMesh" uid="uid://563yko74k3mj" path="res://models/cube.obj" id="4_tuj0h"]
-[ext_resource type="Script" path="res://scripts/game/classes/WorldMesh.cs" id="4_tw6kn"]
-[ext_resource type="Script" path="res://scripts/game/classes/WorldStaticBody.cs" id="6_jygul"]
-[ext_resource type="Script" path="res://scripts/game/classes/WorldCollider.cs" id="7_ph2x4"]
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_6dgbk"]
 data = PackedVector3Array(-1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, -1, 1, 1, 1, -1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1, -1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, 1, -1, -1)
@@ -17,22 +13,18 @@ script = ExtResource("1_d4dsn")
 [node name="Test" type="Node" parent="."]
 script = ExtResource("1_hscsn")
 save = true
+load = true
 
-[node name="WorldDescriptor" type="Node" parent="Test"]
-script = ExtResource("3_73irx")
-Data = "HI"
+[node name="WorldDescriptor" type="Node3D" parent="Test"]
 
 [node name="WorldMesh" type="MeshInstance3D" parent="Test/WorldDescriptor"]
 transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 0, 0, 0)
 mesh = ExtResource("4_tuj0h")
-script = ExtResource("4_tw6kn")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Test/WorldDescriptor/WorldMesh"]
-script = ExtResource("6_jygul")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Test/WorldDescriptor/WorldMesh/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_6dgbk")
-script = ExtResource("7_ph2x4")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)

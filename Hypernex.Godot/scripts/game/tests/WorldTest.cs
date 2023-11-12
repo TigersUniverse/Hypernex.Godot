@@ -24,12 +24,12 @@ namespace Hypernex.Game.Tests
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                WorldManager.Instance.PreSave(this);
+                // WorldManager.Instance.PreSave(this);
                 sw.Stop();
                 GD.Print($"PreSave took {sw.ElapsedMilliseconds} ms");
                 sw.Reset();
                 sw.Start();
-                WorldData data = WorldManager.Instance.SaveWorld(this);
+                WorldData data = WorldManager.Instance.ConvertWorld(this);
                 sw.Stop();
                 GD.Print($"SaveWorld took {sw.ElapsedMilliseconds} ms");
                 sw.Reset();
@@ -47,7 +47,7 @@ namespace Hypernex.Game.Tests
                 GD.Print($"LoadFromFile took {sw.ElapsedMilliseconds} ms");
                 sw.Reset();
                 sw.Start();
-                Node node = WorldManager.Instance.LoadWorld(data);
+                WorldRoot node = WorldManager.Instance.LoadWorld(data);
                 sw.Stop();
                 GD.Print($"LoadWorld took {sw.ElapsedMilliseconds} ms");
                 // CallDeferred(nameof(SpawnWorld), node);
@@ -55,10 +55,11 @@ namespace Hypernex.Game.Tests
             }
         }
 
-        public void SpawnWorld(Node world)
+        public void SpawnWorld(WorldRoot world)
         {
-            WorldManager.Instance.PostLoad(world);
+            // WorldManager.Instance.PostLoad(world);
             AddChild(world);
+            world.Load();
         }
     }
 }

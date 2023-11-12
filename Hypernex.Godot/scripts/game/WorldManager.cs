@@ -15,12 +15,12 @@ namespace Hypernex.Game
     public partial class WorldManager : Node
     {
         public static WorldManager Instance;
-        public Dictionary<string, Type> classes = new Dictionary<string, Type>();
+        public Dictionary<string, WorldComponentConverter> componentConverters = new Dictionary<string, WorldComponentConverter>();
+        public Dictionary<string, WorldAssetConverter> assetConverters = new Dictionary<string, WorldAssetConverter>();
 
         public override void _Ready()
         {
             Instance = this;
-            classes.Clear();
             ScanForClasses(GetType().Assembly.GetTypes());
         }
 
@@ -28,112 +28,190 @@ namespace Hypernex.Game
         {
             foreach (var type in types)
             {
-                PropertyInfo prop = type.GetProperty(IWorldClass.ClassNameName, BindingFlags.Public | BindingFlags.Static);
-                if (type.GetInterfaces().Contains(typeof(IWorldClass)) && prop != null && prop.PropertyType == typeof(string))
+                // if (type.GetInterfaces().Contains(typeof(WorldComponentConverter)))
+                if (type.IsAssignableTo(typeof(WorldComponentConverter)) && !type.IsAbstract)
                 {
-                    classes.Add((string)prop.GetValue(null), type);
+                    string name = type.GetCustomAttribute<ComponentConverterNameAttribute>()?.Name ?? type.Name;
+                    WorldComponentConverter inst = (WorldComponentConverter)type.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>());
+                    componentConverters.Add(name, inst);
+                }
+                if (type.IsAssignableTo(typeof(WorldAssetConverter)) && !type.IsAbstract)
+                {
+                    string name = type.GetCustomAttribute<AssetConverterNameAttribute>()?.Name ?? type.Name;
+                    WorldAssetConverter inst = (WorldAssetConverter)type.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>());
+                    assetConverters.Add(name, inst);
                 }
             }
         }
 
-        private bool IsValidWorldObject(Node node)
+        public bool GetAssetConverter(Type t, out string name, out WorldAssetConverter converter)
         {
-            return classes.ContainsValue(node.GetType());
+            name = assetConverters.FirstOrDefault(x => x.Value.CanHandleType(t)).Key;
+            converter = assetConverters.FirstOrDefault(x => x.Value.CanHandleType(t)).Value;
+            return name != null && converter != null;
         }
 
-        private WorldObject ToWorldObject(Node node)
+        public bool GetComponentConverter(Type t, out string name, out WorldComponentConverter converter)
         {
-            WorldObject obj = new WorldObject();
-            obj.Name = node.Name;
-            obj.ClassName = classes.FirstOrDefault(x => x.Value == node.GetType()).Key;
-            if (!string.IsNullOrEmpty(obj.ClassName) && node is IWorldClass cl)
-            {
-                // obj.ClassData = cl.SaveToData();
-                obj.ClassData2 = JObject.Parse(cl.SaveToData());
-            }
-            foreach (var child in node.GetChildren())
-            {
-                if (IsValidWorldObject(child))
-                {
-                    obj.ChildObjects.Add(ToWorldObject(child));
-                }
-            }
-            return obj;
+            name = componentConverters.FirstOrDefault(x => x.Value.CanHandleType(t)).Key;
+            converter = componentConverters.FirstOrDefault(x => x.Value.CanHandleType(t)).Value;
+            return name != null && converter != null;
         }
 
-        private Node FromWorldObject(WorldObject obj)
+        public WorldAsset LoadAsset(WorldData data, WorldDataAsset dataObject)
         {
-            Node node = null;
-            if (classes.TryGetValue(obj.ClassName, out var type))
+            if (assetConverters.TryGetValue(dataObject.ClassName, out var converter))
             {
-                IWorldClass cl = (IWorldClass)type.GetConstructor(new Type[0]).Invoke(new object[0]);
-                if (cl is Node)
-                {
-                    node = cl as Node;
-                    node.Name = obj.Name;
-                    // cl.LoadFromData(obj.ClassData);
-                    cl.LoadFromData(obj.ClassData2.ToString(Formatting.None));
-                    foreach (var child in obj.ChildObjects)
-                    {
-                        node.AddChild(FromWorldObject(child));
-                    }
-                }
+                return converter.LoadFromData(data, dataObject.ClassData);
             }
-            return node;
+            return null;
         }
 
-        public Node LoadWorld(WorldData data)
+        public WorldDataAsset SaveAsset(WorldData data, WorldAsset obj)
         {
-            WorldRoot worldRoot = new WorldRoot();
-            foreach (var child in data.RootObjects)
+            if (GetAssetConverter(obj.GetType(), out var name, out var converter))
             {
-                worldRoot.AddChild(FromWorldObject(child));
+                var dataObject = new WorldDataAsset();
+                // dataObject.Path = $"{obj.ResourcePath}:{obj.ResourceName}";
+                dataObject.Path = obj.Path;
+                dataObject.ClassName = name;
+                dataObject.ClassData = converter.SaveToData(data, obj);
+                return dataObject;
             }
-            return worldRoot;
+            return null;
         }
 
-        public void PostLoad(Node worldRoot)
+        public Node LoadComponent(WorldData data, WorldDataComponent dataObject)
         {
-            foreach (var node in worldRoot.GetChildren())
+            if (componentConverters.TryGetValue(dataObject.ClassName, out var converter))
             {
-                if (IsValidWorldObject(node) && node is IWorldClass wc)
-                {
-                    wc.PostLoad();
-                    PostLoad(node);
-                }
+                return converter.LoadFromData(data, dataObject.ClassData);
             }
+            return null;
         }
 
-        public WorldData SaveWorld(Node worldRoot)
+        public WorldDataComponent SaveComponent(WorldData data, Node obj)
+        {
+            if (GetComponentConverter(obj.GetType(), out var name, out var converter))
+            {
+                var dataObject = new WorldDataComponent();
+                dataObject.ClassName = name;
+                dataObject.ClassData = converter.SaveToData(data, obj);
+                return dataObject;
+            }
+            return null;
+        }
+
+        public WorldObject LoadObject(WorldData data, WorldDataObject dataObject)
+        {
+            WorldObject worldObject = new WorldObject();
+            worldObject.Name = dataObject.Name;
+            worldObject.LoadFromData(dataObject.ClassData);
+            return worldObject;
+        }
+
+        public WorldDataObject SaveObject(WorldData data, WorldObject obj)
+        {
+            var dataObject = new WorldDataObject();
+            dataObject.Name = obj.Name;
+            dataObject.ParentObject = obj.GetParentIndex();
+            foreach (var cmp in obj.Components)
+            {
+                dataObject.Components.Add(data.AllComponents.Count);
+                data.AllComponents.Add(SaveComponent(data, cmp));
+            }
+            dataObject.ClassName = nameof(Node3D);
+            dataObject.ClassData = obj.SaveToData();
+            return dataObject;
+        }
+
+        public WorldRoot LoadWorld(WorldData data)
+        {
+            WorldRoot root = new WorldRoot();
+            foreach (var obj in data.AllAssets)
+            {
+                var o = LoadAsset(data, obj);
+                root.AddAsset(o);
+            }
+            foreach (var obj in data.AllComponents)
+            {
+                var o = LoadComponent(data, obj);
+                root.AddComponent(o);
+            }
+            foreach (var obj in data.AllObjects)
+            {
+                var o = LoadObject(data, obj);
+                o.Components.AddRange(obj.Components.Select(x => root.Components[x] as Node3D));
+                o._parent = obj.ParentObject;
+                root.AddObject(o);
+            }
+            return root;
+        }
+
+        public WorldData SaveWorld(WorldRoot root)
         {
             WorldData data = new WorldData();
-            foreach (var node in worldRoot.GetChildren())
+            foreach (var obj in root.Assets)
             {
-                if (IsValidWorldObject(node))
-                {
-                    data.RootObjects.Add(ToWorldObject(node));
-                }
+                data.AllAssets.Add(SaveAsset(data, obj));
+            }
+            foreach (var obj in root.Objects)
+            {
+                data.AllObjects.Add(SaveObject(data, obj));
             }
             return data;
         }
 
-        public void PreSave(Node worldRoot)
+        private void ConvertTree(WorldData data, Node node, int parent)
         {
-            foreach (var node in worldRoot.GetChildren())
+            if (WorldObject.IsComponentRoot(node) && node is Node3D n)
             {
-                if (IsValidWorldObject(node) && node is IWorldClass wc)
-                {
-                    wc.PreSave();
-                    PreSave(node);
-                }
+                var dataObject = new WorldDataObject();
+                dataObject.Name = node.Name;
+                dataObject.ParentObject = parent;
+                dataObject.ClassName = nameof(Node3D);
+                dataObject.ClassData = WorldObject.SaveToData(n);
+                dataObject.Components.Add(data.AllComponents.Count);
+                data.AllComponents.Add(SaveComponent(data, node));
+                parent = data.AllObjects.Count;
+                data.AllObjects.Add(dataObject);
+            }
+            else if (parent != -1)
+            {
+                var dataObject = data.AllObjects[parent];
+                dataObject.Components.Add(data.AllComponents.Count);
+                data.AllComponents.Add(SaveComponent(data, node));
+            }
+            foreach (var child in node.GetChildren())
+            {
+                ConvertTree(data, child, parent);
             }
         }
 
-        public static Node LoadWorld(WorldData worldData, Action<Node> spawnCallback = null)
+        public WorldData ConvertWorld(Node node)
+        {
+            WorldData data = new WorldData();
+            foreach (var child in node.GetChildren())
+            {
+                int parent = -1;
+                ConvertTree(data, child, parent);
+            }
+            return data;
+        }
+
+        public void PostLoad(WorldRoot worldRoot)
+        {
+        }
+
+        public void PreSave(WorldRoot worldRoot)
+        {
+        }
+
+        public static WorldRoot LoadWorld(WorldData worldData, Action<Node> spawnCallback = null)
         {
             try
             {
-                Node node = Instance.LoadWorld(worldData);
+                WorldRoot node = Instance.LoadWorld(worldData);
                 spawnCallback?.Invoke(node);
                 Instance.PostLoad(node);
                 return node;

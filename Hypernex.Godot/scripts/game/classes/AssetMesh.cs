@@ -10,11 +10,8 @@ using Newtonsoft.Json;
 
 namespace Hypernex.Game.Classes
 {
-    [GlobalClass]
-    public partial class AssetMesh : Resource, IWorldClass
+    public partial class AssetMesh : WorldAsset
     {
-        public static string ClassName => "AssetMesh";
-
         [JsonProperty]
         [Export]
         public int[] Index { get; set; } = Array.Empty<int>();
@@ -61,6 +58,43 @@ namespace Hypernex.Game.Classes
         {
             get => UV1.Select(x => x.ToFloats()).ToArray();
             set => UV1 = value.Select(x => x.ToGodot2()).ToArray();
+        }
+
+        public Mesh ToMesh()
+        {
+            SurfaceTool st = new SurfaceTool();
+            st.Begin(Mesh.PrimitiveType.Triangles);
+            for (int i = 0; i < Position.Length; i++)
+            {
+                if (Normal.Length != 0)
+                    st.SetNormal(Normal[i]);
+                if (Tangent.Length != 0)
+                    st.SetTangent(Tangent[i].ToPlane());
+                if (UV0.Length != 0)
+                    st.SetUV(UV0[i]);
+                if (UV1.Length != 0)
+                    st.SetUV(UV1[i]);
+                st.AddVertex(Position[i]);
+            }
+            for (int i = 0; i < Index.Length; i++)
+            {
+                st.AddIndex(Index[i]);
+            }
+            return st.Commit();
+        }
+
+        public AssetMesh FromMesh(Mesh mesh)
+        {
+            Name = mesh.ResourceName;
+            Path = mesh.ResourcePath;
+            var arr = mesh.SurfaceGetArrays(0);
+            Index = arr[(int)Mesh.ArrayType.Index].AsInt32Array();
+            Position = arr[(int)Mesh.ArrayType.Vertex].AsVector3Array();
+            Normal = arr[(int)Mesh.ArrayType.Normal].AsVector3Array();
+            Tangent = arr[(int)Mesh.ArrayType.Tangent].AsGodotArray<Vector4>().ToArray();
+            UV0 = arr[(int)Mesh.ArrayType.TexUV].AsVector2Array();
+            UV1 = arr[(int)Mesh.ArrayType.TexUV2].AsVector2Array();
+            return this;
         }
 
         public void LoadFromData(string data)

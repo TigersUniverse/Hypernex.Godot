@@ -5,27 +5,35 @@ namespace Hypernex.Game
 {
     public class WorldData
     {
-        public List<WorldObject> RootObjects { get; set; } = new List<WorldObject>();
-        public List<WorldClass> Classes { get; set; } = new List<WorldClass>();
+        public List<WorldDataObject> AllObjects { get; set; } = new List<WorldDataObject>();
+        public List<WorldDataScript> Scripts { get; set; } = new List<WorldDataScript>();
+        public List<WorldDataComponent> AllComponents { get; set; } = new List<WorldDataComponent>();
+        public List<WorldDataAsset> AllAssets { get; set; } = new List<WorldDataAsset>();
     }
 
-    public class WorldObject
+    public class WorldDataObject
     {
         public string Name { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
-        public JObject ClassData2 { get; set; } = null;
-        public string ClassData { get; set; } = string.Empty;
-        public List<WorldComponent> Components { get; set; } = new List<WorldComponent>();
-        public List<WorldObject> ChildObjects { get; set; } = new List<WorldObject>();
+        public JObject ClassData { get; set; } = null;
+        public int ParentObject { get; set; } = -1;
+        public List<int> Components { get; set; } = new List<int>();
     }
 
-    public class WorldComponent
+    public class WorldDataComponent
     {
         public string ClassName { get; set; } = string.Empty;
-        public string ClassData { get; set; } = string.Empty;
+        public JObject ClassData { get; set; } = null;
     }
 
-    public class WorldClass
+    public class WorldDataAsset
+    {
+        public string Path { get; set; } = string.Empty;
+        public string ClassName { get; set; } = string.Empty;
+        public JObject ClassData { get; set; } = null;
+    }
+
+    public class WorldDataScript
     {
         public string Name { get; set; } = string.Empty;
         public string Lang { get; set; } = string.Empty;
