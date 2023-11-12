@@ -21,6 +21,8 @@ public partial class Init : Node
     [Export]
     public MainOverlay overlay;
     [Export]
+    public Control ui;
+    [Export]
     public PackedScene localPlayerScene;
     [Export]
     public PackedScene remotePlayerScene;
@@ -61,6 +63,7 @@ public partial class Init : Node
 
         APITools.OnUserRefresh += user =>
         {
+            ui.Show();
             login.root.Hide();
             overlay.root.Show();
             overlay.ShowHome();
@@ -69,6 +72,7 @@ public partial class Init : Node
         APITools.OnLogout += () =>
         {
             APITools.DisposeUserSocket();
+            ui.Show();
             overlay.root.Hide();
             login.root.Show();
         };
@@ -88,6 +92,7 @@ public partial class Init : Node
     {
         instance.World.Load();
         WorldManager.Instance.AddChild(instance.World);
+        Instance.ui.Hide();
     }
 
     public static PlayerRoot NewPlayer(bool isLocal)
@@ -122,6 +127,7 @@ public partial class Init : Node
 
     public void SetupAndRun()
     {
+        ui.Show();
         overlay.root.Hide();
         login.root.Show();
         login.TryLoginWith();

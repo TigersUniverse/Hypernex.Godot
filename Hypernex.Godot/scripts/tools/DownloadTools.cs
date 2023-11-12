@@ -100,7 +100,8 @@ namespace Hypernex.Tools
                 return;
             DownloadMeta downloadMeta = Queue.Dequeue();
             Logger.CurrentLogger.Debug("Beginning Download for " + downloadMeta.url);
-            Thread t = new Thread(async () =>
+            RunningThreads.Add(downloadMeta, null);
+            Task.Run(async () =>
             {
                 using HttpClient wc = new HttpClient();
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, downloadMeta.url);
@@ -128,8 +129,6 @@ namespace Hypernex.Tools
                 QuickInvoke.InvokeActionOnMainThread(downloadMeta.done, ms.ToArray());
                 RunningThreads.Remove(downloadMeta);
             });
-            RunningThreads.Add(downloadMeta, t);
-            t.Start();
         }
 
         private static async Task CopyAsync(Stream source, Stream dest, int bufferSize, IProgress<long> progress)

@@ -10,10 +10,11 @@
 [ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_exjdl"]
 [ext_resource type="PackedScene" uid="uid://b4nrx2xxp1xio" path="res://scenes/player.tscn" id="9_cj1hm"]
 
-[node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay")]
+[node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay", "ui")]
 script = ExtResource("1_07r2y")
 login = NodePath("UI/Login/LoginScreen")
 overlay = NodePath("UI/PanelContainer/Overlay")
+ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
 remotePlayerScene = ExtResource("9_cj1hm")
 
