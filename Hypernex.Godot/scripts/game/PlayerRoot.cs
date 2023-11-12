@@ -27,6 +27,11 @@ namespace Hypernex.Game
             return (T)Parts.FirstOrDefault(x => x is T);
         }
 
+        public override void _Ready()
+        {
+            Position = Vector3.Zero;
+        }
+
         public override void _PhysicsProcess(double delta)
         {
             if (Local != this)
@@ -34,7 +39,6 @@ namespace Hypernex.Game
             float tolerance = 1f;
             if (Mathf.IsEqualApprox(Pos.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Pos.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Pos.Z, oldPosition.Z, tolerance))
                 return;
-            GD.Print(Pos);
             GameInstance.FocusedInstance.SendMessage(new PlayerObjectUpdate()
             {
                 Auth = new JoinAuth()

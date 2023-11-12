@@ -27,7 +27,7 @@ namespace Hypernex.Game
 
         public void AddPlayer(PlayerRoot player)
         {
-            player.Position = descriptor.StartPosition;
+            player.Pos = descriptor.StartPosition;
             AddChild(player);
         }
 
