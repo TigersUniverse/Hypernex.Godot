@@ -103,7 +103,9 @@ public partial class Init : Node
     {
         instance.World.Load();
         WorldManager.Instance.AddChild(instance.World);
-        instance.World.AddPlayer(Instance.localPlayerScene.Instantiate<PlayerRoot>());
+        var plr = NewPlayer(true);
+        plr.SetUser(APITools.CurrentUser.Id, instance);
+        instance.World.AddPlayer(plr);
         Instance.ui.Hide();
     }
 
