@@ -14,7 +14,9 @@ using NWaves.Signals;
 
 public partial class VoiceChat : Node
 {
-    public const int MaxBytes = 5760;
+    public const int Bitrate = 64000;
+    public const float FrameSize = 20f;
+    public const int MaxBytes = 4000;
     public const int OpusSampleRate = 24000;
 
     public struct VoiceData
@@ -115,28 +117,37 @@ public partial class VoiceChat : Node
 
     public override void _Process(double delta)
     {
-        // Recording = Input.IsActionPressed("player_voice_chat") && GetMultiplayerAuthority() == Multiplayer.GetUniqueId(); // TODO: remove this line and put in the player classes
+        TickAudio(delta);
     }
 
     public override void _PhysicsProcess(double delta)
     {
-        TickAudio(delta);
+        // TickAudio(delta);
     }
 
     private void TickAudio(double delta)
     {
         playbackPosition += delta;
+        /*if (voice != null)
+            playbackPosition = voice.GetPlaybackPosition();
+        else if (voice3d != null)
+            playbackPosition = voice.GetPlaybackPosition();*/
+        double delta2 = BufferLength;
 
-        if (voice != null && playbackPosition + delta >= BufferLength)
+        if (voice != null && playbackPosition + delta2 >= BufferLength)
         {
-            voice.Playing = true;
+            // voice.Playing = true;
+            // playbackPosition -= BufferLength;
+            // voice.Play(Mathf.Max(0, (float)playbackPosition));
             playbackPosition = 0;
             playback = voice.GetStreamPlayback() as AudioStreamGeneratorPlayback;
             ProcessVoice(delta);
         }
-        else if (voice3d != null && playbackPosition + delta >= BufferLength)
+        else if (voice3d != null && playbackPosition + delta2 >= BufferLength)
         {
-            voice3d.Playing = true;
+            // voice3d.Playing = true;
+            // playbackPosition -= BufferLength;
+            // voice3d.Play(Mathf.Max(0, (float)playbackPosition));
             playbackPosition = 0;
             playback = voice3d.GetStreamPlayback() as AudioStreamGeneratorPlayback;
             ProcessVoice(delta);
@@ -354,7 +365,7 @@ public partial class VoiceChat : Node
                 }
             }
 
-            int length = (int)(10f / 1000f * OpusSampleRate);
+            int length = (int)(FrameSize / 1000f * OpusSampleRate);
             while (queue.Count >= length)
             {
                 int stereo_data_length = length;
@@ -378,8 +389,8 @@ public partial class VoiceChat : Node
 
                 if (encoder == null)
                 {
-                    encoder = OpusEncoder.Create(OpusSampleRate, 1, FragLabs.Audio.Codecs.Opus.Application.Audio);
-                    encoder.Bitrate = 64000;
+                    encoder = OpusEncoder.Create(OpusSampleRate, 1, FragLabs.Audio.Codecs.Opus.Application.Voip);
+                    encoder.Bitrate = Bitrate;
                     encoder.MaxDataBytes = MaxBytes;
                 }
 
@@ -390,7 +401,7 @@ public partial class VoiceChat : Node
                 if (DirectListen)
                     Speak(data, data.Length);
                 else if (Listen)
-                    SendRpcSpeak(encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
+                    Speak(encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
 
                 CallDeferred(nameof(SendRpcSpeak), encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
             }
