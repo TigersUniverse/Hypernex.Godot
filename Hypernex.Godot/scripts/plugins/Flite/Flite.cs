@@ -46,10 +46,10 @@ namespace Flite
         public static extern IntPtr flite_voice_load([MarshalAs(UnmanagedType.LPStr)] string voice_filename);
 
         [DllImport(LibName, CharSet = LibCharSet, CallingConvention = LibCallConv)]
-        public static extern IntPtr register_cmu_us_awb([MarshalAs(UnmanagedType.LPStr)] string voxdir);
+        public static extern IntPtr register_cmu_us_kal16([MarshalAs(UnmanagedType.LPStr)] string voxdir);
 
         [DllImport(LibName, CharSet = LibCharSet, CallingConvention = LibCallConv)]
-        public static extern void unregister_cmu_us_awb(IntPtr vox);
+        public static extern void unregister_cmu_us_kal16(IntPtr vox);
 
         [DllImport(LibName, CharSet = LibCharSet, CallingConvention = LibCallConv)]
         public static extern int flite_add_lang(char *langname, lang_init lang_init, lex_init lex_init);
