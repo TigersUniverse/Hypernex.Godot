@@ -41,6 +41,7 @@ namespace Hypernex.Player
         {
             if (Input.IsActionJustPressed("ui_cancel"))
             {
+                textChatOpen = false;
                 Input.MouseMode = (Input.MouseMode == Input.MouseModeEnum.Visible) ? Input.MouseModeEnum.Captured : Input.MouseModeEnum.Visible;
                 Init.Instance.ui.Visible = Input.MouseMode == Input.MouseModeEnum.Visible;
             }

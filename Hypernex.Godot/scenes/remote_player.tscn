@@ -29,6 +29,9 @@ disabled = true
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 mesh = SubResource("CapsuleMesh_i7wyo")
 
-[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root")]
+[node name="Voice" type="AudioStreamPlayer3D" parent="CharacterBody3D"]
+
+[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root", "audioSource")]
 script = ExtResource("3_hirej")
 root = NodePath("..")
+audioSource = NodePath("../CharacterBody3D/Voice")

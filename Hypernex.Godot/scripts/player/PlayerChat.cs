@@ -47,6 +47,11 @@ namespace Hypernex.Player
                     textChat.Show();
                     textChat.GrabFocus();
                 }
+                else if (!inputs.textChatOpen)
+                {
+                    textChat.Clear();
+                    textChat.Hide();
+                }
             }
             if (voice != null)
             {
