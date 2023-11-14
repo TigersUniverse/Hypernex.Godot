@@ -101,6 +101,18 @@ namespace Hypernex.Game
                     $"PlayerRoot not found for {gameInstance.gameServerId}/{gameInstance.instanceId}/{playerVoice.Auth.UserId}");
         }
 
+        public static void HandlePlayerMessage(GameInstance gameInstance, PlayerMessage playerMessage)
+        {
+            if (playerMessage.Auth.UserId == APITools.CurrentUser?.Id || string.IsNullOrEmpty(playerMessage.Auth.UserId))
+                return;
+            PlayerRoot netPlayer = GetOrCreateNetPlayer(gameInstance, playerMessage.Auth.UserId);
+            if (netPlayer != null)
+                netPlayer.MessageUpdate(playerMessage);
+            else
+                Logger.CurrentLogger.Debug(
+                    $"PlayerRoot not found for {gameInstance.gameServerId}/{gameInstance.instanceId}/{playerMessage.Auth.UserId}");
+        }
+
         public static void PlayerLeave(GameInstance gameInstance, User user)
         {
             if (!Players.ContainsKey(gameInstance))

@@ -4,12 +4,14 @@ using Hypernex.Game;
 
 namespace Hypernex.Player
 {
+    // This whole class will likely become abstract later on
     public partial class PlayerInputs : Node
     {
         [Export]
         public PlayerRoot root;
 
         public Vector2 move;
+        public bool textChatOpen;
         public Vector2 lastMousePosition;
         public Vector2 lastMouseDelta;
         public Vector2 totalMousePosition;
@@ -17,6 +19,7 @@ namespace Hypernex.Player
         public override void _Ready()
         {
             lastMousePosition = GetViewport().GetMousePosition();
+            Input.MouseMode = Input.MouseModeEnum.Captured;
         }
 
         public override void _ExitTree()
@@ -26,6 +29,8 @@ namespace Hypernex.Player
 
         public override void _Input(InputEvent @event)
         {
+            if (Input.MouseMode == Input.MouseModeEnum.Visible)
+                return;
             if (@event is InputEventMouseMotion mouseMotion)
             {
                 lastMouseDelta -= mouseMotion.Relative;
@@ -56,7 +61,19 @@ namespace Hypernex.Player
 
         public virtual void ReadInput()
         {
-            move = Input.GetVector("move_left", "move_right", "move_forward", "move_back");
+            if (Input.IsActionJustReleased("chat_text"))
+            {
+                textChatOpen = true;
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+            }
+            if (textChatOpen)
+            {
+                move = Vector2.Zero;
+            }
+            else
+            {
+                move = Input.GetVector("move_left", "move_right", "move_forward", "move_back");
+            }
         }
     }
 }

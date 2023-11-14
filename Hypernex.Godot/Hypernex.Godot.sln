@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordGameSDK", "scripts\p
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoiceChat", "scripts\plugins\VoiceChat\VoiceChat.csproj", "{0ACE555A-3F30-4D05-BA81-77B8EF0C40CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flite", "scripts\plugins\Flite\Flite.csproj", "{6D68E659-320A-4188-AAA2-934A32462E39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{0ACE555A-3F30-4D05-BA81-77B8EF0C40CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ACE555A-3F30-4D05-BA81-77B8EF0C40CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0ACE555A-3F30-4D05-BA81-77B8EF0C40CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D68E659-320A-4188-AAA2-934A32462E39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D68E659-320A-4188-AAA2-934A32462E39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D68E659-320A-4188-AAA2-934A32462E39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D68E659-320A-4188-AAA2-934A32462E39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{48D58B1A-A6EB-4A4A-85F4-912853D1E094} = {EB3224CF-4542-4CCF-96D8-EBA392053BDC}
 		{65F8675B-8A7A-4599-8BAA-07B18CB4A186} = {EB3224CF-4542-4CCF-96D8-EBA392053BDC}
 		{0ACE555A-3F30-4D05-BA81-77B8EF0C40CF} = {EB3224CF-4542-4CCF-96D8-EBA392053BDC}
+		{6D68E659-320A-4188-AAA2-934A32462E39} = {EB3224CF-4542-4CCF-96D8-EBA392053BDC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43C92F75-7BE2-475A-89DC-79D6C7069EB5}

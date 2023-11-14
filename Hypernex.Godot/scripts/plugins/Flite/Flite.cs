@@ -21,6 +21,12 @@ namespace Flite
         public static extern int flite_init();
 
         [DllImport(LibName)]
+        public static extern void delete_voice(IntPtr u);
+
+        [DllImport(LibName)]
+        public static extern void cst_free(IntPtr u);
+
+        [DllImport(LibName)]
         public static extern IntPtr flite_text_to_wave(string text, IntPtr voice);
 
         [DllImport(LibName)]
@@ -31,7 +37,10 @@ namespace Flite
 
         public static CstWave FliteTextToWave(string text, IntPtr voice)
         {
-            return Marshal.PtrToStructure<CstWave>(flite_text_to_wave(text, voice));
+            IntPtr ptr = flite_text_to_wave(text, voice);
+            CstWave wave = Marshal.PtrToStructure<CstWave>(ptr);
+            cst_free(ptr);
+            return wave;
         }
     }
 }

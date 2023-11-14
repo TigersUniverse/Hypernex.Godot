@@ -88,6 +88,11 @@ namespace Hypernex.Game
                 case "Hypernex.Networking.Messages.PlayerMessage":
                 {
                     // TODO: Implement chatbox system (this will go in NetPlayer)
+                    PlayerMessage playerMessage = (PlayerMessage) Convert.ChangeType(msgMeta.Data, typeof(PlayerMessage));
+                    try
+                    {
+                        PlayerManagement.HandlePlayerMessage(gameInstance, playerMessage);
+                    } catch(Exception){}
                     break;
                 }
                 case "Hypernex.Networking.Messages.NetworkedEvent":

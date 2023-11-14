@@ -35,6 +35,27 @@ shape = SubResource("CapsuleShape3D_wyrxg")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 mesh = SubResource("CapsuleMesh_i7wyo")
 
-[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root")]
+[node name="Voice" type="AudioStreamPlayer3D" parent="CharacterBody3D"]
+
+[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root", "textChat", "audioSource")]
 script = ExtResource("4_r7ubo")
 root = NodePath("..")
+textChat = NodePath("../Control/LineEdit")
+audioSource = NodePath("../CharacterBody3D/Voice")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LineEdit" type="LineEdit" parent="Control"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+placeholder_text = "Type to chat..."

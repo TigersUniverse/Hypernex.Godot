@@ -20,7 +20,8 @@ namespace Hypernex.Game
         public Node[] Parts => parts.Select(x => GetNode(x)).ToArray();
         public string UserId { get; private set; }
         public GameInstance Instance { get; private set; }
-        public Vector3 Pos { get => GetPart<PlayerController>().Position; set => GetPart<PlayerController>().Position = value; }
+        public PlayerController Controller => GetPart<PlayerController>();
+        public Vector3 Pos { get => Controller.Position; set => Controller.Position = value; }
         private Vector3 oldPosition;
         public bool IsLocal => Local == this;
         public string AvatarId;
@@ -105,6 +106,11 @@ namespace Hypernex.Game
         public void VoiceUpdate(PlayerVoice playerVoice)
         {
             GetPart<PlayerChat>()?.HandleVoice(playerVoice);
+        }
+
+        public void MessageUpdate(PlayerMessage playerMessage)
+        {
+            GetPart<PlayerChat>()?.HandleMessage(playerMessage);
         }
 
         public void NetworkObjectUpdate(PlayerObjectUpdate playerObjectUpdate)

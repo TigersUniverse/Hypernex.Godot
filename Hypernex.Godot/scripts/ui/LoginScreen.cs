@@ -26,11 +26,20 @@ namespace Hypernex.UI
         public override void _Ready()
         {
             loginButton.Pressed += TryLogin;
+            usernameEdit.TextSubmitted += Submit;
         }
 
         public override void _ExitTree()
         {
             loginButton.Pressed -= TryLogin;
+            usernameEdit.TextSubmitted -= Submit;
+        }
+
+        private void Submit(string newText)
+        {
+            if (loginButton.Disabled)
+                return;
+            TryLogin();
         }
 
         public void TryLoginWith()
