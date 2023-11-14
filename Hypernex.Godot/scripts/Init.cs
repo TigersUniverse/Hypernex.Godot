@@ -26,6 +26,7 @@ public partial class Init : Node
     public PackedScene localPlayerScene;
     [Export]
     public PackedScene remotePlayerScene;
+    private static IntPtr fliteLibHandle = IntPtr.Zero;
 
     public override void _Ready()
     {
@@ -121,9 +122,9 @@ public partial class Init : Node
     private static IntPtr FliteResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (libraryName != Flite.FliteNativeApi.LibName)
-        {
             return IntPtr.Zero;
-        }
+        if (fliteLibHandle != IntPtr.Zero)
+            return fliteLibHandle;
         string dir = Directory.GetCurrentDirectory();
         if (EngineDebugger.IsActive())
         {
@@ -132,12 +133,15 @@ public partial class Init : Node
         switch (OS.GetName().ToLower())
         {
             case "windows":
-                return NativeLibrary.Load(Path.Combine(dir, $"{Flite.FliteNativeApi.LibName}.dll"));
+                fliteLibHandle = NativeLibrary.Load(Path.Combine(dir, $"{Flite.FliteNativeApi.LibName}.dll"));
+                break;
             case "linux":
-                return NativeLibrary.Load(Path.Combine(dir, $"lib{Flite.FliteNativeApi.LibName}.so"));
+                fliteLibHandle = NativeLibrary.Load(Path.Combine(dir, $"lib{Flite.FliteNativeApi.LibName}.so"));
+                break;
             default:
                 return IntPtr.Zero;
         }
+        return fliteLibHandle;
     }
 
     private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)

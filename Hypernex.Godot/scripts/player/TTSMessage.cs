@@ -1,16 +1,34 @@
 
 using System;
+using System.IO;
 using Godot;
 
 namespace Hypernex.Player
 {
     public static class TTSMessage
     {
-        public static unsafe void PlayMessageOn(this AudioStreamPlayer3D player, string text)
+        static TTSMessage()
+        {
+            InitTTS();
+        }
+
+        public static void InitTTS()
         {
             Flite.FliteNativeApi.flite_init();
-            var voice = Flite.FliteNativeApi.register_cmu_us_awb(null);
+            Flite.FliteNativeApi.AddEnglish();
+        }
+
+        public static unsafe void PlayMessageOn(this AudioStreamPlayer3D player, string text)
+        {
+            string temp = Path.Combine(OS.GetUserDataDir(), "cmu_us_rms.flitevox");
+            if (!File.Exists(temp))
+            {
+                using Godot.FileAccess fileAccess = Godot.FileAccess.Open("res://voices/cmu_us_rms.flitevox", Godot.FileAccess.ModeFlags.Read);
+                File.WriteAllBytes(temp, fileAccess.GetBuffer((long)fileAccess.GetLength()));
+            }
+            var voice = Flite.FliteNativeApi.flite_voice_load(temp);
             var wave = Flite.FliteNativeApi.FliteTextToWave(text, voice);
+            Flite.FliteNativeApi.delete_voice(voice);
             var generator = new AudioStreamGenerator();
             generator.MixRate = wave.sample_rate;
             generator.BufferLength = (float)wave.num_samples / wave.sample_rate;

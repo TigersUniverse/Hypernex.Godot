@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Godot;
+using Hypernex.Player;
 
 public partial class FliteTest : AudioStreamPlayer3D
 {
@@ -12,6 +13,8 @@ public partial class FliteTest : AudioStreamPlayer3D
     public override void _Ready()
     {
         NativeLibrary.SetDllImportResolver(typeof(Flite.FliteNativeApi).Assembly, Resolver);
+        // TTSMessage.InitTTS();
+        lineEdit.GrabFocus();
     }
 
     public void PlayText()
@@ -21,9 +24,18 @@ public partial class FliteTest : AudioStreamPlayer3D
 
     public unsafe void Play(string text)
     {
-        Flite.FliteNativeApi.flite_init();
-        var voice = Flite.FliteNativeApi.register_cmu_us_awb(null);
+        this.PlayMessageOn(text);
+        return;
+        IntPtr voice = Flite.FliteNativeApi.flite_voice_load(Path.Combine(Directory.GetCurrentDirectory(), "voices", "cmu_us_rms.flitevox"));
+        if (voice == IntPtr.Zero)
+        {
+            GD.PrintErr("0");
+            return;
+        }
+        // var voice = Flite.FliteNativeApi.register_cmu_us_awb(null);
         var wave = Flite.FliteNativeApi.FliteTextToWave(text, voice);
+        // Flite.FliteNativeApi.unregister_cmu_us_awb(voice);
+        Flite.FliteNativeApi.delete_voice(voice);
         var generator = new AudioStreamGenerator();
         generator.MixRate = wave.sample_rate;
         generator.BufferLength = (float)wave.num_samples / wave.sample_rate;
@@ -38,12 +50,14 @@ public partial class FliteTest : AudioStreamPlayer3D
         }
     }
 
+    private IntPtr fliteLibHandle = IntPtr.Zero;
+
     private IntPtr Resolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (libraryName != Flite.FliteNativeApi.LibName)
-        {
             return IntPtr.Zero;
-        }
+        if (fliteLibHandle != IntPtr.Zero)
+            return fliteLibHandle;
         string dir = Directory.GetCurrentDirectory();
         if (EngineDebugger.IsActive())
         {
@@ -52,11 +66,14 @@ public partial class FliteTest : AudioStreamPlayer3D
         switch (OS.GetName().ToLower())
         {
             case "windows":
-                return NativeLibrary.Load(Path.Combine(dir, $"{Flite.FliteNativeApi.LibName}.dll"));
+                fliteLibHandle = NativeLibrary.Load(Path.Combine(dir, $"{Flite.FliteNativeApi.LibName}.dll"));
+                break;
             case "linux":
-                return NativeLibrary.Load(Path.Combine(dir, $"lib{Flite.FliteNativeApi.LibName}.so"));
+                fliteLibHandle = NativeLibrary.Load(Path.Combine(dir, $"lib{Flite.FliteNativeApi.LibName}.so"));
+                break;
             default:
                 return IntPtr.Zero;
         }
+        return fliteLibHandle;
     }
 }
