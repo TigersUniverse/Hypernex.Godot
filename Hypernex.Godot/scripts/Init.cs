@@ -126,7 +126,7 @@ public partial class Init : Node
         if (fliteLibHandle != IntPtr.Zero)
             return fliteLibHandle;
         string dir = Directory.GetCurrentDirectory();
-        if (EngineDebugger.IsActive())
+        if (OS.HasFeature("editor"))
         {
             dir = Path.Combine(dir, "scripts", "plugins");
         }
@@ -151,7 +151,7 @@ public partial class Init : Node
             return IntPtr.Zero;
         }
         string dir = Directory.GetCurrentDirectory();
-        if (EngineDebugger.IsActive())
+        if (OS.HasFeature("editor"))
         {
             dir = Path.Combine(dir, "scripts", "plugins", "DiscordGameSDK");
         }

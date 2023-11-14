@@ -76,7 +76,7 @@ public partial class VoiceChat : Node
             return IntPtr.Zero;
         }
         string dir = Directory.GetCurrentDirectory();
-        if (EngineDebugger.IsActive())
+        if (OS.HasFeature("editor"))
         {
             dir = Path.Combine(dir, "scripts", "plugins");
         }

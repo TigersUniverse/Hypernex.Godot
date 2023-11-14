@@ -59,7 +59,7 @@ public partial class FliteTest : AudioStreamPlayer3D
         if (fliteLibHandle != IntPtr.Zero)
             return fliteLibHandle;
         string dir = Directory.GetCurrentDirectory();
-        if (EngineDebugger.IsActive())
+        if (OS.HasFeature("editor"))
         {
             dir = Path.Combine(dir, "scripts", "plugins");
         }
