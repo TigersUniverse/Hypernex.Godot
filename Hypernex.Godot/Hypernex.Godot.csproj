@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
     <ProjectReference Include="scripts\plugins\Nexport\Nexport.csproj" />
     <ProjectReference Include="scripts\plugins\DiscordGameSDK\DiscordGameSDK.csproj" />
     <ProjectReference Include="scripts\plugins\VoiceChat\VoiceChat.csproj" />
+    <ProjectReference Include="scripts\plugins\Flite\Flite.csproj" />
   </ItemGroup>
 
   <ItemGroup>

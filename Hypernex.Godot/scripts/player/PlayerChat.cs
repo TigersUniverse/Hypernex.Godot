@@ -10,6 +10,8 @@ namespace Hypernex.Player
     {
         [Export]
         public PlayerRoot root;
+        [Export]
+        public AudioStreamPlayer3D audioSource;
         public VoiceChat voice;
         public bool IsSpeaking => voice?.IsSpeaking ?? false;
 

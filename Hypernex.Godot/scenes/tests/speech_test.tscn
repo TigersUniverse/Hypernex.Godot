@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3 uid="uid://cwhucrewiej4u"]
+
+[ext_resource type="Script" path="res://scripts/game/tests/FliteTest.cs" id="1_2rytf"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qcebf"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_puc3r"]
+sky_material = SubResource("ProceduralSkyMaterial_qcebf")
+
+[sub_resource type="Environment" id="Environment_wm8cl"]
+background_mode = 2
+sky = SubResource("Sky_puc3r")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="SpeechTest" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_wm8cl")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." node_paths=PackedStringArray("lineEdit")]
+attenuation_filter_db = 0.0
+script = ExtResource("1_2rytf")
+lineEdit = NodePath("../LineEdit")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10.7401)
+current = true
+
+[node name="LineEdit" type="LineEdit" parent="."]
+offset_right = 431.0
+offset_bottom = 31.0
+placeholder_text = "Speech"
+
+[node name="Button" type="Button" parent="."]
+offset_top = 31.0
+offset_right = 41.0
+offset_bottom = 62.0
+text = "Play"
+
+[connection signal="text_submitted" from="LineEdit" to="AudioStreamPlayer3D" method="Play"]
+[connection signal="pressed" from="Button" to="AudioStreamPlayer3D" method="PlayText"]

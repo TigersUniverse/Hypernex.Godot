@@ -40,6 +40,7 @@ public partial class Init : Node
         Telepathy.Log.Warning = s => logger.Warn(s);
         Telepathy.Log.Error = s => logger.Error(s);
 
+        NativeLibrary.SetDllImportResolver(typeof(Flite.FliteNativeApi).Assembly, FliteResolver);
         NativeLibrary.SetDllImportResolver(typeof(Discord.Discord).Assembly, DiscordResolver);
 
         AddChild(new QuickInvoke() { Name = "QuickInvoke" });
@@ -115,6 +116,28 @@ public partial class Init : Node
             return Instance.localPlayerScene.Instantiate<PlayerRoot>();
         else
             return Instance.remotePlayerScene.Instantiate<PlayerRoot>();
+    }
+
+    private static IntPtr FliteResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    {
+        if (libraryName != Flite.FliteNativeApi.LibName)
+        {
+            return IntPtr.Zero;
+        }
+        string dir = Directory.GetCurrentDirectory();
+        if (EngineDebugger.IsActive())
+        {
+            dir = Path.Combine(dir, "scripts", "plugins");
+        }
+        switch (OS.GetName().ToLower())
+        {
+            case "windows":
+                return NativeLibrary.Load(Path.Combine(dir, $"{Flite.FliteNativeApi.LibName}.dll"));
+            case "linux":
+                return NativeLibrary.Load(Path.Combine(dir, $"lib{Flite.FliteNativeApi.LibName}.so"));
+            default:
+                return IntPtr.Zero;
+        }
     }
 
     private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
