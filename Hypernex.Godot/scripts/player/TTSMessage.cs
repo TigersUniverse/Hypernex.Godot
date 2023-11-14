@@ -11,7 +11,6 @@ namespace Hypernex.Player
             Flite.FliteNativeApi.flite_init();
             var voice = Flite.FliteNativeApi.register_cmu_us_awb(null);
             var wave = Flite.FliteNativeApi.FliteTextToWave(text, voice);
-            Flite.FliteNativeApi.delete_voice(voice);
             var generator = new AudioStreamGenerator();
             generator.MixRate = wave.sample_rate;
             generator.BufferLength = (float)wave.num_samples / wave.sample_rate;
