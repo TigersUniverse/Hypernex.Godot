@@ -96,7 +96,7 @@ namespace Hypernex.Player
 
         public void HandleMessage(PlayerMessage data)
         {
-            Logger.CurrentLogger.Debug(data.Message);
+            Logger.CurrentLogger.Debug($"Chat: {data.Auth.UserId}: {data.Message}");
             root.Controller.PlayMessage(data.Message);
         }
 
