@@ -20,12 +20,12 @@ namespace Hypernex.Player
 
         public static unsafe void PlayMessageOn(this AudioStreamPlayer3D player, string text)
         {
-            string temp = Path.Combine(OS.GetUserDataDir(), "cmu_us_rms.flitevox");
+            /*string temp = Path.Combine(OS.GetUserDataDir(), "cmu_us_rms.flitevox");
             if (!File.Exists(temp))
             {
                 using Godot.FileAccess fileAccess = Godot.FileAccess.Open("res://voices/cmu_us_rms.flitevox", Godot.FileAccess.ModeFlags.Read);
                 File.WriteAllBytes(temp, fileAccess.GetBuffer((long)fileAccess.GetLength()));
-            }
+            }*/
             // var voice = Flite.FliteNativeApi.flite_voice_load(temp);
             var voice = Flite.FliteNativeApi.register_cmu_us_kal16(null);
             var wave = Flite.FliteNativeApi.FliteTextToWave(text, voice);

@@ -19,6 +19,7 @@ namespace Hypernex.Game
         public NodePath[] parts = Array.Empty<NodePath>();
         public Node[] Parts => parts.Select(x => GetNode(x)).ToArray();
         public string UserId { get; private set; }
+        public User User { get; private set; }
         public GameInstance Instance { get; private set; }
         public PlayerController Controller => GetPart<PlayerController>();
         public Vector3 Pos { get => Controller.Position; set => Controller.Position = value; }
@@ -40,6 +41,11 @@ namespace Hypernex.Game
             {
                 Local = this;
             }
+            APITools.APIObject.GetUser(r =>
+            {
+                if (r.success)
+                    User = r.result.UserData;
+            }, UserId, isUserId: true);
             GetPart<PlayerChat>()?.UserSet();
             OnUserSet?.Invoke();
         }
