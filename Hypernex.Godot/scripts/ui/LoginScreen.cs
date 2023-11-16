@@ -21,18 +21,48 @@ namespace Hypernex.UI
         [Export]
         public Button loginButton;
         [Export]
+        public OptionButton loginOptions;
+        [Export]
         public AcceptDialog messagePopup;
 
         public override void _Ready()
         {
+            LoadedConfig(ConfigManager.LoadedConfig);
             loginButton.Pressed += TryLogin;
             usernameEdit.TextSubmitted += Submit;
+            loginOptions.ItemSelected += AccountSelected;
+            ConfigManager.OnConfigLoaded += LoadedConfig;
         }
 
         public override void _ExitTree()
         {
             loginButton.Pressed -= TryLogin;
             usernameEdit.TextSubmitted -= Submit;
+            loginOptions.ItemSelected -= AccountSelected;
+            ConfigManager.OnConfigLoaded -= LoadedConfig;
+        }
+
+        private void LoadedConfig(Config config)
+        {
+            loginOptions.Clear();
+            loginOptions.AddItem("Select Account");
+            if (config == null)
+                return;
+            foreach (var acct in config.SavedAccounts)
+            {
+                loginOptions.AddItem(acct.Username);
+            }
+        }
+
+        private void AccountSelected(long index)
+        {
+            ConfigUser user = ConfigManager.LoadedConfig.SavedAccounts[(int)index - 1];
+            HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
+            {
+                TargetDomain = user.Server,
+                IsHTTP = false,
+            };
+            TryLogin(settings);
         }
 
         private void Submit(string newText)
