@@ -81,18 +81,25 @@ public partial class Init : Node
     {
         var node = new WorldManager();
         node.Name = "Worlds";
-        GameInstance.OnGameInstanceLoaded = GameInstanceLoaded;
+        GameInstance.OnGameInstanceLoaded += GameInstanceLoaded;
         return node;
     }
 
     private static void GameInstanceLoaded(GameInstance instance, WorldMeta meta)
     {
-        instance.World.Load();
-        WorldManager.Instance.AddChild(instance.World);
-        var plr = NewPlayer(true);
-        plr.SetUser(APITools.CurrentUser.Id, instance);
-        instance.World.AddPlayer(plr);
-        Instance.ui.Hide();
+        if (instance.IsDisposed)
+        {
+            Instance.ui.Show();
+        }
+        else
+        {
+            instance.World.Load();
+            WorldManager.Instance.AddChild(instance.World);
+            var plr = NewPlayer(true);
+            plr.SetUser(APITools.CurrentUser.Id, instance);
+            instance.World.AddPlayer(plr);
+            Instance.ui.Hide();
+        }
     }
 
     public static PlayerRoot NewPlayer(bool isLocal)

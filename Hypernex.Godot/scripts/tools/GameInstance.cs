@@ -121,6 +121,7 @@ namespace Hypernex.Tools
         }
         private List<User> usersBeforeMe = new ();
         private bool isDisposed;
+        public bool IsDisposed => isDisposed;
         // internal ScriptEvents ScriptEvents;
 
         private GameInstance(JoinedInstance joinInstance, WorldMeta worldMeta)
@@ -458,6 +459,7 @@ namespace Hypernex.Tools
                 return;
             isDisposed = true;
             FocusedInstance = null;
+            OnGameInstanceLoaded?.Invoke(this, worldMeta);
             World?.QueueFree();
             // Physics.gravity = new Vector3(0, LocalPlayer.Instance.Gravity, 0);
             // sandboxes.ForEach(x => x.Dispose());

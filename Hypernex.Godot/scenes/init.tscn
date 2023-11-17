@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=16 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://scripts/ui/WorldsController.cs" id="7_yw38d"]
 [ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_exjdl"]
 [ext_resource type="PackedScene" uid="uid://b4nrx2xxp1xio" path="res://scenes/player.tscn" id="9_cj1hm"]
+[ext_resource type="Script" path="res://scripts/ui/BigCardTemplate.cs" id="11_dnbou"]
+[ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="12_de1ik"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mgffp"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -51,6 +53,7 @@ grow_vertical = 2
 initial_position = 2
 
 [node name="Login" type="VBoxContainer" parent="UI"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -92,7 +95,6 @@ text = "Login"
 layout_mode = 2
 
 [node name="MainOverlay" type="PanelContainer" parent="UI"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -106,11 +108,13 @@ root = NodePath("..")
 tabs = NodePath("../TabContainer")
 logoutButton = NodePath("../TabContainer/Settings/LogoutBtn")
 exitButton = NodePath("../TabContainer/Settings/ExitBtn")
+currentInstanceIdx = 2
 
 [node name="TabContainer" type="TabContainer" parent="UI/MainOverlay"]
 layout_mode = 2
 
 [node name="Home" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Friends" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Home"]
@@ -206,6 +210,71 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Worlds/ScrollContainer"]
+layout_mode = 2
+
+[node name="Current Instance" type="VBoxContainer" parent="UI/MainOverlay/TabContainer" node_paths=PackedStringArray("label", "usersLabel", "usersContainer", "background", "videoBackground")]
+layout_mode = 2
+script = ExtResource("11_dnbou")
+usersLabelFormat = "[center]Users ({0})[/center][right][url]Refresh[/url][/right][right][url=leave]Leave[/url][/right]"
+label = NodePath("HBoxContainer/Label")
+usersLabel = NodePath("UsersLabel")
+usersContainer = NodePath("Users/HBoxContainer")
+background = NodePath("HBoxContainer/Image/TextureRect")
+videoBackground = NodePath("HBoxContainer/Image/VideoStreamPlayer")
+cardUI = ExtResource("5_m63s1")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Current Instance"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Image" type="Control" parent="UI/MainOverlay/TabContainer/Current Instance/HBoxContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(500, 200)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="UI/MainOverlay/TabContainer/Current Instance/HBoxContainer/Image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_de1ik")
+expand_mode = 1
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="UI/MainOverlay/TabContainer/Current Instance/HBoxContainer/Image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+volume_db = -80.0
+expand = true
+
+[node name="Label" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Current Instance/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "My World"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="UsersLabel" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Current Instance"]
+layout_mode = 2
+size_flags_vertical = 10
+bbcode_enabled = true
+text = "Users"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Users" type="ScrollContainer" parent="UI/MainOverlay/TabContainer/Current Instance"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Current Instance/Users"]
 layout_mode = 2
 
 [node name="Settings" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]

@@ -108,6 +108,9 @@ namespace Hypernex.UI
                         case 3:
                             APITools.APIObject.DeclineFriendRequest(r => { }, APITools.CurrentUser, APITools.CurrentToken, userData.Id);
                             break;
+                        case 4:
+                            APITools.APIObject.SendFriendRequest(r => { }, APITools.CurrentUser, APITools.CurrentToken, userData.Id);
+                            break;
                     }
                     break;
                 case CardType.World:
@@ -152,6 +155,9 @@ namespace Hypernex.UI
                         case CardUserType.FriendRequest:
                             popup.AddItem("Accept", 2);
                             popup.AddItem("Decline", 3);
+                            break;
+                        case CardUserType.Instance:
+                            popup.AddItem("Send Friend Request", 4);
                             break;
                     }
                     break;
