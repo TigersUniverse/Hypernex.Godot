@@ -8,6 +8,15 @@ namespace Hypernex.UI
 {
     public partial class BigCardTemplate : Control
     {
+        public enum CardType
+        {
+            None,
+            User,
+            World,
+            Instance,
+            CurrentInstance,
+        }
+
         [Export(PropertyHint.MultilineText)]
         public string usersLabelFormat = "[center]Users ({0})[/center][right][url]Refresh[/url][/right]";
         [Export]
@@ -23,6 +32,9 @@ namespace Hypernex.UI
         [Export]
         public PackedScene cardUI;
 
+        public CardType type = CardType.None;
+        public User userData = null;
+        public WorldMeta worldMeta = null;
         public GameInstance gameInstance = null;
         public SafeInstance safeInstance = null;
 
@@ -41,7 +53,7 @@ namespace Hypernex.UI
             switch (meta.AsString().ToLower())
             {
                 default:
-                    usersLabel.Text = string.Format(usersLabelFormat, "...");
+                    usersLabel.Text = string.Empty;
                     RefreshUsers();
                     break;
                 case "leave":
@@ -52,6 +64,8 @@ namespace Hypernex.UI
 
         public void RefreshUsers()
         {
+            if (type != CardType.Instance && type != CardType.CurrentInstance)
+                return;
             string[] users = Array.Empty<string>();
             if (safeInstance != null)
             {
@@ -72,6 +86,9 @@ namespace Hypernex.UI
 
         public void Reset()
         {
+            type = CardType.None;
+            userData = null;
+            worldMeta = null;
             gameInstance = null;
             safeInstance = null;
             background.Show();
@@ -79,12 +96,15 @@ namespace Hypernex.UI
             videoBackground.Stop();
             foreach (var child in usersContainer.GetChildren())
                 child.QueueFree();
+            usersLabel.Text = string.Empty;
             Hide();
         }
 
         public void SetGameInstance(GameInstance instance)
         {
             Reset();
+            Name = $"Current Instance ({instance.worldMeta.Name.Replace("[", "[lb]")})";
+            type = CardType.CurrentInstance;
             gameInstance = instance;
             label.Text = instance.worldMeta.Name.Replace("[", "[lb]");
             DownloadTools.DownloadBytes(instance.worldMeta.ThumbnailURL, b =>
@@ -108,6 +128,7 @@ namespace Hypernex.UI
         public void SetSafeInstance(SafeInstance instance)
         {
             Reset();
+            Name = "Instance (...)";
             APITools.APIObject.GetWorldMeta(r =>
             {
                 if (r.success)
@@ -116,6 +137,8 @@ namespace Hypernex.UI
                     {
                         if (!IsInstanceValid(label))
                             return;
+                        Name = $"Instance ({r.result.Meta.Name.Replace("[", "[lb]")})";
+                        type = CardType.Instance;
                         safeInstance = instance;
                         label.Text = r.result.Meta.Name.Replace("[", "[lb]");
                         DownloadTools.DownloadBytes(r.result.Meta.ThumbnailURL, b =>
@@ -137,6 +160,54 @@ namespace Hypernex.UI
                     });
                 }
             }, instance.WorldId);
+        }
+
+        public void SetUser(User user)
+        {
+            Reset();
+            Name = "User";
+            type = CardType.User;
+            userData = user;
+            label.Text = user.GetUsersName().Replace("[", "[lb]");
+            DownloadTools.DownloadBytes(user.Bio.PfpURL, b =>
+            {
+                if (!IsInstanceValid(background))
+                    return;
+                Image img = ImageTools.LoadImage(b);
+                if (img != null)
+                    background.Texture = ImageTexture.CreateFromImage(img);
+                else
+                {
+                    videoBackground.Stream = ImageTools.LoadFFmpeg(b);
+                    videoBackground.Play();
+                    background.Hide();
+                }
+            });
+            Show();
+        }
+
+        public void SetWorldMeta(WorldMeta world)
+        {
+            Reset();
+            Name = "World";
+            type = CardType.World;
+            worldMeta = world;
+            label.Text = world.Name.Replace("[", "[lb]");
+            DownloadTools.DownloadBytes(world.ThumbnailURL, b =>
+            {
+                if (!IsInstanceValid(background))
+                    return;
+                Image img = ImageTools.LoadImage(b);
+                if (img != null)
+                    background.Texture = ImageTexture.CreateFromImage(img);
+                else
+                {
+                    videoBackground.Stream = ImageTools.LoadFFmpeg(b);
+                    videoBackground.Play();
+                    background.Hide();
+                }
+            });
+            Show();
         }
     }
 }

@@ -4,6 +4,7 @@ using Godot;
 using Hypernex.CCK;
 using Hypernex.Game;
 using Hypernex.Networking.Messages;
+using Hypernex.Tools;
 
 namespace Hypernex.Player
 {
@@ -101,7 +102,7 @@ namespace Hypernex.Player
 
         public void HandleMessage(PlayerMessage data)
         {
-            Logger.CurrentLogger.Debug($"Chat: {root.User.Username}: {data.Message}");
+            Logger.CurrentLogger.Debug($"Chat: {root.User.GetUsersName().Replace("[", "[lb]")}: {data.Message}");
             root.Controller.PlayMessage(data.Message);
         }
 

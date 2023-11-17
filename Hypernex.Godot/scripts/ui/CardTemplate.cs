@@ -111,18 +111,24 @@ namespace Hypernex.UI
                         case 4:
                             APITools.APIObject.SendFriendRequest(r => { }, APITools.CurrentUser, APITools.CurrentToken, userData.Id);
                             break;
+                        case 5:
+                            Init.Instance.overlay.AddCard(userData);
+                            break;
                     }
                     break;
                 case CardType.World:
                     switch (id)
                     {
                         case 1:
-                            SocketManager.CreateInstance(worldMeta, InstancePublicity.Friends, InstanceProtocol.KCP);
+                            Init.Instance.overlay.AddCard(worldMeta);
                             break;
                         case 2:
-                            SocketManager.CreateInstance(worldMeta, InstancePublicity.Anyone, InstanceProtocol.KCP);
+                            SocketManager.CreateInstance(worldMeta, InstancePublicity.Friends, InstanceProtocol.KCP);
                             break;
                         case 3:
+                            SocketManager.CreateInstance(worldMeta, InstancePublicity.Anyone, InstanceProtocol.KCP);
+                            break;
+                        case 4:
                             SocketManager.CreateInstance(worldMeta, InstancePublicity.ClosedRequest, InstanceProtocol.KCP);
                             break;
                     }
@@ -131,6 +137,9 @@ namespace Hypernex.UI
                     switch (id)
                     {
                         case 1:
+                            Init.Instance.overlay.AddCard(safeInstance);
+                            break;
+                        case 2:
                             SocketManager.JoinInstance(safeInstance);
                             break;
                     }
@@ -148,26 +157,32 @@ namespace Hypernex.UI
                     switch (userType)
                     {
                         default:
+                            popup.AddItem("View User", 5);
                             break;
                         case CardUserType.Friend:
+                            popup.AddItem("View User", 5);
                             popup.AddItem("Invite", 1);
                             break;
                         case CardUserType.FriendRequest:
+                            popup.AddItem("View User", 5);
                             popup.AddItem("Accept", 2);
                             popup.AddItem("Decline", 3);
                             break;
                         case CardUserType.Instance:
+                            popup.AddItem("View User", 5);
                             popup.AddItem("Send Friend Request", 4);
                             break;
                     }
                     break;
                 case CardType.World:
-                    popup.AddItem("Create Instance (Friends)", 1);
-                    popup.AddItem("Create Instance (Anyone)", 2);
-                    popup.AddItem("Create Instance (Closed Request)", 3);
+                    popup.AddItem("View World", 1);
+                    popup.AddItem("Create Instance (Friends)", 2);
+                    popup.AddItem("Create Instance (Anyone)", 3);
+                    popup.AddItem("Create Instance (Closed Request)", 4);
                     break;
                 case CardType.Instance:
-                    popup.AddItem("Join Instance", 1);
+                    popup.AddItem("View Instance", 1);
+                    popup.AddItem("Join Instance", 2);
                     break;
             }
         }
@@ -323,7 +338,7 @@ namespace Hypernex.UI
                         cardInfoId = userId;
                         userType = utype;
                         userData = r.result.UserData;
-                        label.Text = $"{r.result.UserData.Username.Replace("[", "[lb]")} [color={GetColor(r.result.UserData.Bio.Status)}]{r.result.UserData.Bio.Status}[/color]";
+                        label.Text = $"{r.result.UserData.GetUsersName().Replace("[", "[lb]")} [color={GetColor(r.result.UserData.Bio.Status)}]{r.result.UserData.Bio.Status}[/color]";
                         DownloadTools.DownloadBytes(r.result.UserData.Bio.PfpURL, b =>
                         {
                             if (!IsInstanceValid(icon))

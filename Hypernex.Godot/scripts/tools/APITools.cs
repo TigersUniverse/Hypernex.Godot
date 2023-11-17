@@ -107,6 +107,11 @@ namespace Hypernex.Tools
             UserSocket = null;
         }
 
+        public static string GetUsersName(this User user)
+        {
+            return string.IsNullOrEmpty(user?.Bio?.DisplayName) ? user?.Username : user?.Bio?.DisplayName;
+        }
+
         public static void GetWorldMeta(string worldId, Action<WorldMeta> callback)
         {
             if (CachedWorldMeta.Any(x => x.Id == worldId))

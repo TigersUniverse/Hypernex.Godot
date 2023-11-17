@@ -1,0 +1,78 @@
+[gd_scene load_steps=4 format=3 uid="uid://bc42bxyk4uvjk"]
+
+[ext_resource type="Script" path="res://scripts/ui/BigCardTemplate.cs" id="1_3gxw0"]
+[ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="2_2xvhd"]
+[ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="3_p0uxf"]
+
+[node name="BigCard" type="Control" node_paths=PackedStringArray("label", "usersLabel", "usersContainer", "background", "videoBackground")]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_3gxw0")
+label = NodePath("VBoxContainer/HBoxContainer/Label")
+usersLabel = NodePath("VBoxContainer/UsersLabel")
+usersContainer = NodePath("VBoxContainer/Users/HBoxContainer")
+background = NodePath("VBoxContainer/HBoxContainer/Image/TextureRect")
+videoBackground = NodePath("VBoxContainer/HBoxContainer/Image/VideoStreamPlayer")
+cardUI = ExtResource("2_2xvhd")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Image" type="Control" parent="VBoxContainer/HBoxContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(500, 200)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer/Image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_p0uxf")
+expand_mode = 1
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VBoxContainer/HBoxContainer/Image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+volume_db = -80.0
+expand = true
+
+[node name="Label" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "My World"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="UsersLabel" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 10
+bbcode_enabled = true
+text = "Users"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Users" type="ScrollContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Users"]
+layout_mode = 2
