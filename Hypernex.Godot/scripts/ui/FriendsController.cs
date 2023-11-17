@@ -57,7 +57,7 @@ namespace Hypernex.UI
             {
                 CardTemplate node = friendUI.Instantiate<CardTemplate>();
                 container.AddChild(node);
-                node.SetUserId(friend);
+                node.SetUserId(friend, CardTemplate.CardUserType.Friend);
             }
         }
     }

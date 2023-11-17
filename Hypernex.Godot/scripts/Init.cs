@@ -63,23 +63,7 @@ public partial class Init : Node
 
         AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
 
-        APITools.OnUserRefresh += user =>
-        {
-            ui.Show();
-            login.root.Hide();
-            overlay.root.Show();
-            overlay.ShowHome();
-            APITools.CreateUserSocket(SocketManager.InitSocket);
-        };
-        APITools.OnLogout += () =>
-        {
-            APITools.DisposeUserSocket();
-            ui.Show();
-            overlay.root.Hide();
-            login.root.Show();
-        };
-
-        SetupAndRun();
+        SetupAndRunGame();
     }
 
     public override void _Process(double delta)
@@ -166,8 +150,24 @@ public partial class Init : Node
         }
     }
 
-    public void SetupAndRun()
+    public void SetupAndRunGame()
     {
+        APITools.OnUserRefresh += user =>
+        {
+            ui.Show();
+            login.root.Hide();
+            overlay.root.Show();
+            overlay.ShowHome();
+            APITools.CreateUserSocket(SocketManager.InitSocket);
+        };
+        APITools.OnLogout += () =>
+        {
+            APITools.DisposeUserSocket();
+            ui.Show();
+            overlay.root.Hide();
+            login.root.Show();
+        };
+
         ui.Show();
         overlay.root.Hide();
         login.root.Show();

@@ -17,6 +17,14 @@ namespace Hypernex.UI
             Instance,
         }
 
+        public enum CardUserType
+        {
+            Other,
+            Friend,
+            FriendRequest,
+            Instance,
+        }
+
         public static Vector2 baseSize = new Vector2(1280, 720);
         [Export]
         public Vector2 scaleSize = new Vector2(250, 100);
@@ -39,6 +47,7 @@ namespace Hypernex.UI
 
         public CardType type = CardType.None;
         public string cardInfoId = string.Empty;
+        public CardUserType userType = CardUserType.Other;
         public User userData = null;
         public WorldMeta worldMeta = null;
         public SafeInstance safeInstance = null;
@@ -93,6 +102,12 @@ namespace Hypernex.UI
                         case 1:
                             SocketManager.InviteUser(GameInstance.FocusedInstance, userData);
                             break;
+                        case 2:
+                            APITools.APIObject.AcceptFriendRequest(r => { }, APITools.CurrentUser, APITools.CurrentToken, userData.Id);
+                            break;
+                        case 3:
+                            APITools.APIObject.DeclineFriendRequest(r => { }, APITools.CurrentUser, APITools.CurrentToken, userData.Id);
+                            break;
                     }
                     break;
                 case CardType.World:
@@ -127,7 +142,18 @@ namespace Hypernex.UI
             switch (type)
             {
                 case CardType.User:
-                    popup.AddItem("Invite", 1);
+                    switch (userType)
+                    {
+                        default:
+                            break;
+                        case CardUserType.Friend:
+                            popup.AddItem("Invite", 1);
+                            break;
+                        case CardUserType.FriendRequest:
+                            popup.AddItem("Accept", 2);
+                            popup.AddItem("Decline", 3);
+                            break;
+                    }
                     break;
                 case CardType.World:
                     popup.AddItem("Create Instance (Friends)", 1);
@@ -188,7 +214,9 @@ namespace Hypernex.UI
 
         public void Reset()
         {
+            type = CardType.None;
             cardInfoId = string.Empty;
+            userType = CardUserType.Other;
             userData = null;
             worldMeta = null;
             safeInstance = null;
@@ -200,6 +228,7 @@ namespace Hypernex.UI
             videoBackground.Stop();
             if (menu != null)
                 menu.GetPopup().Clear();
+            Hide();
         }
 
         public void SetSafeInstance(SafeInstance instance)
@@ -232,6 +261,7 @@ namespace Hypernex.UI
                                 background.Hide();
                             }
                         });
+                        Show();
                     });
                 }
             }, instance.WorldId);
@@ -266,12 +296,13 @@ namespace Hypernex.UI
                                 background.Hide();
                             }
                         });
+                        Show();
                     });
                 }
             }, worldId);
         }
 
-        public void SetUserId(string userId)
+        public void SetUserId(string userId, CardUserType utype)
         {
             Reset();
             APITools.APIObject.GetUser(r =>
@@ -284,6 +315,7 @@ namespace Hypernex.UI
                             return;
                         type = CardType.User;
                         cardInfoId = userId;
+                        userType = utype;
                         userData = r.result.UserData;
                         label.Text = $"{r.result.UserData.Username.Replace("[", "[lb]")} [color={GetColor(r.result.UserData.Bio.Status)}]{r.result.UserData.Bio.Status}[/color]";
                         DownloadTools.DownloadBytes(r.result.UserData.Bio.PfpURL, b =>
@@ -314,6 +346,7 @@ namespace Hypernex.UI
                                 background.Hide();
                             }
                         });
+                        Show();
                     });
                 }
             }, userId, isUserId: true);
