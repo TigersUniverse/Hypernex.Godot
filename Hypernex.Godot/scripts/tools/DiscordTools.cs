@@ -11,7 +11,7 @@ using User = HypernexSharp.APIObjects.User;
 
 namespace Hypernex.Tools
 {
-#if false
+#if GODOT_ANDROID
     internal static class DiscordTools
     {
         public static void StartDiscord()
@@ -120,7 +120,7 @@ namespace Hypernex.Tools
                     Timestamps = new ActivityTimestamps {Start = startTime},
                     Assets = new ActivityAssets {LargeImage = "logo"}
                 }, result => { });
-                APITools.OnUserRefresh += user =>
+                APITools.OnUserLogin += user =>
                 {
                     // if (ignoreUserRefresh)
                         // return;

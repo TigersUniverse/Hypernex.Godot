@@ -4,12 +4,14 @@
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="2_2xvhd"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="3_p0uxf"]
 
-[node name="BigCard" type="Control" node_paths=PackedStringArray("label", "usersLabel", "usersContainer", "background", "videoBackground")]
+[node name="BigCard" type="Control" node_paths=PackedStringArray("label", "usersLabel", "controlsContainer", "usersContainer", "background", "videoBackground")]
+custom_minimum_size = Vector2(600, 500)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3gxw0")
 label = NodePath("VBoxContainer/HBoxContainer/Label")
 usersLabel = NodePath("VBoxContainer/UsersLabel")
+controlsContainer = NodePath("VBoxContainer/Controls/HBoxContainer")
 usersContainer = NodePath("VBoxContainer/Users/HBoxContainer")
 background = NodePath("VBoxContainer/HBoxContainer/Image/TextureRect")
 videoBackground = NodePath("VBoxContainer/HBoxContainer/Image/VideoStreamPlayer")
@@ -61,9 +63,17 @@ fit_content = true
 scroll_active = false
 shortcut_keys_enabled = false
 
+[node name="Controls" type="ScrollContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Controls"]
+layout_mode = 2
+
 [node name="UsersLabel" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 10
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.1
 bbcode_enabled = true
 text = "Users"
 fit_content = true

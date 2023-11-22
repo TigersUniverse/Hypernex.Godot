@@ -365,7 +365,7 @@ public partial class VoiceChat : Node
                 }
             }
 
-            int length = (int)(FrameSize / 1000f * OpusSampleRate);
+            int length = Mathf.RoundToInt(FrameSize / 1000f * OpusSampleRate);
             while (queue.Count >= length)
             {
                 int stereo_data_length = length;

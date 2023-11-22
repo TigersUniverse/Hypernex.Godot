@@ -17,7 +17,7 @@ namespace Hypernex.Tools
         public static User CurrentUser { get; internal set; }
         public static UserSocket UserSocket { get; internal set; }
         public static Action OnSocketConnect { get; set; } = () => { };
-        public static Action<User> OnUserRefresh { get; set; } = _ => { };
+        public static Action<User> OnUserLogin { get; set; } = _ => { };
         public static Action OnLogout { get; set; } = () => { };
         public static bool IsFullReady => APIObject != null && CurrentUser != null && CurrentToken != null && (UserSocket?.IsOpen ?? false);
 
@@ -87,7 +87,7 @@ namespace Hypernex.Tools
         {
             CurrentUser = user;
             CurrentToken = token;
-            QuickInvoke.InvokeActionOnMainThread(OnUserRefresh, CurrentUser);
+            QuickInvoke.InvokeActionOnMainThread(OnUserLogin, CurrentUser);
         }
 
         public static void Logout()
@@ -110,6 +110,21 @@ namespace Hypernex.Tools
         public static string GetUsersName(this User user)
         {
             return string.IsNullOrEmpty(user?.Bio?.DisplayName) ? user?.Username : user?.Bio?.DisplayName;
+        }
+
+        public static void RefreshUser(Action callback)
+        {
+            APIObject.GetUser(CurrentToken, r =>
+            {
+                if (r.success)
+                {
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        CurrentUser = r.result.UserData;
+                    });
+                    QuickInvoke.InvokeActionOnMainThread(callback);
+                }
+            });
         }
 
         public static void GetWorldMeta(string worldId, Action<WorldMeta> callback)

@@ -159,7 +159,7 @@ public partial class Init : Node
 
     public void SetupAndRunGame()
     {
-        APITools.OnUserRefresh += user =>
+        APITools.OnUserLogin += user =>
         {
             ui.Show();
             login.root.Hide();

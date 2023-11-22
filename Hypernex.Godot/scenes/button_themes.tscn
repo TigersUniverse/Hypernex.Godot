@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://d3ayvfsqhkktb"]
+
+[ext_resource type="Theme" uid="uid://1cua8ppjbi8u" path="res://themes/main_theme.tres" id="1_aoium"]
+
+[node name="ButtonThemes" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_aoium")
+
+[node name="Container" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Primary" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Primary"
+text = "Primary"
+
+[node name="Secondary" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Secondary"
+text = "Secondary"
+
+[node name="Success" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Success"
+text = "Success"
+
+[node name="Danger" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Danger"
+text = "Danger"
+
+[node name="Warning" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Warning"
+text = "Warning"
+
+[node name="Info" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Info"
+text = "Info"
+
+[node name="Custom" type="Button" parent="Container"]
+layout_mode = 2
+theme_type_variation = &"Button_Custom"
+text = "Custom"

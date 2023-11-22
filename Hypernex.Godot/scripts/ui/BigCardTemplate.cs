@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Hypernex.Tools;
+using Hypernex.Tools.Godot;
 using HypernexSharp.APIObjects;
 
 namespace Hypernex.UI
@@ -24,6 +26,8 @@ namespace Hypernex.UI
         [Export]
         public RichTextLabel usersLabel;
         [Export]
+        public Container controlsContainer;
+        [Export]
         public Container usersContainer;
         [Export]
         public TextureRect background;
@@ -31,8 +35,11 @@ namespace Hypernex.UI
         public VideoStreamPlayer videoBackground;
         [Export]
         public PackedScene cardUI;
+        [Export]
+        public PackedScene buttonUI;
 
         public CardType type = CardType.None;
+        public CardTemplate.CardUserType userType = CardTemplate.CardUserType.Other;
         public User userData = null;
         public WorldMeta worldMeta = null;
         public GameInstance gameInstance = null;
@@ -87,6 +94,7 @@ namespace Hypernex.UI
         public void Reset()
         {
             type = CardType.None;
+            userType = CardTemplate.CardUserType.Other;
             userData = null;
             worldMeta = null;
             gameInstance = null;
@@ -96,8 +104,31 @@ namespace Hypernex.UI
             videoBackground.Stop();
             foreach (var child in usersContainer.GetChildren())
                 child.QueueFree();
+            foreach (var child in controlsContainer.GetChildren())
+                child.QueueFree();
             usersLabel.Text = string.Empty;
             Hide();
+        }
+
+        public void Refresh()
+        {
+            switch (type)
+            {
+                case CardType.User:
+                    APITools.APIObject.GetUser(r =>
+                    {
+                        if (r.success)
+                        {
+                            APITools.RefreshUser(() =>
+                            {
+                                if (!IsInstanceValid(label))
+                                    return;
+                                SetUser(r.result.UserData, userType);
+                            });
+                        }
+                    }, userData.Id, isUserId: true);
+                    break;
+            }
         }
 
         public void SetGameInstance(GameInstance instance)
@@ -162,13 +193,42 @@ namespace Hypernex.UI
             }, instance.WorldId);
         }
 
-        public void SetUser(User user)
+        public void SetUser(User user, CardTemplate.CardUserType utype)
         {
             Reset();
             Name = "User";
             type = CardType.User;
+            userType = utype;
             userData = user;
             label.Text = user.GetUsersName().Replace("[", "[lb]");
+            var box1 = controlsContainer.AddVBox();
+            box1.AddLabel("User Actions", (ui, v) => { });
+            var box2 = box1.AddHBox();
+            box2.AddButton("Invite", UIButtonTheme.Primary, ui => SocketManager.InviteUser(GameInstance.FocusedInstance, userData));
+            var box3 = box2.AddVBox();
+            if (APITools.CurrentUser.Following.Contains(userData.Id))
+                box3.AddButton("Unfollow", UIButtonTheme.Secondary, ui =>
+                {
+                    ui.Text = "...";
+                    ui.Disabled = true;
+                    APITools.APIObject.UnfollowUser(r => Refresh(), APITools.CurrentUser, APITools.CurrentToken, userData.Id);
+                });
+            else
+                box3.AddButton("Follow", UIButtonTheme.Secondary, ui =>
+                {
+                    ui.Text = "...";
+                    ui.Disabled = true;
+                    APITools.APIObject.FollowUser(r => Refresh(), APITools.CurrentUser, APITools.CurrentToken, userData.Id);
+                });
+            box3.AddButton("Remove Friend", UIButtonTheme.Danger, ui => APITools.APIObject.RemoveFriend(r => Refresh(), APITools.CurrentUser, APITools.CurrentToken, userData.Id));
+            box3.AddButton("Block", UIButtonTheme.Danger, ui => APITools.APIObject.BlockUser(r => Refresh(), APITools.CurrentUser, APITools.CurrentToken, userData.Id));
+            if (GameInstance.FocusedInstance != null)
+            {
+                var box4 = box2.AddVBox();
+                box4.AddButton("Warn", UIButtonTheme.Warning, ui => GameInstance.FocusedInstance.WarnUser(userData, "TODO"));
+                box4.AddButton("Kick", UIButtonTheme.Danger, ui => GameInstance.FocusedInstance.KickUser(userData, "TODO"));
+                box4.AddButton("Ban", UIButtonTheme.Danger, ui => GameInstance.FocusedInstance.BanUser(userData, "TODO"));
+            }
             DownloadTools.DownloadBytes(user.Bio.PfpURL, b =>
             {
                 if (!IsInstanceValid(background))

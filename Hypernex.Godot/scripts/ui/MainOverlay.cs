@@ -63,19 +63,16 @@ namespace Hypernex.UI
 
         public void SetTab(int idx)
         {
-            QuickInvoke.InvokeActionOnMainThread(() =>
-            {
-                tabs.CurrentTab = idx;
-            });
+            tabs.CurrentTab = idx;
         }
 
-        public void AddCard(User user)
+        public void AddCard(User user, CardTemplate.CardUserType utype)
         {
             currentBigCard?.QueueFree();
             var card = bigCardUI.Instantiate<BigCardTemplate>();
             currentBigCard = card;
             tabs.AddChild(card);
-            card.SetUser(user);
+            card.SetUser(user, utype);
             int idx = tabs.GetTabIdxFromControl(card);
             CallDeferred(nameof(SetTab), idx);
         }

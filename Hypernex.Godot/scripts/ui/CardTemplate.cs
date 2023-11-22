@@ -112,7 +112,7 @@ namespace Hypernex.UI
                             APITools.APIObject.SendFriendRequest(r => { }, APITools.CurrentUser, APITools.CurrentToken, userData.Id);
                             break;
                         case 5:
-                            Init.Instance.overlay.AddCard(userData);
+                            Init.Instance.overlay.AddCard(userData, userType);
                             break;
                     }
                     break;

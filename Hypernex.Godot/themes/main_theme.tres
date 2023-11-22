@@ -1,0 +1,32 @@
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://1cua8ppjbi8u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l4dt1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jiy5c"]
+bg_color = Color(1, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dhmka"]
+bg_color = Color(0.2, 0.4, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bw5nm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uovju"]
+bg_color = Color(0, 0.8, 0.4, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pjhwr"]
+bg_color = Color(0.8, 0.6, 0, 1)
+
+[resource]
+Button_Custom/base_type = &"Button"
+Button_Custom/colors/button_color_type = Color(1, 1, 1, 1)
+Button_Custom/styles/normal = SubResource("StyleBoxFlat_l4dt1")
+Button_Danger/base_type = &"Button_Custom"
+Button_Danger/styles/normal = SubResource("StyleBoxFlat_jiy5c")
+Button_Primary/base_type = &"Button_Custom"
+Button_Primary/styles/normal = SubResource("StyleBoxFlat_dhmka")
+Button_Secondary/base_type = &"Button_Custom"
+Button_Secondary/styles/normal = SubResource("StyleBoxFlat_bw5nm")
+Button_Success/base_type = &"Button_Custom"
+Button_Success/styles/normal = SubResource("StyleBoxFlat_uovju")
+Button_Warning/base_type = &"Button_Custom"
+Button_Warning/styles/normal = SubResource("StyleBoxFlat_pjhwr")

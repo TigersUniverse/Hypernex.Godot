@@ -1,10 +1,12 @@
-[gd_scene load_steps=15 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=18 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
 [ext_resource type="PackedScene" uid="uid://dyvx634j6ne8i" path="res://scenes/remote_player.tscn" id="3_gx5fr"]
 [ext_resource type="Script" path="res://scripts/ui/MainOverlay.cs" id="3_yxb3m"]
 [ext_resource type="Script" path="res://scripts/ui/FriendsController.cs" id="4_1wv3s"]
+[ext_resource type="Theme" uid="uid://1cua8ppjbi8u" path="res://themes/main_theme.tres" id="4_f5hfe"]
+[ext_resource type="Script" path="res://scripts/ui/ThemeManager.cs" id="4_ju6j5"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="5_m63s1"]
 [ext_resource type="Script" path="res://scripts/ui/RequestsController.cs" id="6_0f1ly"]
 [ext_resource type="Script" path="res://scripts/ui/WorldsController.cs" id="7_yw38d"]
@@ -25,6 +27,13 @@ sky = SubResource("Sky_t3dit")
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8o0g"]
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
 [node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay", "ui")]
 script = ExtResource("1_07r2y")
 login = NodePath("UI/Login/LoginScreen")
@@ -40,6 +49,10 @@ environment = SubResource("Environment_ukjnl")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
+[node name="ThemeManager" type="Node" parent="."]
+script = ExtResource("4_ju6j5")
+buttonBaseBox = SubResource("StyleBoxFlat_k8o0g")
+
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
@@ -47,6 +60,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("4_f5hfe")
 
 [node name="AcceptDialog" type="AcceptDialog" parent="UI"]
 initial_position = 2
