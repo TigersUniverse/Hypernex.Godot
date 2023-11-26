@@ -48,7 +48,6 @@ namespace Hypernex.Player
             if (Input.MouseMode == Input.MouseModeEnum.Visible)
                 return;
             var position = GetViewport().GetMousePosition();
-            // lastMouseDelta = lastMousePosition - position;
             lastMousePosition = position;
             totalMousePosition += lastMouseDelta * 0.005f;
             lastMouseDelta = Vector2.Zero;

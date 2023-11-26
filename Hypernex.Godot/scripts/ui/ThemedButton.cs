@@ -22,6 +22,7 @@ namespace Hypernex.UI
             if (Enum.TryParse<UIButtonTheme>(str, out var result))
             {
                 Color col = ThemeManager.Instance.GetColor(result);
+                Color txtCol = ThemeManager.Instance.GetTextColor(col);
                 StyleBoxFlat ogBox = (StyleBoxFlat)ThemeManager.Instance.buttonBaseBox.Duplicate();
                 ogBox.BgColor = col;
                 StyleBoxFlat boxPressed = (StyleBoxFlat)ThemeManager.Instance.buttonBaseBox.Duplicate();
@@ -29,6 +30,7 @@ namespace Hypernex.UI
                 StyleBoxFlat boxDisabled = (StyleBoxFlat)ThemeManager.Instance.buttonBaseBox.Duplicate();
                 boxDisabled.BgColor = col.Darkened(ThemeManager.Instance.colorDisabled);
                 BeginBulkThemeOverride();
+                AddThemeColorOverride("font_color", txtCol);
                 AddThemeStyleboxOverride("disabled", boxDisabled);
                 AddThemeStyleboxOverride("focus", ogBox);
                 AddThemeStyleboxOverride("hover", boxPressed);

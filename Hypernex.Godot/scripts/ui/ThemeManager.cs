@@ -41,6 +41,11 @@ namespace Hypernex.UI
             Instance = this;
         }
 
+        public Color GetTextColor(Color color)
+        {
+            return color.Luminance < 0.5f ? Colors.White : Colors.Black;
+        }
+
         public Color GetColor(UIButtonTheme theme)
         {
             switch (theme)

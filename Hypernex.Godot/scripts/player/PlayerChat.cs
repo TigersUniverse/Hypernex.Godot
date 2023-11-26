@@ -88,7 +88,6 @@ namespace Hypernex.Player
             voice = new VoiceChat();
             voice.IsLocalPlayer = root.IsLocal;
             voice.OnSpeak = OnSpeak;
-            // voice.Listen = true;
             voice.BufferLength = 0.5f;
             voice.ProcessMode = ProcessModeEnum.Always;
             AddChild(voice);

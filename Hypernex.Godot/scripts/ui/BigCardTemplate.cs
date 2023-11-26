@@ -35,8 +35,6 @@ namespace Hypernex.UI
         public VideoStreamPlayer videoBackground;
         [Export]
         public PackedScene cardUI;
-        [Export]
-        public PackedScene buttonUI;
 
         public CardType type = CardType.None;
         public CardTemplate.CardUserType userType = CardTemplate.CardUserType.Other;
@@ -138,6 +136,10 @@ namespace Hypernex.UI
             type = CardType.CurrentInstance;
             gameInstance = instance;
             label.Text = instance.worldMeta.Name.Replace("[", "[lb]");
+            var box1 = controlsContainer.AddVBox();
+            box1.AddLabel("Actions", (ui, v) => { });
+            var box2 = box1.AddHBox();
+            box2.AddButton("Leave", UIButtonTheme.Warning, ui => gameInstance?.Dispose());
             DownloadTools.DownloadBytes(instance.worldMeta.ThumbnailURL, b =>
             {
                 if (!IsInstanceValid(background))
