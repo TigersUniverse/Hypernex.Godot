@@ -13,7 +13,7 @@ namespace Hypernex.Game.Tests
 
         public override async void _Ready()
         {
-            await ToSignal(GetTree().CreateTimer(0.25f), "timeout");
+            await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
             // new Thread(() => RunTest()).Start();
             RunTest();
         }

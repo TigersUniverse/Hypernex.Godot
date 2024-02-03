@@ -82,15 +82,7 @@ namespace Hypernex.Game.Classes
 
         public static bool IsComponentRoot(Node node)
         {
-            if (node.GetType() == typeof(Node3D))
-                return true;
-            switch (node)
-            {
-                default:
-                    return false;
-                case PhysicsBody3D:
-                    return true;
-            }
+            return true;
         }
 
         public Node3D FinalizeComponents()

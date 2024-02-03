@@ -28,7 +28,6 @@ namespace Hypernex.Game
         {
             foreach (var type in types)
             {
-                // if (type.GetInterfaces().Contains(typeof(WorldComponentConverter)))
                 if (type.IsAssignableTo(typeof(WorldComponentConverter)) && !type.IsAbstract)
                 {
                     string name = type.GetCustomAttribute<ComponentConverterNameAttribute>()?.Name ?? type.Name;
