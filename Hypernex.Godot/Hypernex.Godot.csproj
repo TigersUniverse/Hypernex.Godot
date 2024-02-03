@@ -1,22 +1,18 @@
-<Project Sdk="Godot.NET.Sdk/4.1.2">
-
+<Project Sdk="Godot.NET.Sdk/4.2.1">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="scripts\plugins\**" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="scripts\plugins\Nexport\Nexport.csproj" />
     <ProjectReference Include="scripts\plugins\DiscordGameSDK\DiscordGameSDK.csproj" />
     <ProjectReference Include="scripts\plugins\VoiceChat\VoiceChat.csproj" />
     <ProjectReference Include="scripts\plugins\Flite\Flite.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="HypernexSharp">
       <HintPath>scripts\plugins\HypernexSharp\HypernexSharp.dll</HintPath>
@@ -40,10 +36,8 @@
       <HintPath>scripts\plugins\Nexport\MessagePack.Annotations.dll</HintPath>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
   </ItemGroup>
-
 </Project>
