@@ -14,8 +14,8 @@ namespace Hypernex.Game.Classes
     public partial class WorldObject : Resource
     {
         public WorldRoot World { get; set; } = null;
-        public Node3D Root { get; private set; } = null;
-        public List<Node3D> Components { get; private set; } = new List<Node3D>();
+        public Node Root { get; private set; } = null;
+        public List<Node> Components { get; private set; } = new List<Node>();
         private string _name = string.Empty;
         private Transform3D _xform = Transform3D.Identity;
         internal int _parent = -1;
@@ -48,14 +48,14 @@ namespace Hypernex.Game.Classes
         {
             get
             {
-                if (GodotObject.IsInstanceValid(Root))
-                    return Root.Transform;
+                if (GodotObject.IsInstanceValid(Root) && Root is Node3D n)
+                    return n.Transform;
                 return default;
             }
             set
             {
-                if (GodotObject.IsInstanceValid(Root))
-                    Root.Transform = value;
+                if (GodotObject.IsInstanceValid(Root) && Root is Node3D n)
+                    n.Transform = value;
                 _xform = value;
             }
         }
@@ -70,12 +70,12 @@ namespace Hypernex.Game.Classes
             return World.GetParentObjectIndex(this);
         }
 
-        public T GetComponent<T>() where T : Node3D
+        public T GetComponent<T>() where T : Node
         {
             return (T)Components.FirstOrDefault(x => x is T);
         }
 
-        public T[] GetComponents<T>() where T : Node3D
+        public T[] GetComponents<T>() where T : Node
         {
             return Components.Where(x => x is T).Select(x => (T)x).ToArray();
         }
@@ -85,7 +85,7 @@ namespace Hypernex.Game.Classes
             return true;
         }
 
-        public Node3D FinalizeComponents()
+        public Node FinalizeComponents()
         {
             if (GodotObject.IsInstanceValid(Root))
                 return Root;

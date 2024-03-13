@@ -25,7 +25,6 @@ mesh = ExtResource("3_j1wr1")
 [node name="StaticBody3D" type="StaticBody3D" parent="Test/World/WorldMesh"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Test/World/WorldMesh/StaticBody3D"]
-transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
 shape = SubResource("ConcavePolygonShape3D_1l7cg")
 
 [node name="WorldDescriptor" type="Node3D" parent="Test/World"]

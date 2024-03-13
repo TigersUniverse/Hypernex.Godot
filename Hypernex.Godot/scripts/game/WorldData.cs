@@ -7,7 +7,6 @@ namespace Hypernex.Game
     {
         public List<WorldDataObject> AllObjects { get; set; } = new List<WorldDataObject>();
         public List<WorldDataScript> Scripts { get; set; } = new List<WorldDataScript>();
-        public List<WorldDataComponent> AllComponents { get; set; } = new List<WorldDataComponent>();
         public List<WorldDataAsset> AllAssets { get; set; } = new List<WorldDataAsset>();
     }
 
@@ -17,7 +16,7 @@ namespace Hypernex.Game
         public string ClassName { get; set; } = string.Empty;
         public JObject ClassData { get; set; } = null;
         public int ParentObject { get; set; } = -1;
-        public List<int> Components { get; set; } = new List<int>();
+        public List<WorldDataComponent> Components { get; set; } = new List<WorldDataComponent>();
     }
 
     public class WorldDataComponent

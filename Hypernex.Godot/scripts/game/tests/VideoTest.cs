@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Threading;
 using Godot;
+using Hypernex.CCK;
+using Hypernex.Tools;
 
 namespace Hypernex.Game.Tests
 {
@@ -9,15 +11,19 @@ namespace Hypernex.Game.Tests
         [Export]
         public string url;
 
-        public override void _Ready()
+        public override async void _Ready()
         {
-            Stream = ResourceLoader.Load(url) as VideoStream;
-            Finished += () =>
+            byte[] res = await HttpUtils.HttpGetAsync(this, url);
+            if (IsInstanceValid(this))
             {
-                StreamPosition = 0;
+                Stream = ImageTools.LoadFFmpeg(res);
+                Finished += () =>
+                {
+                    StreamPosition = 0;
+                    Play();
+                };
                 Play();
-            };
-            Play();
+            }
         }
     }
 }

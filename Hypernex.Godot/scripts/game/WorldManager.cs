@@ -116,8 +116,7 @@ namespace Hypernex.Game
             dataObject.ParentObject = obj.GetParentIndex();
             foreach (var cmp in obj.Components)
             {
-                dataObject.Components.Add(data.AllComponents.Count);
-                data.AllComponents.Add(SaveComponent(data, cmp));
+                dataObject.Components.Add(SaveComponent(data, cmp));
             }
             dataObject.ClassName = nameof(Node3D);
             dataObject.ClassData = obj.SaveToData();
@@ -132,15 +131,10 @@ namespace Hypernex.Game
                 var o = LoadAsset(data, obj);
                 root.AddAsset(o);
             }
-            foreach (var obj in data.AllComponents)
-            {
-                var o = LoadComponent(data, obj);
-                root.AddComponent(o);
-            }
             foreach (var obj in data.AllObjects)
             {
                 var o = LoadObject(data, obj);
-                o.Components.AddRange(obj.Components.Select(x => root.Components[x] as Node3D));
+                o.Components.AddRange(obj.Components.Select(x => LoadComponent(data, x) as Node));
                 o._parent = obj.ParentObject;
                 root.AddObject(o);
             }
@@ -170,16 +164,14 @@ namespace Hypernex.Game
                 dataObject.ParentObject = parent;
                 dataObject.ClassName = nameof(Node3D);
                 dataObject.ClassData = WorldObject.SaveToData(n);
-                dataObject.Components.Add(data.AllComponents.Count);
-                data.AllComponents.Add(SaveComponent(data, node));
+                dataObject.Components.Add(SaveComponent(data, node));
                 parent = data.AllObjects.Count;
                 data.AllObjects.Add(dataObject);
             }
             else if (parent != -1)
             {
                 var dataObject = data.AllObjects[parent];
-                dataObject.Components.Add(data.AllComponents.Count);
-                data.AllComponents.Add(SaveComponent(data, node));
+                dataObject.Components.Add(SaveComponent(data, node));
             }
             foreach (var child in node.GetChildren())
             {
