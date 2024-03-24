@@ -126,8 +126,10 @@ bigCardUI = ExtResource("11_6bljf")
 
 [node name="TabContainer" type="TabContainer" parent="UI/MainOverlay"]
 layout_mode = 2
+current_tab = 3
 
 [node name="Home" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Friends" type="RichTextLabel" parent="UI/MainOverlay/TabContainer/Home"]
@@ -231,8 +233,12 @@ layout_mode = 2
 usersLabelFormat = "[center]Users ({0})[/center][right][url]Refresh[/url][/right][right][url=leave]Leave[/url][/right]"
 
 [node name="Settings" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
-visible = false
 layout_mode = 2
+
+[node name="EditMode" type="CheckBox" parent="UI/MainOverlay/TabContainer/Settings"]
+layout_mode = 2
+text = "Edit Mode"
+alignment = 1
 
 [node name="LogoutBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
 layout_mode = 2

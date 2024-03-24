@@ -1,15 +1,48 @@
-[gd_scene load_steps=6 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=9 format=3 uid="uid://blqal6vcg8rus"]
 
-[ext_resource type="Script" path="res://scripts/game/WorldManager.cs" id="1_d4dsn"]
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
-[ext_resource type="Script" path="res://scripts/game/classes/WorldDescriptor.cs" id="3_73irx"]
+[ext_resource type="Script" path="res://addons/cck/classes/WorldDescriptor.cs" id="3_73irx"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_33wh5"]
+sky_material = SubResource("ProceduralSkyMaterial_sxber")
+
+[sub_resource type="Environment" id="Environment_4365i"]
+background_mode = 2
+sky = SubResource("Sky_33wh5")
+tonemap_mode = 2
+glow_enabled = true
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_1l7cg"]
 data = PackedVector3Array(1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0, -1)
 
+[sub_resource type="GDScript" id="GDScript_a2ttp"]
+resource_name = "Test"
+script/source = "extends Node
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
 [node name="WorldTest" type="Node"]
-script = ExtResource("1_d4dsn")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_4365i")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
 
 [node name="Test" type="Node" parent="."]
 script = ExtResource("1_hscsn")
@@ -31,5 +64,9 @@ shape = SubResource("ConcavePolygonShape3D_1l7cg")
 script = ExtResource("3_73irx")
 StartPosition = Vector3(0, 10, 0)
 
+[node name="Node" type="Node" parent="Test/World/WorldDescriptor"]
+script = SubResource("GDScript_a2ttp")
+metadata/script = "test"
+
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

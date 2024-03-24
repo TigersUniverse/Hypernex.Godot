@@ -103,8 +103,8 @@ namespace Hypernex.UI
             {
                 HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
                 {
-                    TargetDomain = "play.hypernex.dev",
-                    IsHTTP = false,
+                    TargetDomain = "localhost",
+                    IsHTTP = true,
                 };
                 TryLogin(settings);
             }

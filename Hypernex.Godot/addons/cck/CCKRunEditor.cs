@@ -3,7 +3,7 @@ using Godot;
 using System;
 using System.Reflection;
 
-namespace Hypernex.CCK.Godot
+namespace Hypernex.CCK.GodotVersion
 {
     [Tool]
     public partial class CCKRunEditor : EditorInspectorPlugin

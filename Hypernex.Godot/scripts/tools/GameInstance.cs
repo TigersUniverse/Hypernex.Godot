@@ -357,7 +357,7 @@ namespace Hypernex.Tools
         {
             try
             {
-                World = WorldManager.LoadWorld(WorldManager.LoadFromFile(s));
+                World = WorldRoot.LoadFromFile(s);
                 if (World == null)
                 {
                     Dispose();

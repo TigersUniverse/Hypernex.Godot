@@ -5,35 +5,36 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="scripts\plugins\**" />
+    <Compile Remove="addons\**" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="scripts\plugins\Nexport\Nexport.csproj" />
-    <ProjectReference Include="scripts\plugins\DiscordGameSDK\DiscordGameSDK.csproj" />
-    <ProjectReference Include="scripts\plugins\VoiceChat\VoiceChat.csproj" />
-    <ProjectReference Include="scripts\plugins\Flite\Flite.csproj" />
+    <ProjectReference Include="addons\cck\CCK.Godot.csproj" />
+    <ProjectReference Include="addons\Nexport\Nexport.csproj" />
+    <ProjectReference Include="addons\DiscordGameSDK\DiscordGameSDK.csproj" />
+    <ProjectReference Include="addons\VoiceChat\VoiceChat.csproj" />
+    <ProjectReference Include="addons\Flite\Flite.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="HypernexSharp">
-      <HintPath>scripts\plugins\HypernexSharp\HypernexSharp.dll</HintPath>
+      <HintPath>addons\HypernexSharp\HypernexSharp.dll</HintPath>
     </Reference>
     <Reference Include="Hypernex.CCK">
-      <HintPath>scripts\plugins\Hypernex.CCK\Hypernex.CCK.dll</HintPath>
+      <HintPath>addons\Hypernex.CCK\Hypernex.CCK.dll</HintPath>
     </Reference>
     <Reference Include="Nexbox">
-      <HintPath>scripts\plugins\Nexbox\Nexbox.dll</HintPath>
+      <HintPath>addons\Nexbox\Nexbox.dll</HintPath>
     </Reference>
     <Reference Include="Hypernex.Networking">
-      <HintPath>scripts\plugins\Hypernex.Networking\Hypernex.Networking.dll</HintPath>
+      <HintPath>addons\Hypernex.Networking\Hypernex.Networking.dll</HintPath>
     </Reference>
     <Reference Include="Tomlet">
-      <HintPath>scripts\plugins\Tomlet\Tomlet.dll</HintPath>
+      <HintPath>addons\Tomlet\Tomlet.dll</HintPath>
     </Reference>
     <Reference Include="MessagePack">
-      <HintPath>scripts\plugins\Nexport\MessagePack.dll</HintPath>
+      <HintPath>addons\Nexport\MessagePack.dll</HintPath>
     </Reference>
     <Reference Include="MessagePack.Annotations">
-      <HintPath>scripts\plugins\Nexport\MessagePack.Annotations.dll</HintPath>
+      <HintPath>addons\Nexport\MessagePack.Annotations.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

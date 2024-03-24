@@ -26,6 +26,7 @@ public partial class Init : Node
     public PackedScene localPlayerScene;
     [Export]
     public PackedScene remotePlayerScene;
+    public static Node worldsRoot;
     private static IntPtr fliteLibHandle = IntPtr.Zero;
 
     public override void _Ready()
@@ -46,7 +47,9 @@ public partial class Init : Node
 
         AddChild(new QuickInvoke() { Name = "QuickInvoke" });
         AddChild(new ConfigManager() { Name = "ConfigManager" });
-        AddChild(NewWorldManager());
+        // NewWorldManager();
+        worldsRoot = new Node() { Name = "Worlds" };
+        AddChild(worldsRoot);
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
 
         int pluginsLoaded;
@@ -77,14 +80,6 @@ public partial class Init : Node
         GameInstance.FocusedInstance?.FixedUpdate();
     }
 
-    private static WorldManager NewWorldManager()
-    {
-        var node = new WorldManager();
-        node.Name = "Worlds";
-        GameInstance.OnGameInstanceLoaded += GameInstanceLoaded;
-        return node;
-    }
-
     private static void GameInstanceLoaded(GameInstance instance, WorldMeta meta)
     {
         if (instance.IsDisposed)
@@ -94,7 +89,7 @@ public partial class Init : Node
         else
         {
             instance.World.Load();
-            WorldManager.Instance.AddChild(instance.World);
+            worldsRoot.AddChild(instance.World);
             var plr = NewPlayer(true);
             plr.SetUser(APITools.CurrentUser.Id, instance);
             instance.World.AddPlayer(plr);
@@ -119,7 +114,7 @@ public partial class Init : Node
         string dir = Directory.GetCurrentDirectory();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(dir, "scripts", "plugins");
+            dir = Path.Combine(dir, "addons");
         }
         switch (OS.GetName().ToLower())
         {
@@ -144,7 +139,7 @@ public partial class Init : Node
         string dir = Directory.GetCurrentDirectory();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(dir, "scripts", "plugins", "DiscordGameSDK");
+            dir = Path.Combine(dir, "addons", "DiscordGameSDK");
         }
         switch (OS.GetName().ToLower())
         {

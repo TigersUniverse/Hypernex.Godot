@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using Hypernex.Game.Classes;
+using Hypernex.CCK.GodotVersion;
+using Hypernex.CCK.GodotVersion.Classes;
+using Hypernex.CCK.GodotVersion.Converters;
 using Hypernex.Tools;
 
 namespace Hypernex.Game
@@ -11,19 +13,8 @@ namespace Hypernex.Game
     {
         public GameInstance gameInstance;
         public WorldDescriptor descriptor;
-        public List<WorldObject> Objects = new List<WorldObject>();
-        public List<Node> Components = new List<Node>();
-        public List<WorldAsset> Assets = new List<WorldAsset>();
-
-        public int GetParentObjectIndex(WorldObject worldObject)
-        {
-            if (IsInstanceValid(worldObject.Root))
-            {
-                var par = worldObject.Root.GetParent();
-                return Objects.FindIndex(x => x.Root == par);
-            }
-            return -1;
-        }
+        public List<Node> Objects = new List<Node>();
+        public List<Resource> Assets = new List<Resource>();
 
         public void AddPlayer(PlayerRoot player)
         {
@@ -31,42 +22,58 @@ namespace Hypernex.Game
             AddChild(player);
         }
 
-        public void AddObject(WorldObject worldObject)
+        public void AddObject(Node worldObject)
         {
-            worldObject.World = this;
-            Objects.Add(worldObject);
-        }
-
-        public void AddComponent(Node worldObject)
-        {
+            if (Objects.Contains(worldObject))
+                return;
             if (worldObject is WorldDescriptor desc)
                 descriptor = desc;
-            Components.Add(worldObject);
+            worldObject.Owner = this;
+            Objects.Add(worldObject);
+            foreach (var child in worldObject.GetChildren())
+            {
+                AddObject(child);
+            }
         }
 
-        public void AddAsset(WorldAsset worldObject)
+        public void AddAsset(Resource worldObject)
         {
             Assets.Add(worldObject);
         }
 
-        private void Load(int parent)
-        {
-            for (int i = 0; i < Objects.Count; i++)
-            {
-                var obj = Objects[i];
-                if (obj._parent != parent)
-                    continue;
-                if (parent == -1)
-                    AddChild(obj.FinalizeComponents());
-                else
-                    Objects[parent].Root.AddChild(obj.FinalizeComponents());
-                Load(i);
-            }
-        }
-
         public void Load()
         {
-            Load(-1);
+        }
+
+        public static WorldRoot LoadFromFile(string path)
+        {
+            WorldRoot root = new WorldRoot();
+            SafeScene safeScn = new SafeScene();
+            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            safeScn.FromString(file.GetAsText(true));
+            ConvertDB db = new ConvertDB();
+            db.Register<MeshConverter>();
+            PackedScene scn = safeScn.SetupToPackedScene(db);
+            Node node = scn.Instantiate();
+            root.AddChild(node);
+            root.AddObject(node);
+            return root;
+        }
+
+        public static void SaveToFile(string path, Node root)
+        {
+            foreach (var child in root.FindChildren("*", owned: true))
+            {
+                child.Owner = root;
+            }
+            PackedScene scn = new PackedScene();
+            scn.Pack(root);
+            SafeScene safeScene = new SafeScene();
+            ConvertDB db = new ConvertDB();
+            db.Register<MeshConverter>();
+            safeScene.SetupFromState(scn.GetState(), db);
+            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+            file.StoreString(safeScene.ToString());
         }
     }
 }

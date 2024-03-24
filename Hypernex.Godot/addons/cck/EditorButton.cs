@@ -3,7 +3,7 @@ using Godot;
 using System;
 using System.Reflection;
 
-namespace Hypernex.CCK.Godot
+namespace Hypernex.CCK.GodotVersion
 {
     public partial class EditorButton : Button
     {

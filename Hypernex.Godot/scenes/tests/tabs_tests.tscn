@@ -1,0 +1,63 @@
+[gd_scene load_steps=3 format=3 uid="uid://bl12grgo3j7vi"]
+
+[ext_resource type="Script" path="res://scripts/ui/generic/TabGroup.cs" id="1_jiyfc"]
+[ext_resource type="Script" path="res://scripts/ui/generic/TabOpenButton.cs" id="2_6r5ps"]
+
+[node name="TabsTests" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -46.0
+offset_right = 46.0
+offset_bottom = 40.0
+grow_horizontal = 2
+script = ExtResource("1_jiyfc")
+
+[node name="Tab" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Open" type="Button" parent="HBoxContainer/Tab" node_paths=PackedStringArray("root")]
+layout_mode = 2
+text = "Tab1"
+script = ExtResource("2_6r5ps")
+root = NodePath("..")
+
+[node name="Close" type="Button" parent="HBoxContainer/Tab"]
+layout_mode = 2
+text = "X"
+
+[node name="Tab2" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Open" type="Button" parent="HBoxContainer/Tab2" node_paths=PackedStringArray("root")]
+layout_mode = 2
+text = "Tab2"
+script = ExtResource("2_6r5ps")
+root = NodePath("../../Tab")
+
+[node name="Close" type="Button" parent="HBoxContainer/Tab2"]
+layout_mode = 2
+text = "X"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_vertical = 2
+theme_override_constants/separation = 0
+script = ExtResource("1_jiyfc")
