@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=11 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
+[ext_resource type="Texture2D" uid="uid://dome6nkl687io" path="res://icon.svg" id="2_65fnm"]
 [ext_resource type="Script" path="res://addons/cck/classes/WorldDescriptor.cs" id="3_73irx"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
 
@@ -16,6 +17,9 @@ background_mode = 2
 sky = SubResource("Sky_33wh5")
 tonemap_mode = 2
 glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_615mv"]
+albedo_texture = ExtResource("2_65fnm")
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_1l7cg"]
 data = PackedVector3Array(1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0, -1)
@@ -53,6 +57,7 @@ load = true
 
 [node name="WorldMesh" type="MeshInstance3D" parent="Test/World"]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_615mv")
 mesh = ExtResource("3_j1wr1")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Test/World/WorldMesh"]

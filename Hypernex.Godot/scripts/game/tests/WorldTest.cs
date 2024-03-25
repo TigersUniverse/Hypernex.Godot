@@ -25,7 +25,7 @@ namespace Hypernex.Game.Tests
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves", "test.tscn");
+                string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves", "test.world");
                 WorldRoot.SaveToFile(dir, this);
                 sw.Stop();
                 GD.Print($"SaveToFile took {sw.ElapsedMilliseconds} ms");
@@ -34,7 +34,7 @@ namespace Hypernex.Game.Tests
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves", "test.tscn");
+                string dir = Path.Combine(OS.GetUserDataDir(), "WorldSaves", "test.world");
                 WorldRoot root = WorldRoot.LoadFromFile(dir);
                 sw.Stop();
                 GD.Print($"LoadFromFile took {sw.ElapsedMilliseconds} ms");

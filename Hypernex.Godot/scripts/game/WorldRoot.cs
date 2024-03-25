@@ -53,6 +53,8 @@ namespace Hypernex.Game
             safeScn.FromString(file.GetAsText(true));
             ConvertDB db = new ConvertDB();
             db.Register<MeshConverter>();
+            db.Register<MaterialConverter>();
+            db.Register<Texture2DConverter>();
             PackedScene scn = safeScn.SetupToPackedScene(db);
             Node node = scn.Instantiate();
             root.AddChild(node);
@@ -71,6 +73,8 @@ namespace Hypernex.Game
             SafeScene safeScene = new SafeScene();
             ConvertDB db = new ConvertDB();
             db.Register<MeshConverter>();
+            db.Register<MaterialConverter>();
+            db.Register<Texture2DConverter>();
             safeScene.SetupFromState(scn.GetState(), db);
             using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
             file.StoreString(safeScene.ToString());
