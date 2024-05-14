@@ -4,7 +4,7 @@ using Godot;
 namespace Hypernex.CCK.GodotVersion.Classes
 {
     [GlobalClass]
-    public partial class WorldDescriptor : Node3D
+    public partial class WorldDescriptor : Node3D, ISandboxClass
     {
         [Export]
         public string Data { get; set; }

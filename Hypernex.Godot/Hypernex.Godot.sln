@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hypernex.Godot", "Hypernex.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "addons", "addons", "{789F4207-64AA-47C8-B9D1-AD456F463EB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCK.Godot", "addons\cck\CCK.Godot.csproj", "{7344AC68-24D1-4B72-9830-D64402C943CB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,14 +17,5 @@ Global
 		{A8DE0E5B-7448-48E8-9460-64CC19E3F4E4}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{A8DE0E5B-7448-48E8-9460-64CC19E3F4E4}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{A8DE0E5B-7448-48E8-9460-64CC19E3F4E4}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
-		{7344AC68-24D1-4B72-9830-D64402C943CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7344AC68-24D1-4B72-9830-D64402C943CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7344AC68-24D1-4B72-9830-D64402C943CB}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{7344AC68-24D1-4B72-9830-D64402C943CB}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{7344AC68-24D1-4B72-9830-D64402C943CB}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{7344AC68-24D1-4B72-9830-D64402C943CB}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{7344AC68-24D1-4B72-9830-D64402C943CB} = {789F4207-64AA-47C8-B9D1-AD456F463EB8}
 	EndGlobalSection
 EndGlobal

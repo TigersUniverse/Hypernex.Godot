@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Godot;
 using Hypernex.CCK;
 using Hypernex.Configuration;
 using Hypernex.Configuration.ConfigMeta;
@@ -147,6 +149,37 @@ namespace Hypernex.Tools
                 else
                     QuickInvoke.InvokeActionOnMainThread(callback, null);
             }, worldId);
+        }
+
+        public static void UploadWorld(string fullPath, WorldMeta meta)
+        {
+            WorldMeta metaFinal = new WorldMeta(meta.Id, meta.OwnerId, meta.Publicity, meta.Name, meta.Description, meta.ThumbnailURL);
+            FileStream fs = new FileStream(fullPath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Delete | FileShare.Read);
+            if (fs.Length > 1048576 * 90)
+            {
+                string tempDir = Path.Combine(OS.GetUserDataDir(), "file_parts");
+                Directory.CreateDirectory(tempDir);
+                APIObject.UploadPart(result =>
+                {
+                    fs.Dispose();
+                    Directory.Delete(tempDir, true);
+                    if (result.success)
+                        Logger.CurrentLogger.Log("Uploaded world!");
+                    else
+                        Logger.CurrentLogger.Error($"Failed to upload world! {result.message}");
+                }, CurrentUser, CurrentToken, fs, tempDir, worldMeta: metaFinal);
+            }
+            else
+            {
+                APIObject.UploadWorld(result =>
+                {
+                    fs.Dispose();
+                    if (result.success)
+                        Logger.CurrentLogger.Log("Uploaded world!");
+                    else
+                        Logger.CurrentLogger.Error($"Failed to upload world! {result.message}");
+                }, CurrentUser, CurrentToken, fs, metaFinal);
+            }
         }
     }
 }

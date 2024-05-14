@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.2.1">
+<Project Sdk="Godot.NET.Sdk/4.2.2">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -6,9 +6,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="addons\**" />
+    <Compile Include="addons\cck\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="addons\cck\CCK.Godot.csproj" />
+    <!-- <ProjectReference Include="addons\cck\CCK.Godot.csproj" /> -->
     <ProjectReference Include="addons\Nexport\Nexport.csproj" />
     <ProjectReference Include="addons\DiscordGameSDK\DiscordGameSDK.csproj" />
     <ProjectReference Include="addons\VoiceChat\VoiceChat.csproj" />

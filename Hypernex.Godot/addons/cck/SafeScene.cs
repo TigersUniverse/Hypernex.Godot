@@ -94,12 +94,22 @@ namespace Hypernex.CCK.GodotVersion
                 StringName type = nodeTypes[i];
                 if (ClassDB.CanInstantiate(type) && ClassDB.IsParentClass(type, nameof(Node)))
                 {
-                    Node node = ClassDB.Instantiate(type).As<Node>();
-                    node.Name = GetName(path);
+                    Script script = null;
                     for (int j = 0; j < nodePropCount[i]; j++)
                     {
                         // GD.Print(nodePropValues[i][j].data.GetType());
-                        node.Set(nodePropNames[i][j], nodePropValues[i][j].GetData(convertDb));
+                        if (nodePropNames[i][j].Equals("script", StringComparison.OrdinalIgnoreCase))
+                        {
+                            script = (Script)nodePropValues[i][j].GetData(convertDb);
+                            // node.SetScript(nodePropValues[i][j].GetData(convertDb));
+                        }
+                    }
+                    Node node = script is CSharpScript cs ? cs.New().As<Node>() : ClassDB.Instantiate(type).As<Node>();
+                    node.Name = GetName(path);
+                    for (int j = 0; j < nodePropCount[i]; j++)
+                    {
+                        if (!nodePropNames[i][j].Equals("script", StringComparison.OrdinalIgnoreCase))
+                            node.Set(nodePropNames[i][j], nodePropValues[i][j].GetData(convertDb));
                     }
                     nodes.Add(path, node);
                 }

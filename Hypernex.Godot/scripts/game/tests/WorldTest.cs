@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using Godot;
+using Hypernex.CCK.GodotVersion.Classes;
 
 namespace Hypernex.Game.Tests
 {

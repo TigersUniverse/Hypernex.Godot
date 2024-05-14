@@ -47,7 +47,7 @@ public partial class Init : Node
 
         AddChild(new QuickInvoke() { Name = "QuickInvoke" });
         AddChild(new ConfigManager() { Name = "ConfigManager" });
-        // NewWorldManager();
+        GameInstance.OnGameInstanceLoaded += GameInstanceLoaded;
         worldsRoot = new Node() { Name = "Worlds" };
         AddChild(worldsRoot);
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
@@ -161,6 +161,7 @@ public partial class Init : Node
             overlay.root.Show();
             overlay.ShowHome();
             APITools.CreateUserSocket(SocketManager.InitSocket);
+            // APITools.UploadWorld(System.IO.Path.Combine(OS.GetUserDataDir(), "my_world.hnw"), new HypernexSharp.APIObjects.WorldMeta(string.Empty, APITools.CurrentUser.Id, HypernexSharp.APIObjects.WorldPublicity.OwnerOnly, "My World 2", "The best", string.Empty));
         };
         APITools.OnLogout += () =>
         {

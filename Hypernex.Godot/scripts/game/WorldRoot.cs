@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.CCK.GodotVersion.Converters;
@@ -43,6 +44,7 @@ namespace Hypernex.Game
 
         public void Load()
         {
+            Logger.CurrentLogger.Log("World Load");
         }
 
         public static WorldRoot LoadFromFile(string path)
@@ -52,6 +54,7 @@ namespace Hypernex.Game
             using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
             safeScn.FromString(file.GetAsText(true));
             ConvertDB db = new ConvertDB();
+            db.Register<CSharpScriptConverter>();
             db.Register<MeshConverter>();
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();
@@ -72,6 +75,7 @@ namespace Hypernex.Game
             scn.Pack(root);
             SafeScene safeScene = new SafeScene();
             ConvertDB db = new ConvertDB();
+            db.Register<CSharpScriptConverter>();
             db.Register<MeshConverter>();
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();

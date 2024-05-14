@@ -16,7 +16,7 @@ namespace Hypernex.CCK.GodotVersion.Converters
             public Vector2[] TexUV2;
             public int[] Index;
 
-            public MeshStruct(Godot.Collections.Array arrs)
+            public MeshStruct(global::Godot.Collections.Array arrs)
             {
                 Vertex = arrs[(int)Mesh.ArrayType.Vertex].AsVector3Array();
                 Normal = arrs[(int)Mesh.ArrayType.Normal].AsVector3Array();
@@ -27,9 +27,9 @@ namespace Hypernex.CCK.GodotVersion.Converters
                 Index = arrs[(int)Mesh.ArrayType.Index].AsInt32Array();
             }
 
-            public Godot.Collections.Array GetArrays()
+            public global::Godot.Collections.Array GetArrays()
             {
-                var arrs = new Godot.Collections.Array();
+                var arrs = new global::Godot.Collections.Array();
                 arrs.Resize((int)Mesh.ArrayType.Max);
                 if (Vertex.Length != 0)
                     arrs[(int)Mesh.ArrayType.Vertex] = Vertex;

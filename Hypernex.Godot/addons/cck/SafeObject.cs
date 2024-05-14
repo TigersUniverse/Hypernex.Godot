@@ -67,9 +67,9 @@ namespace Hypernex.CCK.GodotVersion
                 case Variant.Type.Signal:
                     return default;
                 case Variant.Type.Dictionary:
-                    return Variant.From(((JObject)data).ToObject<Godot.Collections.Dictionary>());
+                    return Variant.From(((JObject)data).ToObject<global::Godot.Collections.Dictionary>());
                 case Variant.Type.Array:
-                    return Variant.From(((JArray)data).ToObject<Godot.Collections.Array>());
+                    return Variant.From(((JArray)data).ToObject<global::Godot.Collections.Array>());
                 case Variant.Type.PackedByteArray:
                     return Variant.From(((JArray)data).ToObject<byte[]>());
                 case Variant.Type.PackedInt32Array:

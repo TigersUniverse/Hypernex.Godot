@@ -1,8 +1,11 @@
 #if TOOLS
 using Godot;
+using Hypernex.Game;
+
 // using Hypernex.Game;
 // using Hypernex.Game.Classes;
 // using HypernexSharp;
+
 using System;
 using System.Linq;
 
@@ -26,6 +29,8 @@ namespace Hypernex.CCK.GodotVersion
         public void ExportWorld()
         {
             Node root = EditorInterface.Singleton.GetEditedSceneRoot();
+            WorldRoot.SaveToFile("user://my_world.hnw", root);
+            OS.ShellShowInFileManager(OS.GetUserDataDir(), true);
             // Node desc = root.FindChildren("*").FirstOrDefault(x => x.GetType() == typeof(WorldDescriptor));
             // if (IsInstanceValid(desc))
             {
