@@ -4,7 +4,7 @@ The Hypernex Godot Client
 
 ## Status
 
-This project is very Work-in-Progress.
+This client is very Work-in-Progress.
 
 ### Features
 
