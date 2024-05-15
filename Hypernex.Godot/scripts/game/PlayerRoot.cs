@@ -21,8 +21,9 @@ namespace Hypernex.Game
         public string UserId { get; private set; }
         public User User { get; private set; }
         public GameInstance Instance { get; private set; }
-        public PlayerController Controller => GetPart<PlayerController>();
+        public Node3D Controller => /*GetViewport().UseXR ? GetPart<XRPlayerController>().xrBody :*/ GetPart<PlayerController>();
         public Vector3 Pos { get => Controller.Position; set => Controller.Position = value; }
+        public Quaternion Rot { get => Controller.Quaternion; set => Controller.Quaternion = value; }
         private Vector3 oldPosition;
         public bool IsLocal => Local == this;
         public string AvatarId;
@@ -69,6 +70,7 @@ namespace Hypernex.Game
         {
             while (IsInstanceValid(this))
             {
+                await ToSignal(GetTree().CreateTimer(0.05f), SceneTreeTimer.SignalName.Timeout);
                 if (Instance.IsOpen)
                 {
                     Instance.SendMessage(new PlayerUpdate()
@@ -76,13 +78,12 @@ namespace Hypernex.Game
                         Auth = GetJoinAuth(),
                         AvatarId = AvatarId,
                         IsSpeaking = GetPart<PlayerChat>()?.IsSpeaking ?? false,
-                        IsPlayerVR = false, // TODO: vr
+                        IsPlayerVR = GetViewport().UseXR,
                         PlayerAssignedTags = new List<string>(),
                         ExtraneousData = new Dictionary<string, object>(),
                         WeightedObjects = new Dictionary<string, float>(),
                     });
                 }
-                await ToSignal(GetTree().CreateTimer(0.05f), SceneTreeTimer.SignalName.Timeout);
             }
         }
 
@@ -99,7 +100,10 @@ namespace Hypernex.Game
                 Object = new Networking.Messages.Data.NetworkedObject()
                 {
                     ObjectLocation = "root",
+                    // IgnoreObjectLocation = false,
                     Position = Pos.ToFloat3(),
+                    Rotation = Rot.ToFloat4(),
+                    Size = Vector3.One.ToFloat3(),
                 },
             }, Nexport.MessageChannel.Unreliable);
             oldPosition = Pos;
@@ -124,6 +128,7 @@ namespace Hypernex.Game
             if (playerObjectUpdate.Object.ObjectLocation.ToLower() == "root")
             {
                 Pos = playerObjectUpdate.Object.Position.ToGodot3();
+                Rot = playerObjectUpdate.Object.Rotation.ToGodotQuat();
             }
         }
 

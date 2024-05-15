@@ -39,7 +39,7 @@ namespace Hypernex.CCK.GodotVersion.Converters
         {
             Dictionary<string, JToken> dict = new Dictionary<string, JToken>();
             CSharpScript script = (CSharpScript)data;
-            var obj = script.New().AsGodotObject();
+            using var obj = script.New().AsGodotObject();
             dict.Add("typename", obj.GetType().Name);
             // dict.Add("name", script.ResourceName);
             // dict.Add("path", script.ResourcePath);

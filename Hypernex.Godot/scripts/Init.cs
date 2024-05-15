@@ -89,6 +89,7 @@ public partial class Init : Node
         else
         {
             instance.World.Load();
+            instance.World.Name = instance.instanceId;
             worldsRoot.AddChild(instance.World);
             var plr = NewPlayer(true);
             plr.SetUser(APITools.CurrentUser.Id, instance);
@@ -161,7 +162,7 @@ public partial class Init : Node
             overlay.root.Show();
             overlay.ShowHome();
             APITools.CreateUserSocket(SocketManager.InitSocket);
-            // APITools.UploadWorld(System.IO.Path.Combine(OS.GetUserDataDir(), "my_world.hnw"), new HypernexSharp.APIObjects.WorldMeta(string.Empty, APITools.CurrentUser.Id, HypernexSharp.APIObjects.WorldPublicity.OwnerOnly, "My World 2", "The best", string.Empty));
+            // APITools.UploadWorld(System.IO.Path.Combine(OS.GetUserDataDir(), "my_world.hnw"), new HypernexSharp.APIObjects.WorldMeta(string.Empty, APITools.CurrentUser.Id, HypernexSharp.APIObjects.WorldPublicity.OwnerOnly, $"My World {DateTime.Now}", $"The best {DateTime.Now}", string.Empty));
         };
         APITools.OnLogout += () =>
         {

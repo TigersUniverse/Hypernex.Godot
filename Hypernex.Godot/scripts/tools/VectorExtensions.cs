@@ -45,6 +45,16 @@ namespace Hypernex.Tools.Godot
             return new Vector4(v[0], v[1], v[2], v[3]);
         }
 
+        public static float4 ToFloat4(this Quaternion v)
+        {
+            return new float4(v.X, v.Y, v.Z, v.W);
+        }
+
+        public static Quaternion ToGodotQuat(this float4 v)
+        {
+            return new Quaternion(v.x, v.y, v.z, v.w);
+        }
+
         public static Plane ToPlane(this Vector4 v)
         {
             return new Plane(v.X, v.Y, v.Z, v.W);

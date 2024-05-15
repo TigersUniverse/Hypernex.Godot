@@ -422,14 +422,17 @@ namespace Hypernex.Tools
 
         internal void Update()
         {
+            /*
             if (!authed && IsOpen)
             {
-                __SendMessage(new JoinAuth()
+                __SendMessage(new JoinAuth
                 {
-                    TempToken = userIdToken,
                     UserId = APITools.CurrentUser.Id,
+                    TempToken = userIdToken,
                 });
+                return;
             }
+            */
             if (!string.IsNullOrEmpty(hostId) && (host == null || (host != null && host.Id != hostId)))
             {
                 if (hostId == APITools.CurrentUser.Id)

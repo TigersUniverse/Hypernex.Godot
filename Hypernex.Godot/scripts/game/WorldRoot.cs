@@ -56,12 +56,16 @@ namespace Hypernex.Game
             ConvertDB db = new ConvertDB();
             db.Register<CSharpScriptConverter>();
             db.Register<MeshConverter>();
+            db.Register<ConcaveConverter>();
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();
             PackedScene scn = safeScn.SetupToPackedScene(db);
             Node node = scn.Instantiate();
-            root.AddChild(node);
-            root.AddObject(node);
+            if (IsInstanceValid(node))
+            {
+                root.AddChild(node);
+                root.AddObject(node);
+            }
             return root;
         }
 
@@ -76,6 +80,7 @@ namespace Hypernex.Game
             SafeScene safeScene = new SafeScene();
             ConvertDB db = new ConvertDB();
             db.Register<CSharpScriptConverter>();
+            db.Register<ConcaveConverter>();
             db.Register<MeshConverter>();
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();

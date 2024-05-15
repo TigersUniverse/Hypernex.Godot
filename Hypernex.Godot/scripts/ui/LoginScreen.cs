@@ -60,7 +60,7 @@ namespace Hypernex.UI
             HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
             {
                 TargetDomain = user.Server,
-                IsHTTP = false,
+                IsHTTP = true,
             };
             TryLogin(settings);
         }
@@ -74,14 +74,13 @@ namespace Hypernex.UI
 
         public void TryLoginWith()
         {
-            return;
             if (ConfigManager.LoadedConfig.SavedAccounts.Any())
             {
                 ConfigUser user = ConfigManager.LoadedConfig.SavedAccounts.First();
                 HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
                 {
                     TargetDomain = user.Server,
-                    IsHTTP = false,
+                    IsHTTP = true,
                 };
                 TryLogin(settings);
             }
@@ -95,7 +94,7 @@ namespace Hypernex.UI
                 HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
                 {
                     TargetDomain = user.Server,
-                    IsHTTP = false,
+                    IsHTTP = true,
                 };
                 TryLogin(settings);
             }
@@ -103,7 +102,7 @@ namespace Hypernex.UI
             {
                 HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
                 {
-                    TargetDomain = "localhost",
+                    TargetDomain = "192.168.1.10",
                     IsHTTP = true,
                 };
                 TryLogin(settings);
