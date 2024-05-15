@@ -5,6 +5,7 @@ using Godot;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
 using HypernexSharp.APIObjects;
+using HypernexSharp.SocketObjects;
 
 namespace Hypernex.UI
 {
@@ -254,7 +255,13 @@ namespace Hypernex.UI
             Name = "World";
             type = CardType.World;
             worldMeta = world;
-            label.Text = world.Name.Replace("[", "[lb]");
+            label.Text = "[font_size=24]" + world.Name.Replace("[", "[lb]") + "[/font_size]";
+            label.Text += "\n\n[font_size=16]" + world.Description.Replace("[", "[lb]") + "[/font_size]";
+            var box1 = controlsContainer.AddVBox();
+            // TODO: does this work?
+            var opt1 = box1.AddOptions("Anyone", "Acquaintances", "Friends", "OpenRequest", "ModeratorRequest", "ClosedRequest");
+            var opts = new[] { InstancePublicity.Anyone, InstancePublicity.Acquaintances, InstancePublicity.Friends, InstancePublicity.OpenRequest, InstancePublicity.ModeratorRequest, InstancePublicity.ClosedRequest };
+            box1.AddButton("Create Instance", UIButtonTheme.Info, btn => SocketManager.CreateInstance(world, opts[opt1.Selected]));
             DownloadTools.DownloadBytes(world.ThumbnailURL, b =>
             {
                 if (!IsInstanceValid(background))

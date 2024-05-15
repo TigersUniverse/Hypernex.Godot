@@ -57,5 +57,17 @@ namespace Hypernex.UI
             control.AddChild(ui);
             return ui;
         }
+
+        public static OptionButton AddOptions(this Control control, params string[] options)
+        {
+            var ui = new OptionButton();
+            for (int i = 0; i < options.Length; i++)
+            {
+                ui.AddItem(options[i], i);
+            }
+            ui.Selected = 0;
+            control.AddChild(ui);
+            return ui;
+        }
     }
 }

@@ -60,7 +60,6 @@ size_flags_horizontal = 3
 bbcode_enabled = true
 text = "My World"
 fit_content = true
-scroll_active = false
 shortcut_keys_enabled = false
 
 [node name="Controls" type="ScrollContainer" parent="VBoxContainer"]
