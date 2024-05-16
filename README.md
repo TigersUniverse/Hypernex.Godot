@@ -15,10 +15,15 @@ This client is very Work-in-Progress.
 - Proximity Text To Speech
 - GIF/Video playback in UI
 
+### In Progress
+
+- Godot Editor CCK
+
 ### Planned
 
+- Avatars
 - VR
-- CCK
+- In-Game CCK(?)
 
 And (probably) more.
 
