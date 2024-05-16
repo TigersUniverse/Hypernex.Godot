@@ -10,7 +10,6 @@ namespace Hypernex.CCK.GodotVersion.Converters
         public bool CanConvert(string type)
         {
             return ClassDB.IsParentClass(type, nameof(Texture2D));
-            // return type.Equals(nameof(Texture2D), StringComparison.OrdinalIgnoreCase);
         }
 
         public GodotObject Convert(ConvertDB db, string type, object data)
@@ -31,7 +30,6 @@ namespace Hypernex.CCK.GodotVersion.Converters
             dict.Add("mipmaps", img.HasMipmaps());
             dict.Add("format", (long)img.GetFormat());
             dict.Add("data", img.GetData());
-            // return Json.Stringify(tex.GetImage().Data, fullPrecision: true);
             return dict;
         }
     }

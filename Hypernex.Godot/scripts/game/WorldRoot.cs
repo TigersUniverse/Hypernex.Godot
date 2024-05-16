@@ -69,6 +69,7 @@ namespace Hypernex.Game
             db.Register<ConcaveConverter>();
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();
+            db.Register<AudioStreamConverter>();
             PackedScene scn = safeScn.SetupToPackedScene(db);
             Node node = scn.Instantiate();
             if (IsInstanceValid(node))
@@ -94,6 +95,7 @@ namespace Hypernex.Game
             db.Register<MeshConverter>();
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();
+            db.Register<AudioStreamConverter>();
             safeScene.SetupFromState(scn.GetState(), db);
             using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
             file.StoreString(safeScene.ToString());
