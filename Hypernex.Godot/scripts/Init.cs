@@ -1,7 +1,7 @@
 using Godot;
 using Hypernex;
 using Hypernex.CCK;
-using Hypernex.CCK.Godot;
+using Hypernex.CCK.GodotVersion;
 using Hypernex.Configuration;
 using Hypernex.Game;
 using Hypernex.Tools;

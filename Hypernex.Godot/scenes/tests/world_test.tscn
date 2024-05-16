@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=12 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="Texture2D" uid="uid://dome6nkl687io" path="res://icon.svg" id="2_65fnm"]
 [ext_resource type="Script" path="res://addons/cck/classes/WorldDescriptor.cs" id="3_73irx"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
+[ext_resource type="Script" path="res://addons/cck/classes/WorldScript.cs" id="5_oulgq"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -72,6 +73,23 @@ StartPosition = Vector3(0, 10, 0)
 [node name="Node" type="Node" parent="Test/World/WorldDescriptor"]
 script = SubResource("GDScript_a2ttp")
 metadata/script = "test"
+
+[node name="Label3D" type="Label3D" parent="Test/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+text = "HIIIII"
+
+[node name="Clock" type="Node" parent="Test/World/Label3D"]
+script = ExtResource("5_oulgq")
+Contents = "function settime() {
+	let t =  new Time();
+	let hr = t.GetHours() % 12;
+	if (hr == 0) {
+		hr = 12;
+	}
+	UI.SetText(item, `${hr}:${t.GetMinutes()} ${t.GetAMPM()}`);
+}
+
+Runtime.OnFixedUpdate(settime);"
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

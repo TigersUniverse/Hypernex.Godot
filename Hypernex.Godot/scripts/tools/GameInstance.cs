@@ -9,7 +9,6 @@ using Hypernex.Networking;
 using Hypernex.Networking.Messages;
 using Hypernex.Player;
 using Hypernex.Sandboxing;
-using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
 using HypernexSharp.Socketing.SocketResponses;
@@ -104,7 +103,7 @@ namespace Hypernex.Tools
 
         private HypernexInstanceClient client;
         internal bool authed;
-        // internal List<Sandbox> sandboxes = new ();
+        internal List<ScriptRunner> sandboxes => World?.Runners;
         public readonly string instanceCreatorId;
 
         private string hostId => client?.HostId ?? string.Empty;
@@ -417,7 +416,7 @@ namespace Hypernex.Tools
 
         internal void FixedUpdate()
         {
-            // sandboxes.ForEach(x => x.Runtime.FixedUpdate());
+            sandboxes?.ForEach(x => x.runtime.FixedUpdate());
         }
 
         internal void Update()
@@ -448,12 +447,12 @@ namespace Hypernex.Tools
                 if (host != null)
                     DiscordTools.FocusInstance(worldMeta, gameServerId + "/" + instanceId, host);
             }
-            // sandboxes.ForEach(x => x.Runtime.Update());
+            sandboxes?.ForEach(x => x.runtime.Update());
         }
 
         internal void LateUpdate()
         {
-            // sandboxes.ForEach(x => x.Runtime.LateUpdate());
+            sandboxes?.ForEach(x => x.runtime.LateUpdate());
         }
 
         public void Dispose()
@@ -465,8 +464,7 @@ namespace Hypernex.Tools
             OnGameInstanceLoaded?.Invoke(this, worldMeta);
             World?.QueueFree();
             // Physics.gravity = new Vector3(0, LocalPlayer.Instance.Gravity, 0);
-            // sandboxes.ForEach(x => x.Dispose());
-            // sandboxes.Clear();
+            sandboxes?.ForEach(x => x.Stop());
             Close();
         }
     }

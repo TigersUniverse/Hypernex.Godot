@@ -7,9 +7,6 @@ namespace Hypernex.CCK.GodotVersion.Classes
     public partial class WorldDescriptor : Node3D, ISandboxClass
     {
         [Export]
-        public string Data { get; set; }
-
-        [Export]
         public Vector3 StartPosition { get; set; }
     }
 }

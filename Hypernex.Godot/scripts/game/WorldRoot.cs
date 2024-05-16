@@ -6,6 +6,7 @@ using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.CCK.GodotVersion.Converters;
+using Hypernex.Sandboxing;
 using Hypernex.Tools;
 
 namespace Hypernex.Game
@@ -15,6 +16,7 @@ namespace Hypernex.Game
         public GameInstance gameInstance;
         public WorldDescriptor descriptor;
         public List<Node> Objects = new List<Node>();
+        public List<ScriptRunner> Runners = new List<ScriptRunner>();
         public List<Resource> Assets = new List<Resource>();
 
         public void AddPlayer(PlayerRoot player)
@@ -29,6 +31,14 @@ namespace Hypernex.Game
                 return;
             if (worldObject is WorldDescriptor desc)
                 descriptor = desc;
+            if (worldObject is WorldScript script)
+            {
+                ScriptRunner runner = new ScriptRunner();
+                runner.Name = script.Name + "_Runner";
+                runner.scriptRef = script;
+                script.AddSibling(runner);
+                Runners.Add(runner);
+            }
             worldObject.Owner = this;
             Objects.Add(worldObject);
             foreach (var child in worldObject.GetChildren())

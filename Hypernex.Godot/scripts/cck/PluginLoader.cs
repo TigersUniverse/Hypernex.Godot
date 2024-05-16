@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Godot;
 
-namespace Hypernex.CCK.Godot
+namespace Hypernex.CCK.GodotVersion
 {
     public partial class PluginLoader : Node
     {
