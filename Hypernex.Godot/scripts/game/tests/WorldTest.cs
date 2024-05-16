@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using Godot;
-using Hypernex.CCK.GodotVersion.Classes;
+using Godot.Collections;
+using Hypernex.CCK.GodotVersion;
+using Hypernex.Tools;
 
 namespace Hypernex.Game.Tests
 {
@@ -15,9 +16,20 @@ namespace Hypernex.Game.Tests
 
         public override async void _Ready()
         {
+            // Dictionary dict = new Dictionary();
+            // dict.Add("test", this);
+            // GD.Print(GD.VarToStr(dict));
+            // SaveLoader.ParseProperty("hello = \"world!\"", 0, out var key, out var val, out var off);
+            // GD.PrintS(key, val, off);
+
+            SaveLoader.ParsedTres tscn = SaveLoader.ParseTres(string.Empty, File.ReadAllText(ProjectSettings.GlobalizePath("user://test.tres")).ReplaceLineEndings("\n"));
+            GD.Print(JsonTools.JsonSerialize(tscn));
+
+            var loader = new SaveLoader();
+            loader.ReadZip("res://temp/bin.zip");
+            AddChild(loader.scene.Instantiate());
             await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
-            // new Thread(() => RunTest()).Start();
-            RunTest();
+            // RunTest();
         }
 
         public void RunTest()
