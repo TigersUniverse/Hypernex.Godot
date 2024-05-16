@@ -13,6 +13,10 @@ namespace Hypernex.UI
         [Export]
         public TabContainer tabs;
         [Export]
+        public Button cckButton;
+        [Export]
+        public Window cckWindow;
+        [Export]
         public Button logoutButton;
         [Export]
         public Button exitButton;
@@ -24,6 +28,7 @@ namespace Hypernex.UI
 
         public override void _Ready()
         {
+            cckButton.Pressed += LaunchCCK;
             logoutButton.Pressed += APITools.Logout;
             exitButton.Pressed += Exit;
             GameInstance.OnGameInstanceLoaded += GameInstanceLoaded;
@@ -33,6 +38,7 @@ namespace Hypernex.UI
 
         public override void _ExitTree()
         {
+            cckButton.Pressed -= LaunchCCK;
             logoutButton.Pressed -= APITools.Logout;
             exitButton.Pressed -= Exit;
             GameInstance.OnGameInstanceLoaded -= GameInstanceLoaded;
@@ -97,6 +103,11 @@ namespace Hypernex.UI
             card.SetSafeInstance(instance);
             int idx = tabs.GetTabIdxFromControl(card);
             CallDeferred(nameof(SetTab), idx);
+        }
+
+        public void LaunchCCK()
+        {
+            cckWindow.Show();
         }
 
         private void Exit()

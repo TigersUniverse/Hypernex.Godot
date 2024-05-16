@@ -147,38 +147,50 @@ namespace Hypernex.Tools
                         callback.Invoke(result.result.Meta);
                     }));
                 else
-                    QuickInvoke.InvokeActionOnMainThread(callback, null);
+                    QuickInvoke.InvokeActionOnMainThread(callback, (WorldMeta)null);
             }, worldId);
         }
 
-        public static void UploadWorld(string fullPath, WorldMeta meta)
+        public static void UploadWorld(string fullPath, WorldMeta meta, Action<bool, string> callback = null)
         {
             WorldMeta metaFinal = new WorldMeta(meta.Id, meta.OwnerId, meta.Publicity, meta.Name, meta.Description, meta.ThumbnailURL);
-            FileStream fs = new FileStream(fullPath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Delete | FileShare.Read);
-            if (fs.Length > 1048576 * 90)
+            try
             {
-                string tempDir = Path.Combine(OS.GetUserDataDir(), "file_parts");
-                Directory.CreateDirectory(tempDir);
-                APIObject.UploadPart(result =>
+                FileStream fs = new FileStream(fullPath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Delete | FileShare.Read);
+                if (fs.Length > 1048576 * 90)
                 {
-                    fs.Dispose();
-                    Directory.Delete(tempDir, true);
-                    if (result.success)
-                        Logger.CurrentLogger.Log("Uploaded world!");
-                    else
-                        Logger.CurrentLogger.Error($"Failed to upload world! {result.message}");
-                }, CurrentUser, CurrentToken, fs, tempDir, worldMeta: metaFinal);
+                    string tempDir = Path.Combine(OS.GetUserDataDir(), "file_parts");
+                    Directory.CreateDirectory(tempDir);
+                    APIObject.UploadPart(result =>
+                    {
+                        fs.Dispose();
+                        Directory.Delete(tempDir, true);
+                        if (result.success)
+                            Logger.CurrentLogger.Log("Uploaded world!");
+                        else
+                            Logger.CurrentLogger.Error($"Failed to upload world! {result.message}");
+                        if (callback != null)
+                            QuickInvoke.InvokeActionOnMainThread(callback, result.success, result.message);
+                    }, CurrentUser, CurrentToken, fs, tempDir, worldMeta: metaFinal);
+                }
+                else
+                {
+                    APIObject.UploadWorld(result =>
+                    {
+                        fs.Dispose();
+                        if (result.success)
+                            Logger.CurrentLogger.Log("Uploaded world!");
+                        else
+                            Logger.CurrentLogger.Error($"Failed to upload world! {result.message}");
+                        if (callback != null)
+                            QuickInvoke.InvokeActionOnMainThread(callback, result.success, result.message);
+                    }, CurrentUser, CurrentToken, fs, metaFinal);
+                }
             }
-            else
+            catch (Exception e)
             {
-                APIObject.UploadWorld(result =>
-                {
-                    fs.Dispose();
-                    if (result.success)
-                        Logger.CurrentLogger.Log("Uploaded world!");
-                    else
-                        Logger.CurrentLogger.Error($"Failed to upload world! {result.message}");
-                }, CurrentUser, CurrentToken, fs, metaFinal);
+                Logger.CurrentLogger.Error(e);
+                callback?.Invoke(false, e.Message);
             }
         }
     }

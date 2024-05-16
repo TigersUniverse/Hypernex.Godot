@@ -255,13 +255,15 @@ namespace Hypernex.UI
             Name = "World";
             type = CardType.World;
             worldMeta = world;
-            label.Text = "[font_size=24]" + world.Name.Replace("[", "[lb]") + "[/font_size]";
+            label.Text = "[center][font_size=24]" + world.Name.Replace("[", "[lb]") + "[/font_size][/center]";
             label.Text += "\n\n[font_size=16]" + world.Description.Replace("[", "[lb]") + "[/font_size]";
             var box1 = controlsContainer.AddVBox();
             // TODO: does this work?
             var opt1 = box1.AddOptions("Anyone", "Acquaintances", "Friends", "OpenRequest", "ModeratorRequest", "ClosedRequest");
-            var opts = new[] { InstancePublicity.Anyone, InstancePublicity.Acquaintances, InstancePublicity.Friends, InstancePublicity.OpenRequest, InstancePublicity.ModeratorRequest, InstancePublicity.ClosedRequest };
-            box1.AddButton("Create Instance", UIButtonTheme.Info, btn => SocketManager.CreateInstance(world, opts[opt1.Selected]));
+            var opts1 = new[] { InstancePublicity.Anyone, InstancePublicity.Acquaintances, InstancePublicity.Friends, InstancePublicity.OpenRequest, InstancePublicity.ModeratorRequest, InstancePublicity.ClosedRequest };
+            var opt2 = box1.AddOptions("KCP", "TCP", "UDP");
+            var opts2 = new[] { InstanceProtocol.KCP, InstanceProtocol.TCP, InstanceProtocol.UDP };
+            box1.AddButton("Create Instance", UIButtonTheme.Info, btn => SocketManager.CreateInstance(world, opts1[opt1.Selected], opts2[opt2.Selected]));
             DownloadTools.DownloadBytes(world.ThumbnailURL, b =>
             {
                 if (!IsInstanceValid(background))

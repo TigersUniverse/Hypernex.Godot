@@ -30,6 +30,7 @@ namespace Hypernex.UI
             LoadedConfig(ConfigManager.LoadedConfig);
             loginButton.Pressed += TryLogin;
             usernameEdit.TextSubmitted += Submit;
+            passwordEdit.TextSubmitted += Submit;
             loginOptions.ItemSelected += AccountSelected;
             ConfigManager.OnConfigLoaded += LoadedConfig;
         }
@@ -38,6 +39,7 @@ namespace Hypernex.UI
         {
             loginButton.Pressed -= TryLogin;
             usernameEdit.TextSubmitted -= Submit;
+            passwordEdit.TextSubmitted -= Submit;
             loginOptions.ItemSelected -= AccountSelected;
             ConfigManager.OnConfigLoaded -= LoadedConfig;
         }
@@ -120,6 +122,8 @@ namespace Hypernex.UI
                     messagePopup.DialogText = m;
                     messagePopup.Show();
                     loginButton.Disabled = false;
+                    passwordEdit.Clear();
+                    twoFactorEdit.Clear();
                 });
             });
         }
