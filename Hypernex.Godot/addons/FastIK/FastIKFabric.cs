@@ -1,0 +1,242 @@
+﻿using System;
+using Godot;
+
+namespace DitzelGames.FastIK
+{
+    /// <summary>
+    /// Fabrik IK Solver
+    /// </summary>
+    [GlobalClass]
+    public partial class FastIKFabric : Node
+    {
+        /// <summary>
+        /// Chain length of bones
+        /// </summary>
+        [Export]
+        public int ChainLength = 2;
+
+        /// <summary>
+        /// Target the chain should bent to
+        /// </summary>
+        [Export]
+        public Node3D Target;
+        [Export]
+        public Node3D Pole;
+
+        /// <summary>
+        /// Solver iterations per update
+        /// </summary>
+        [ExportGroup("Solver Parameters")]
+        [Export]
+        public int Iterations = 10;
+
+        /// <summary>
+        /// Distance when the solver stops
+        /// </summary>
+        [Export]
+        public float Delta = 0.001f;
+
+        /// <summary>
+        /// Strength of going back to the start position.
+        /// </summary>
+        // [Range(0, 1)]
+        [Export(PropertyHint.Range, "0,1")]
+        public float SnapBackStrength = 1f;
+
+
+        protected float[] BonesLength; //Target to Origin
+        public float CompleteLength { get; protected set; }
+        protected Node3D[] Bones;
+        protected Vector3[] Positions;
+        protected Vector3[] StartDirectionSucc;
+        protected Quaternion[] StartRotationBone;
+        protected Quaternion StartRotationTarget;
+        protected Node3D Root;
+
+        public bool IsOutOfReach { get; protected set; } = false;
+        public float ReachAmountSqr { get; protected set; } = 0f;
+
+
+        public override void _Ready()
+        {
+            Init();
+        }
+
+        public void Init()
+        {
+            //initial array
+            Bones = new Node3D[ChainLength + 1];
+            Positions = new Vector3[ChainLength + 1];
+            BonesLength = new float[ChainLength];
+            StartDirectionSucc = new Vector3[ChainLength + 1];
+            StartRotationBone = new Quaternion[ChainLength + 1];
+
+            //find root
+            Root = GetParent<Node3D>();
+            for (var i = 0; i <= ChainLength; i++)
+            {
+                if (Root == null)
+                    throw new Exception("The chain value is longer than the ancestor chain!");
+                Root = Root.GetParentNode3D();
+            }
+
+            //init target
+            if (!IsInstanceValid(Target))
+            {
+                return;
+            }
+            StartRotationTarget = GetRotationRootSpace(Target);
+
+
+            //init data
+            var current = GetParent<Node3D>();
+            CompleteLength = 0;
+            for (var i = Bones.Length - 1; i >= 0; i--)
+            {
+                Bones[i] = current;
+                StartRotationBone[i] = GetRotationRootSpace(current);
+
+                if (i == Bones.Length - 1)
+                {
+                    //leaf
+                    StartDirectionSucc[i] = GetPositionRootSpace(Target) - GetPositionRootSpace(current);
+                }
+                else
+                {
+                    //mid bone
+                    StartDirectionSucc[i] = GetPositionRootSpace(Bones[i + 1]) - GetPositionRootSpace(current);
+                    BonesLength[i] = StartDirectionSucc[i].Length();
+                    CompleteLength += BonesLength[i];
+                }
+
+                current = current.GetParentNode3D();
+            }
+
+
+
+        }
+
+        public override void _Process(double delta)
+        {
+            ResolveIK();
+        }
+
+        private void ResolveIK()
+        {
+            if (!IsInstanceValid(Target))
+                return;
+
+            if (BonesLength.Length != ChainLength)
+                Init();
+
+            //Fabric
+
+            //  root
+            //  (bone0) (bonelen 0) (bone1) (bonelen 1) (bone2)...
+            //   x--------------------x--------------------x---...
+
+            //get position
+            for (int i = 0; i < Bones.Length; i++)
+                Positions[i] = GetPositionRootSpace(Bones[i]);
+
+            var targetPosition = GetPositionRootSpace(Target);
+            var targetRotation = GetRotationRootSpace(Target);
+
+            //1st is possible to reach?
+            ReachAmountSqr = (targetPosition - GetPositionRootSpace(Bones[0])).LengthSquared();
+            if (ReachAmountSqr >= CompleteLength * CompleteLength)
+            {
+                IsOutOfReach = true;
+                //just strech it
+                var direction = (targetPosition - Positions[0]).Normalized();
+                //set everything after root
+                for (int i = 1; i < Positions.Length; i++)
+                    Positions[i] = Positions[i - 1] + direction * BonesLength[i - 1];
+            }
+            else
+            {
+                IsOutOfReach = false;
+                for (int i = 0; i < Positions.Length - 1; i++)
+                    Positions[i + 1] = Positions[i + 1].Lerp(Positions[i] + StartDirectionSucc[i], SnapBackStrength);
+
+                for (int iteration = 0; iteration < Iterations; iteration++)
+                {
+                    //https://www.youtube.com/watch?v=UNoX65PRehA
+                    //back
+                    for (int i = Positions.Length - 1; i > 0; i--)
+                    {
+                        if (i == Positions.Length - 1)
+                            Positions[i] = targetPosition; //set it to target
+                        else
+                            Positions[i] = Positions[i + 1] + (Positions[i] - Positions[i + 1]).Normalized() * BonesLength[i]; //set in line on distance
+                    }
+
+                    //forward
+                    for (int i = 1; i < Positions.Length; i++)
+                        Positions[i] = Positions[i - 1] + (Positions[i] - Positions[i - 1]).Normalized() * BonesLength[i - 1];
+
+                    //close enough?
+                    if ((Positions[Positions.Length - 1] - targetPosition).LengthSquared() < Delta * Delta)
+                        break;
+                }
+            }
+
+            //move towards pole
+            if (IsInstanceValid(Pole))
+            {
+                var polePosition = GetPositionRootSpace(Pole);
+                for (int i = 1; i < Positions.Length - 1; i++)
+                {
+                    var plane = new Plane(Positions[i + 1] - Positions[i - 1], Positions[i - 1]);
+                    var projectedPole = plane.Project(polePosition); // TODO: does this work?
+                    var projectedBone = plane.Project(Positions[i]); // TODO: does this work?
+                    var angle = (projectedBone - Positions[i - 1]).SignedAngleTo(projectedPole - Positions[i - 1], plane.Normal);
+                    Positions[i] = new Quaternion(plane.Normal, angle) * (Positions[i] - Positions[i - 1]) + Positions[i - 1];
+                }
+            }
+
+            //set position & rotation
+            for (int i = 0; i < Positions.Length; i++)
+            {
+                if (i == Positions.Length - 1)
+                    SetRotationRootSpace(Bones[i], targetRotation.Inverse() * StartRotationTarget * StartRotationBone[i].Inverse());
+                else
+                    SetRotationRootSpace(Bones[i], new Quaternion(StartDirectionSucc[i], Positions[i + 1] - Positions[i]) * StartRotationBone[i].Inverse());
+                SetPositionRootSpace(Bones[i], Positions[i]);
+            }
+        }
+
+        private Vector3 GetPositionRootSpace(Node3D current)
+        {
+            if (Root == null)
+                return current.GlobalPosition;
+            else
+                return Root.Quaternion.Inverse() * (current.GlobalPosition - Root.GlobalPosition);
+        }
+
+        private void SetPositionRootSpace(Node3D current, Vector3 position)
+        {
+            if (Root == null)
+                current.GlobalPosition = position;
+            else
+                current.GlobalPosition = Root.Quaternion * position + Root.GlobalPosition;
+        }
+
+        private Quaternion GetRotationRootSpace(Node3D current)
+        {
+            //inverse(after) * before => rot: before -> after
+            if (Root == null)
+                return current.Quaternion;
+            else
+                return current.Quaternion.Inverse() * Root.Quaternion;
+        }
+
+        private void SetRotationRootSpace(Node3D current, Quaternion rotation)
+        {
+            if (Root == null)
+                current.Quaternion = rotation;
+            else
+                current.Quaternion = Root.Quaternion * rotation;
+        }
+    }
+}
