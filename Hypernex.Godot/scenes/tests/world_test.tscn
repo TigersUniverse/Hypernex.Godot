@@ -1,7 +1,8 @@
 [gd_scene load_steps=12 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
-[ext_resource type="Texture2D" uid="uid://dome6nkl687io" path="res://icon.svg" id="2_65fnm"]
+[ext_resource type="Material" uid="uid://foarkyosj826" path="res://scenes/tests/world_test.tres" id="2_5nyuk"]
+[ext_resource type="AudioStream" uid="uid://ll5phgir3b0n" path="res://scenes/tests/Unity_Kevin_MacLeod.mp3" id="2_kj8dh"]
 [ext_resource type="Script" path="res://addons/cck/classes/WorldDescriptor.cs" id="3_73irx"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
 [ext_resource type="Script" path="res://addons/cck/classes/WorldScript.cs" id="5_oulgq"]
@@ -19,9 +20,6 @@ sky = SubResource("Sky_33wh5")
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_615mv"]
-albedo_texture = ExtResource("2_65fnm")
-
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_1l7cg"]
 data = PackedVector3Array(1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0, -1)
 
@@ -29,15 +27,8 @@ data = PackedVector3Array(1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0
 resource_name = "Test"
 script/source = "extends Node
 
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+static func _static_init():
+	print(\"hacked smh\")
 "
 
 [node name="WorldTest" type="Node"]
@@ -58,7 +49,7 @@ load = true
 
 [node name="WorldMesh" type="MeshInstance3D" parent="Test/World"]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_615mv")
+material_override = ExtResource("2_5nyuk")
 mesh = ExtResource("3_j1wr1")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Test/World/WorldMesh"]
@@ -80,16 +71,20 @@ text = "HIIIII"
 
 [node name="Clock" type="Node" parent="Test/World/Label3D"]
 script = ExtResource("5_oulgq")
-Contents = "function settime() {
-	let t =  new Time();
-	let hr = t.GetHours() % 12;
-	if (hr == 0) {
+Language = 1
+Contents = "function settime()
+	local t = Time();
+	local hr = t.GetHours() % 12;
+	if hr == 0 then
 		hr = 12;
-	}
-	UI.SetText(item, `${hr}:${t.GetMinutes()} ${t.GetAMPM()}`);
-}
+	end
+	UI.SetText(item, hr .. \":\" .. t.GetMinutes() .. \" \" .. t.GetAMPM());
+end
 
-Runtime.OnFixedUpdate(settime);"
+Runtime.OnFixedUpdate(SandboxFunc().SetAction(settime));"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Test"]
+stream = ExtResource("2_kj8dh")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

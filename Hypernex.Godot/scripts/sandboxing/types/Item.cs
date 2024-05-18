@@ -24,11 +24,12 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public bool Enabled
         {
-            get => t.IsProcessing() && t.IsPhysicsProcessing();
+            get => t.CanProcess();
             set
             {
-                t.SetProcess(value);
-                t.SetPhysicsProcess(value);
+                t.ProcessMode = value ? Node.ProcessModeEnum.Inherit : Node.ProcessModeEnum.Disabled;
+                // t.SetProcess(value);
+                // t.SetPhysicsProcess(value);
             }
         }
 

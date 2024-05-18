@@ -62,7 +62,7 @@ namespace Hypernex.Game
 
         public override void _Ready()
         {
-            Position = Vector3.Zero;
+            // Position = Vector3.Zero;
             UpdateLoop();
         }
 
