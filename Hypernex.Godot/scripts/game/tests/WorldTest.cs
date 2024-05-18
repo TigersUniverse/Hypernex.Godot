@@ -14,21 +14,12 @@ namespace Hypernex.Game.Tests
         [Export]
         public bool load = false;
 
-        public override async void _Ready()
+        public override void _Ready()
         {
-            // Dictionary dict = new Dictionary();
-            // dict.Add("test", this);
-            // GD.Print(GD.VarToStr(dict));
-            // SaveLoader.ParseProperty("hello = \"world!\"", 0, out var key, out var val, out var off);
-            // GD.PrintS(key, val, off);
-
-            SaveLoader.ParsedTres tscn = SaveLoader.ParseTres(string.Empty, File.ReadAllText(ProjectSettings.GlobalizePath("user://test.tres")).ReplaceLineEndings("\n"));
-            GD.Print(JsonTools.JsonSerialize(tscn));
-
-            var loader = new SaveLoader();
-            loader.ReadZip("res://temp/bin.zip");
+            var loader = new SafeLoader();
+            loader.ReadZip("user://my_world.hnw");
             AddChild(loader.scene.Instantiate());
-            await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
+            // await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
             // RunTest();
         }
 

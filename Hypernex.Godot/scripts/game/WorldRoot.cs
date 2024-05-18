@@ -60,6 +60,7 @@ namespace Hypernex.Game
         public static WorldRoot LoadFromFile(string path)
         {
             WorldRoot root = new WorldRoot();
+            /*
             SafeScene safeScn = new SafeScene();
             using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
             safeScn.FromString(file.GetAsText(true));
@@ -70,6 +71,15 @@ namespace Hypernex.Game
             db.Register<MaterialConverter>();
             db.Register<Texture2DConverter>();
             PackedScene scn = safeScn.SetupToPackedScene(db);
+            */
+            SafeLoader loader = new SafeLoader();
+            loader.ReadZip(path);
+            PackedScene scn = loader.scene;
+            if (!IsInstanceValid(loader.scene))
+            {
+                Logger.CurrentLogger.Error("Unable to load world!");
+                return root;
+            }
             Node node = scn.Instantiate();
             if (IsInstanceValid(node))
             {

@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Godot;
+using Hypernex.CCK.GodotVersion.Classes;
 
 namespace Hypernex.CCK.GodotVersion
 {
-    public partial class SaveLoader
+    public partial class SafeLoader
     {
         public class ParsedSubTres
         {
@@ -33,16 +35,17 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedExtResources[id];
                     return new Variant();
                 }
-                return SaveLoader.ConvertPropertyString(prop);
+                return SafeLoader.ConvertPropertyString(prop);
             }
 
             public Resource ToResource()
             {
+                if (ClassDB.IsParentClass(Type, nameof(Script)))
+                    return null;
                 Resource res = ClassDB.Instantiate(Type).As<Resource>();
                 foreach (var kvp in Properties)
                 {
-                    OS.Alert(kvp.Key);
-                    if (kvp.Key == "_surfaces")
+                    if (kvp.Key == Resource.PropertyName.ResourcePath)
                         continue;
                     res.Set(kvp.Key, ConvertPropertyString(kvp.Value));
                 }
@@ -93,14 +96,19 @@ namespace Hypernex.CCK.GodotVersion
                     string id = prop.Substr(startIdx + 2, endIdx - startIdx - 2);
 
                     var sub = SubResources[id];
+                    if (ClassDB.IsParentClass(sub.Type, nameof(Script)))
+                        return new Variant();
+                        // sub.Type = nameof(Resource);
                     Resource res = ClassDB.Instantiate(sub.Type).As<Resource>();
                     foreach (var kvp in sub.Properties)
                     {
+                        if (kvp.Key == Resource.PropertyName.ResourcePath)
+                            continue;
                         res.Set(kvp.Key, ConvertPropertyString(kvp.Value));
                     }
                     return res;
                 }
-                return SaveLoader.ConvertPropertyString(prop);
+                return SafeLoader.ConvertPropertyString(prop);
             }
 
             public PackedScene ToPackedScene()
@@ -108,10 +116,26 @@ namespace Hypernex.CCK.GodotVersion
                 Dictionary<string, Node> nodes = new Dictionary<string, Node>();
                 foreach (var parNode in Nodes)
                 {
-                    Node node = (Node)ClassDB.Instantiate(parNode.Type);
+                    if (ClassDB.IsParentClass(parNode.Type, nameof(Script)))
+                        parNode.Type = nameof(Node);
+                    Node node = null;
+                    foreach (var kvp in parNode.Properties)
+                    {
+                        if (!kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        Script scr = ConvertPropertyString(kvp.Value).As<Script>();
+                        if (scr is CSharpScript css)
+                            node = css.New().As<Node>();
+                        if (scr is GDScript gds)
+                            node = gds.New().As<Node>();
+                    }
+                    if (node == null)
+                        node = ClassDB.Instantiate(parNode.Type).As<Node>();
                     node.Name = parNode.Name;
                     foreach (var kvp in parNode.Properties)
                     {
+                        if (kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
+                            continue;
                         node.Set(kvp.Key, ConvertPropertyString(kvp.Value));
                     }
                     NodePath path = new NodePath($"{parNode.Parent}/{parNode.Name}");
@@ -186,6 +210,22 @@ namespace Hypernex.CCK.GodotVersion
             return j == 0;
         }
 
+        public static Script LoadScript(string path)
+        {
+            foreach (var csType in typeof(ISandboxClass).Assembly.GetTypes())
+            {
+                if (csType.GetInterface(nameof(ISandboxClass)) == null)
+                    continue;
+                ScriptPathAttribute scrPath = csType.GetCustomAttribute<ScriptPathAttribute>();
+                if (scrPath != null && scrPath.Path == path)
+                {
+                    CSharpScript script = ResourceLoader.Load<CSharpScript>(scrPath.Path);
+                    return script;
+                }
+            }
+            return null;
+        }
+
         public ZipReader reader;
         public ParsedTscn world;
         public PackedScene scene;
@@ -193,7 +233,12 @@ namespace Hypernex.CCK.GodotVersion
         public void ReadZip(string path)
         {
             reader = new ZipReader();
-            reader.Open(path);
+            Error err = reader.Open(path);
+            if (err != Error.Ok)
+            {
+                GD.PrintErr(err);
+                return;
+            }
             if (reader.FileExists("world.txt"))
             {
                 string worldPath = Encoding.UTF8.GetString(reader.ReadFile("world.txt"));
@@ -206,6 +251,10 @@ namespace Hypernex.CCK.GodotVersion
                         res = ReadData(resKvp.Value, reader.ReadFile(resPath));
                     else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
                         res = ReadData(resKvp.Value.ReplaceN(resKvp.Value.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
+                    else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
+                        res = ReadData(resKvp.Value.ReplaceN(resKvp.Value.GetExtension(), "asset"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "asset")));
+                    else
+                        res = LoadScript(resKvp.Value);
                     world.LoadedExtResources.Add(resKvp.Key, res);
                 }
                 scene = world.ToPackedScene();
@@ -215,7 +264,6 @@ namespace Hypernex.CCK.GodotVersion
 
         public Resource ReadData(string path, byte[] data)
         {
-            OS.Alert(path);
             if (path.ToLower().EndsWith(".tres"))
             {
                 ParsedTres tres = ParseTres(path, Encoding.UTF8.GetString(data));
@@ -228,6 +276,30 @@ namespace Hypernex.CCK.GodotVersion
                     tres.LoadedExtResources.Add(resKvp.Key, res);
                 }
                 return tres.ToResource();
+            }
+            else if (path.ToLower().EndsWith(".asset"))
+            {
+                DirAccess.MakeDirAbsolute("user://temp/");
+                string tempPath = "user://temp/temp.asset";
+                FileAccess file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Write);
+                file.StoreBuffer(data);
+                file.Close();
+                file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Read);
+                string type = file.GetPascalString();
+                if (ClassDB.IsParentClass(type, nameof(Script)))
+                    return null;
+                    // type = nameof(Resource);
+                Resource res = ClassDB.Instantiate(type).As<Resource>();
+                while (file.GetPosition() < file.GetLength())
+                {
+                    string key = file.GetPascalString();
+                    Variant val = file.GetVar(false);
+                    if (key == Resource.PropertyName.ResourcePath)
+                        continue;
+                    res.Set(key, val);
+                }
+                file.Close();
+                return res;
             }
             else
             {
@@ -277,6 +349,9 @@ namespace Hypernex.CCK.GodotVersion
             //     return new Variant();
             // prevent objects from loading
             if (prop.Trim().Contains("Object(", StringComparison.OrdinalIgnoreCase))
+                return new Variant();
+            // prevent long parsing times
+            if (prop.Length >= 4096 * 2)
                 return new Variant();
             return GD.StrToVar(prop);
             foreach (var key in Enum.GetNames<Variant.Type>())
