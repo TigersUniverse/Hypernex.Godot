@@ -14,9 +14,12 @@ namespace Hypernex.Player
         [Export]
         public float speed = 1f;
         public float gravity;
+        [Export]
+        public Camera3D cam;
 
         public override void _Ready()
         {
+            cam.MakeCurrent();
             inputs = root.GetPart<PlayerInputs>();
             gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
         }

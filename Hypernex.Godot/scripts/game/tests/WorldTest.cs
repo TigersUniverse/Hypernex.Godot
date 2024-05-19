@@ -1,8 +1,11 @@
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
+using System.Threading.Tasks;
 using Godot;
+using Godot.Collections;
+using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
+using Hypernex.Tools;
 
 namespace Hypernex.Game.Tests
 {
@@ -16,8 +19,9 @@ namespace Hypernex.Game.Tests
         public override async void _Ready()
         {
             await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
-            // new Thread(() => RunTest()).Start();
-            RunTest();
+            var root = WorldRoot.LoadFromFile("user://my_world.hnw");
+            AddChild(root);
+            // RunTest();
         }
 
         public void RunTest()

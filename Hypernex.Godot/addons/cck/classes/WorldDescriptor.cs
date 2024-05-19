@@ -3,9 +3,11 @@ using Godot;
 
 namespace Hypernex.CCK.GodotVersion.Classes
 {
-    [GlobalClass]
+    // [GlobalClass]
     public partial class WorldDescriptor : Node3D, ISandboxClass
     {
+        public const string TypeName = "WorldDescriptor";
+
         [Export]
         public Vector3 StartPosition { get; set; }
     }

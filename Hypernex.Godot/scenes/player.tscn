@@ -18,24 +18,28 @@ parts = [NodePath("Inputs"), NodePath("CharacterBody3D"), NodePath("Chat")]
 script = ExtResource("2_777if")
 root = NodePath("..")
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("root")]
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("root", "cam")]
 script = ExtResource("3_4k47x")
 root = NodePath("..")
 accel = 100.0
 speed = 5.0
+cam = NodePath("View/Camera3D")
 
 [node name="View" type="Node3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="Camera3D" type="Camera3D" parent="CharacterBody3D/View"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_wyrxg")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CapsuleMesh_i7wyo")
 
 [node name="Voice" type="AudioStreamPlayer3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root", "textChat", "audioSource")]
 script = ExtResource("4_r7ubo")
