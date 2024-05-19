@@ -73,6 +73,8 @@ namespace Hypernex.Game
             PackedScene scn = safeScn.SetupToPackedScene(db);
             */
             SafeLoader loader = new SafeLoader();
+            loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
+            loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.ReadZip(path);
             PackedScene scn = loader.scene;
             if (!IsInstanceValid(loader.scene))

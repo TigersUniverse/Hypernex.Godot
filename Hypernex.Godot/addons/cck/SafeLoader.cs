@@ -111,7 +111,7 @@ namespace Hypernex.CCK.GodotVersion
                 return SafeLoader.ConvertPropertyString(prop);
             }
 
-            public PackedScene ToPackedScene()
+            public PackedScene ToPackedScene(Dictionary<string, Script> scripts)
             {
                 Dictionary<string, Node> nodes = new Dictionary<string, Node>();
                 foreach (var parNode in Nodes)
@@ -121,9 +121,18 @@ namespace Hypernex.CCK.GodotVersion
                     Node node = null;
                     foreach (var kvp in parNode.Properties)
                     {
-                        if (!kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
+                        Script scr = null;
+                        if (kvp.Key.Equals("metadata/typename", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!scripts.TryGetValue(kvp.Value.Trim('"'), out scr))
+                                continue;
+                        }
+                        else
                             continue;
-                        Script scr = ConvertPropertyString(kvp.Value).As<Script>();
+                        if (scr == null)
+                            continue;
+                        // if (scr != null)
+                        //     scr = ConvertPropertyString(kvp.Value).As<Script>();
                         if (scr is CSharpScript css)
                             node = css.New().As<Node>();
                         if (scr is GDScript gds)
@@ -134,7 +143,7 @@ namespace Hypernex.CCK.GodotVersion
                     node.Name = parNode.Name;
                     foreach (var kvp in parNode.Properties)
                     {
-                        if (kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
+                        if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                             continue;
                         node.Set(kvp.Key, ConvertPropertyString(kvp.Value));
                     }
@@ -226,9 +235,28 @@ namespace Hypernex.CCK.GodotVersion
             return null;
         }
 
+        public static Script LoadScript<T>() where T : ISandboxClass
+        {
+            return LoadScript(typeof(T));
+        }
+
+        public static Script LoadScript(Type type)
+        {
+            if (type.GetInterface(nameof(ISandboxClass)) == null)
+                return null;
+            ScriptPathAttribute scrPath = type.GetCustomAttribute<ScriptPathAttribute>();
+            if (scrPath != null)
+            {
+                CSharpScript script = ResourceLoader.Load<CSharpScript>(scrPath.Path);
+                return script;
+            }
+            return null;
+        }
+
         public ZipReader reader;
         public ParsedTscn world;
         public PackedScene scene;
+        public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
 
         public void ReadZip(string path)
         {
@@ -248,7 +276,7 @@ namespace Hypernex.CCK.GodotVersion
                     Resource res = LoadFile(resKvp.Value);
                     world.LoadedExtResources.Add(resKvp.Key, res);
                 }
-                scene = world.ToPackedScene();
+                scene = world.ToPackedScene(validScripts);
             }
             reader.Close();
         }
