@@ -17,7 +17,7 @@ func export_asset(res : Resource, path : String) -> void:
 		if prop_val is Resource:
 			file.store_8(1)
 			if prop_val.resource_path.is_empty():
-				OS.alert(prop_val)
+				printerr("Not able to export ", prop_val)
 			file.store_pascal_string(prop_val.resource_path)
 		else:
 			file.store_8(0)
