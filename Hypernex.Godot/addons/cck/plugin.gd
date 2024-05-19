@@ -14,7 +14,14 @@ func export_asset(res : Resource, path : String) -> void:
 		var prop_name : String = prop["name"]
 		var prop_val : Variant = res.get(prop_name)
 		file.store_pascal_string(prop_name)
-		file.store_var(prop_val)
+		if prop_val is Resource:
+			file.store_8(1)
+			if prop_val.resource_path.is_empty():
+				OS.alert(prop_val)
+			file.store_pascal_string(prop_val.resource_path)
+		else:
+			file.store_8(0)
+			file.store_var(prop_val)
 	file.close()
 
 func export_deps(writer : ZIPPacker, path : String) -> void:
@@ -30,7 +37,7 @@ func export_deps(writer : ZIPPacker, path : String) -> void:
 			writer.start_file(dep_path.replacen("res://", ""))
 			writer.write_file(dep_file)
 			writer.close_file()
-		elif dep_res.is_class("AudioStream"):
+		elif dep_res.is_class("AudioStream") or true:
 			# write binary file
 			export_asset(dep_res, temp_path)
 			var dep_file := FileAccess.get_file_as_bytes(temp_path)

@@ -245,16 +245,7 @@ namespace Hypernex.CCK.GodotVersion
                 world = ParseTscn(path, Encoding.UTF8.GetString(reader.ReadFile(worldPath)));
                 foreach (var resKvp in world.ExtResources)
                 {
-                    string resPath = resKvp.Value.ReplaceN("res://", "");
-                    Resource res = null;
-                    if (reader.FileExists(resPath))
-                        res = ReadData(resKvp.Value, reader.ReadFile(resPath));
-                    else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
-                        res = ReadData(resKvp.Value.ReplaceN(resKvp.Value.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
-                    else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
-                        res = ReadData(resKvp.Value.ReplaceN(resKvp.Value.GetExtension(), "asset"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "asset")));
-                    else
-                        res = LoadScript(resKvp.Value);
+                    Resource res = LoadFile(resKvp.Value);
                     world.LoadedExtResources.Add(resKvp.Key, res);
                 }
                 scene = world.ToPackedScene();
@@ -262,9 +253,24 @@ namespace Hypernex.CCK.GodotVersion
             reader.Close();
         }
 
+        public Resource LoadFile(string path)
+        {
+            string resPath = path.ReplaceN("res://", "");
+            Resource res = null;
+            if (reader.FileExists(resPath))
+                res = ReadData(path, reader.ReadFile(resPath));
+            else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
+                res = ReadData(path.ReplaceN(path.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
+            else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
+                res = ReadData(path.ReplaceN(path.GetExtension(), "asset"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "asset")));
+            else
+                res = LoadScript(path);
+            return res;
+        }
+
         public Resource ReadData(string path, byte[] data)
         {
-            if (path.ToLower().EndsWith(".tres"))
+            /*if (path.ToLower().EndsWith(".tres"))
             {
                 ParsedTres tres = ParseTres(path, Encoding.UTF8.GetString(data));
                 foreach (var resKvp in tres.ExtResources)
@@ -277,7 +283,7 @@ namespace Hypernex.CCK.GodotVersion
                 }
                 return tres.ToResource();
             }
-            else if (path.ToLower().EndsWith(".asset"))
+            else*/ if (path.ToLower().EndsWith(".asset"))
             {
                 DirAccess.MakeDirAbsolute("user://temp/");
                 string tempPath = "user://temp/temp.asset";
@@ -293,10 +299,22 @@ namespace Hypernex.CCK.GodotVersion
                 while (file.GetPosition() < file.GetLength())
                 {
                     string key = file.GetPascalString();
-                    Variant val = file.GetVar(false);
-                    if (key == Resource.PropertyName.ResourcePath)
-                        continue;
-                    res.Set(key, val);
+                    byte isRes = file.Get8();
+                    if (isRes == 0)
+                    {
+                        Variant val = file.GetVar(false);
+                        if (key == Resource.PropertyName.ResourcePath)
+                            continue;
+                        res.Set(key, val);
+                    }
+                    else if (isRes == 1)
+                    {
+                        string resPath = file.GetPascalString();
+                        if (key == Resource.PropertyName.ResourcePath)
+                            continue;
+                        Resource subRes = LoadFile(resPath);
+                        res.Set(key, subRes);
+                    }
                 }
                 file.Close();
                 return res;
@@ -344,9 +362,6 @@ namespace Hypernex.CCK.GodotVersion
 
         public static Variant ConvertPropertyString(string prop)
         {
-            // TODO: arrays?
-            // if (prop.Trim().StartsWith('{') || prop.Trim().StartsWith('['))
-            //     return new Variant();
             // prevent objects from loading
             if (prop.Trim().Contains("Object(", StringComparison.OrdinalIgnoreCase))
                 return new Variant();
