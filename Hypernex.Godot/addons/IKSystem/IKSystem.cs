@@ -1,4 +1,4 @@
-#if false
+#if true
 using System;
 using DitzelGames.FastIK;
 using Godot;
@@ -66,14 +66,24 @@ public partial class IKSystem : Node
     public IKData leftFootData;
     public IKData rightFootData;
 
-    public Node3D head;
+    [Export]
+    public BoneAttachment3D head;
     public Node3D headTarget;
     public Vector3 direction;
-    public Node3D hips;
-    public Node3D leftHand;
-    public Node3D rightHand;
-    public Node3D leftFoot;
-    public Node3D rightFoot;
+    [Export]
+    public BoneAttachment3D hips;
+    [Export]
+    public BoneAttachment3D leftHand;
+    [Export]
+    public BoneAttachment3D rightHand;
+    [Export]
+    public BoneAttachment3D leftUpperLeg;
+    [Export]
+    public BoneAttachment3D rightUpperLeg;
+    [Export]
+    public BoneAttachment3D leftFoot;
+    [Export]
+    public BoneAttachment3D rightFoot;
 
     public float footDistance;
 
@@ -83,6 +93,8 @@ public partial class IKSystem : Node
     public float flipDist => flipFlop ? 1f : 1f;
 
     public Vector3 hipsPos;
+    public Vector3 lastVel;
+    public float speedAvg;
     public float timer;
     public float velTimer;
     public float leftTimer;
@@ -90,6 +102,21 @@ public partial class IKSystem : Node
 
     public IKLoopState leftLoopState;
     public IKLoopState rightLoopState;
+
+    public override void _EnterTree()
+    {
+        Init();
+    }
+
+    public override void _ExitTree()
+    {
+        OnDisable();
+    }
+
+    public override void _Process(double delta)
+    {
+        LateUpdate(delta);
+    }
 
     private void OnEnable()
     {
@@ -101,24 +128,35 @@ public partial class IKSystem : Node
         return (value - min1) / (max1 - min1) * (max2 - min2) + min2;
     }
 
-    private void LateUpdate()
+    private static Vector3 DirectionToLocal(Transform3D t, Vector3 v)
     {
+        var inv = t.AffineInverse();
+        return inv * v - inv * Vector3.Zero;
+        var val = inv.Basis.GetRotationQuaternion().Normalized() * v;
+        return val;
+    }
+
+    private void LateUpdate(double delta)
+    {
+        if (!IsInstanceValid(humanoid))
+            return;
         if (IsInstanceValid(leftHandData.ik))
-            leftHandData.ik.enabled = handIk;
+            leftHandData.ik.Enabled = handIk;
         if (IsInstanceValid(rightHandData.ik))
-            rightHandData.ik.enabled = handIk;
+            rightHandData.ik.Enabled = handIk;
         if (IsInstanceValid(leftFootData.ik))
-            leftFootData.ik.enabled = footIk;
+            leftFootData.ik.Enabled = footIk;
         if (IsInstanceValid(rightFootData.ik))
-            rightFootData.ik.enabled = footIk;
+            rightFootData.ik.Enabled = footIk;
         if (IsInstanceValid(hips) && IsInstanceValid(head) && IsInstanceValid(headTarget))
         {
-            hips.Position = hips.GetParentNode3D().InverseTransformPoint(headTarget.GlobalPosition) - hips.GetParentNode3D().InverseTransformVector(direction);
+            hips.Position = hips.GetParentNode3D().ToLocal(headTarget.GlobalPosition) - hips.GetParentNode3D().ToLocal(direction);
+            // hips.Position = hips.GetParentNode3D().InverseTransformPoint(headTarget.GlobalPosition) - hips.GetParentNode3D().InverseTransformVector(direction);
             head.GlobalPosition = headTarget.GlobalPosition;
             head.GlobalBasis = headTarget.GlobalBasis;
         }
 
-        Vector3 vel = hips.position - hipsPos;
+        Vector3 vel = hips.GlobalPosition - hipsPos;
 #if false
         bool found = false;
         if (leftFootData.target && leftFootData.ik)
@@ -210,34 +248,51 @@ public partial class IKSystem : Node
 
         if (moveFeet)
         {
-            float speed = vel.magnitude;
-            // speed = 1f;
+            float speed = vel.Length();
+            float scale = 1f / humanoid.GlobalBasis.Scale.Z;
             {
                 Vector2 pos = EvaluateLoop(ref leftLoopState, ref leftTimer, loopSize, speed, 0f);
-                float y = MapValue(pos.y, 0f, 1f, minStepHeight, maxStepHeight);
-                float z = MapValue(pos.x, -1f, 1f, minStepLength, maxStepLength);
+                float y = MapValue(pos.Y, 0f, 1f, minStepHeight, maxStepHeight) * scale;
+                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale;
+                float x = footDistance * 0.5f * scale;
 
-                Vector3 end = Vector3.zero;
-                if (vel.magnitude > 0f)
-                    end = Quaternion.LookRotation(humanoid.transform.InverseTransformDirection(vel.normalized)) * new Vector3(0f, y, z);
-                end.x += -footDistance * 0.5f;
-                leftFootData.target.localPosition = end;
+                Vector3 end = Vector3.Zero;
+                if (lastVel.Length() > 0f)
+                {
+                    var dir = DirectionToLocal(humanoid.GlobalTransform, lastVel.Normalized());
+                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * Basis.LookingAt(dir, Vector3.Up).GetRotationQuaternion() * new Vector3(0f, y, -z);
+                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
+                    leftFootData.target.Position = end;
+                }
             }
             {
                 Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0.5f);
-                float y = MapValue(pos.y, 0f, 1f, minStepHeight, maxStepHeight);
-                float z = MapValue(pos.x, -1f, 1f, minStepLength, maxStepLength);
+                float y = MapValue(pos.Y, 0f, 1f, minStepHeight, maxStepHeight) * scale;
+                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale;
+                float x = -footDistance * 0.5f * scale;
 
-                Vector3 end = Vector3.zero;
-                if (vel.magnitude > 0f)
-                    end = Quaternion.LookRotation(humanoid.transform.InverseTransformDirection(vel.normalized)) * new Vector3(0f, y, z);
-                end.x += footDistance * 0.5f;
-                rightFootData.target.localPosition = end;
+                Vector3 end = Vector3.Zero;
+                if (lastVel.Length() > 0f)
+                {
+                    var dir = DirectionToLocal(humanoid.GlobalTransform, lastVel.Normalized());
+                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * Basis.LookingAt(dir, Vector3.Up).GetRotationQuaternion() * new Vector3(0f, y, -z);
+                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
+                    rightFootData.target.Position = end;
+                }
             }
         }
 
-        if (hips)
-            hipsPos = hips.position;
+        if (IsInstanceValid(hips))
+        {
+            hipsPos = hips.GlobalPosition;
+            if (vel.Length() > 0f)
+            {
+                lastVel = vel;
+                lastVel.Y = 0f;
+            }
+            speedAvg += vel.Length();
+            speedAvg *= 0.5f;
+        }
     }
 
     public void Init()
@@ -247,8 +302,9 @@ public partial class IKSystem : Node
         leftTimer = 0f;
         rightTimer = 0f;
         OnDisable();
-        if (humanoid && humanoid.avatar && humanoid.avatar.isHuman)
+        if (IsInstanceValid(humanoid) /*&& humanoid.avatar && humanoid.avatar.isHuman*/)
         {
+            /*
             head = humanoid.GetBoneTransform(HumanBodyBones.Head);
             hips = humanoid.GetBoneTransform(HumanBodyBones.Hips);
             leftHand = humanoid.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -256,56 +312,56 @@ public partial class IKSystem : Node
             leftFoot = humanoid.GetBoneTransform(HumanBodyBones.LeftFoot);
             rightFoot = humanoid.GetBoneTransform(HumanBodyBones.RightFoot);
             direction = humanoid.GetBoneTransform(HumanBodyBones.Head).position - humanoid.GetBoneTransform(HumanBodyBones.Hips).position;
-            float scl = direction.magnitude;
-            footDistance = Vector3.Distance(leftFoot.position, rightFoot.position);
+            */
+            direction = head.GlobalPosition - hips.GlobalPosition;
+            float scl = direction.Length();
+            footDistance = leftFoot.GlobalPosition.DistanceTo(rightFoot.GlobalPosition);
+            float scale = 1f / humanoid.GlobalBasis.Scale.Z;
+
+            Vector3 right = -humanoid.GlobalBasis.X.Normalized();
+            Vector3 forward = humanoid.GlobalBasis.Z.Normalized(); // no -z because model front is +z
+            Vector3 up = humanoid.GlobalBasis.Y.Normalized();
 
             // hips and head
             {
-                headTarget = new GameObject("Head Target").transform;
-                headTarget.SetParent(transform);
-                headTarget.position = head.position;
-                headTarget.rotation = head.rotation;
-                hipsPos = hips.position;
+                headTarget = new Node3D() { Name = "Head_Target" };
+                humanoid.AddChild(headTarget);
+                headTarget.GlobalTransform = head.GlobalTransform;
+                hipsPos = hips.GlobalPosition;
             }
 
             // left hand
             {
-                leftHandData.target = new GameObject("LeftHand Target").transform;
-                leftHandData.target.SetParent(transform);
-                leftHandData.target.position = leftHand.position;
-                leftHandData.target.rotation = leftHand.rotation;
-                leftHandData.pole = new GameObject("LeftHand Pole").transform;
-                leftHandData.pole.SetParent(head);
-                leftHandData.pole.position = head.position - transform.right * scl - transform.forward * scl + transform.up * 0.5f * scl;
+                leftHandData.target = new Node3D() { Name = "LeftHand_Target" };
+                humanoid.AddChild(leftHandData.target);
+                leftHandData.target.GlobalTransform = leftHand.GlobalTransform;
+                leftHandData.pole = new Node3D() { Name = "LeftHand_Pole" };
+                head.AddChild(leftHandData.pole);
+                leftHandData.pole.GlobalPosition = head.GlobalPosition - right * scl - forward * scl + up * 0.5f * scl;
 
-                FastIKFabric ik = leftHand.gameObject.AddComponent<FastIKFabric>();
+                FastIKFabric ik = new FastIKFabric();
+                leftHand.AddChild(ik);
                 ik.Target = leftHandData.target;
                 ik.Pole = leftHandData.pole;
-                if (humanoid.GetBoneTransform(HumanBodyBones.LeftShoulder))
-                    ik.ChainLength = 3;
-                // else
-                    ik.ChainLength = 2;
+                ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
                 ik.Init();
                 leftHandData.ik = ik;
             }
             // right hand
             {
-                rightHandData.target = new GameObject("RightHand Target").transform;
-                rightHandData.target.SetParent(transform);
-                rightHandData.target.position = rightHand.position;
-                rightHandData.target.rotation = rightHand.rotation;
-                rightHandData.pole = new GameObject("RightHand Pole").transform;
-                rightHandData.pole.SetParent(head);
-                rightHandData.pole.position = head.position + transform.right * scl - transform.forward * scl + transform.up * 0.5f * scl;
+                rightHandData.target = new Node3D() { Name = "RightHand_Target" };
+                humanoid.AddChild(rightHandData.target);
+                rightHandData.target.GlobalTransform = rightHand.GlobalTransform;
+                rightHandData.pole = new Node3D() { Name = "RightHand_Pole" };
+                head.AddChild(rightHandData.pole);
+                rightHandData.pole.GlobalPosition = head.GlobalPosition + right * scl - forward * scl + up * 0.5f * scl;
 
-                FastIKFabric ik = rightHand.gameObject.AddComponent<FastIKFabric>();
+                FastIKFabric ik = new FastIKFabric();
+                rightHand.AddChild(ik);
                 ik.Target = rightHandData.target;
                 ik.Pole = rightHandData.pole;
-                if (humanoid.GetBoneTransform(HumanBodyBones.RightShoulder))
-                    ik.ChainLength = 3;
-                // else
-                    ik.ChainLength = 2;
+                ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
                 ik.Init();
                 rightHandData.ik = ik;
@@ -313,42 +369,49 @@ public partial class IKSystem : Node
 
             // left foot
             {
-                leftFootData.target = new GameObject("LeftFoot Target").transform;
-                leftFootData.target.SetParent(transform);
-                leftFootData.target.position = leftFoot.position;
-                leftFootData.target.rotation = leftFoot.rotation;
-                leftFootData.pole = new GameObject("LeftFoot Pole").transform;
-                leftFootData.pole.SetParent(hips);
-                leftFootData.pole.position = humanoid.GetBoneTransform(HumanBodyBones.LeftUpperLeg).position - transform.right * 0.25f * scl + transform.forward * 1.5f * scl + transform.up * 0.9f * scl;
+                leftFootData.target = new Node3D() { Name = "LeftFoot_Target" };
+                humanoid.AddChild(leftFootData.target);
+                leftFootData.target.GlobalTransform = leftFoot.GlobalTransform;
+                leftFootData.pole = new Node3D() { Name = "LeftFoot_Pole" };
+                hips.AddChild(leftFootData.pole);
+                leftFootData.pole.GlobalPosition = leftUpperLeg.GlobalPosition - right * 0.25f * scl + forward * 1.5f * scl + up * 0.9f * scl;
 
-                FastIKFabric ik = leftFoot.gameObject.AddComponent<FastIKFabric>();
+                FastIKFabric ik = new FastIKFabric();
+                leftFoot.AddChild(ik);
                 ik.Target = leftFootData.target;
                 ik.Pole = leftFootData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
                 ik.Init();
                 leftFootData.ik = ik;
-                leftFootPos = leftFoot.position;
+                leftFootPos = leftFoot.GlobalPosition;
             }
             // right foot
             {
-                rightFootData.target = new GameObject("RightFoot Target").transform;
-                rightFootData.target.SetParent(transform);
-                rightFootData.target.position = rightFoot.position;
-                rightFootData.target.rotation = rightFoot.rotation;
-                rightFootData.pole = new GameObject("RightFoot Pole").transform;
-                rightFootData.pole.SetParent(hips);
-                rightFootData.pole.position = humanoid.GetBoneTransform(HumanBodyBones.RightUpperLeg).position + transform.right * 0.25f * scl + transform.forward * 1.5f * scl + transform.up * 0.9f * scl;
+                rightFootData.target = new Node3D() { Name = "RightFoot_Target" };
+                humanoid.AddChild(rightFootData.target);
+                rightFootData.target.GlobalTransform = rightFoot.GlobalTransform;
+                rightFootData.pole = new Node3D() { Name = "RightFoot_Pole" };
+                hips.AddChild(rightFootData.pole);
+                rightFootData.pole.GlobalPosition = rightUpperLeg.GlobalPosition + right * 0.25f * scl + forward * 1.5f * scl + up * 0.9f * scl;
 
-                FastIKFabric ik = rightFoot.gameObject.AddComponent<FastIKFabric>();
+                FastIKFabric ik = new FastIKFabric();
+                rightFoot.AddChild(ik);
                 ik.Target = rightFootData.target;
                 ik.Pole = rightFootData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
                 ik.Init();
                 rightFootData.ik = ik;
-                rightFootPos = rightFoot.position;
+                rightFootPos = rightFoot.GlobalPosition;
             }
+
+            // head.OverridePose = true;
+            // hips.OverridePose = true;
+            // leftHand.OverridePose = true;
+            // rightHand.OverridePose = true;
+            // leftFoot.OverridePose = true;
+            // rightFoot.OverridePose = true;
         }
     }
 
@@ -361,28 +424,28 @@ public partial class IKSystem : Node
         Vector2 contactPt = new Vector2(speed * 0.3f, 0f);
         Vector2 followPt = new Vector2(-speed * 0.1f, 0f);
         Vector2 thruPt = new Vector2(-speed, speed * 0.4f);
-        Vector2 point = Vector2.zero;
+        Vector2 point = Vector2.Zero;
         switch (state)
         {
             case IKLoopState.Apex:
-                point = Vector2.Lerp(apexPt, buildupPt, realOffset);
+                point = apexPt.Lerp(buildupPt, realOffset);
                 offset += dt * 1.5f;
                 break;
             case IKLoopState.Buildup:
-                point = Vector2.Lerp(buildupPt, contactPt, realOffset);
+                point = buildupPt.Lerp(contactPt, realOffset);
                 offset += dt * 2f;
                 break;
             case IKLoopState.Contact:
-                point = Vector2.Lerp(contactPt, thruPt, realOffset);
+                point = contactPt.Lerp(thruPt, realOffset);
                 // point = Vector2.Lerp(contactPt, followPt, realOffset);
                 offset += dt * 2f;
                 break;
             case IKLoopState.FollowThru:
-                point = Vector2.Lerp(followPt, thruPt, realOffset);
+                point = followPt.Lerp(thruPt, realOffset);
                 offset += dt * 0.5f;
                 break;
             case IKLoopState.ThruApex:
-                point = Vector2.Lerp(thruPt, apexPt, realOffset);
+                point = thruPt.Lerp(apexPt, realOffset);
                 offset += dt;
                 break;
         }
@@ -415,19 +478,28 @@ public partial class IKSystem : Node
     {
         void DestroyIKData(IKData data)
         {
-            if (data.target)
-                DestroyImmediate(data.target.gameObject);
-            if (data.pole)
-                DestroyImmediate(data.pole.gameObject);
-            if (data.ik)
-                DestroyImmediate(data.ik);
+            if (IsInstanceValid(data.target))
+                data.target.QueueFree();
+            if (IsInstanceValid(data.pole))
+                data.pole.QueueFree();
+            if (IsInstanceValid(data.ik))
+                data.ik.QueueFree();
         }
+        if (IsInstanceValid(headTarget))
+            headTarget.QueueFree();
         DestroyIKData(leftHandData);
         DestroyIKData(rightHandData);
         DestroyIKData(leftFootData);
         DestroyIKData(rightFootData);
+        head.OverridePose = false;
+        hips.OverridePose = false;
+        leftHand.OverridePose = false;
+        rightHand.OverridePose = false;
+        leftFoot.OverridePose = false;
+        rightFoot.OverridePose = false;
     }
 
+#if false
     private void OnDrawGizmosSelected()
     {
         void DrawIKData(IKData data)
@@ -444,5 +516,7 @@ public partial class IKSystem : Node
         DrawIKData(leftFootData);
         DrawIKData(rightFootData);
     }
+#endif
+
 }
 #endif

@@ -9,6 +9,128 @@ namespace DitzelGames.FastIK
     [GlobalClass]
     public partial class FastIKFabric : Node
     {
+        public class BoneData
+        {
+            public Node3D Node { get; set; }
+            public int BoneIndex { get; set; }
+            public Transform3D GlobalTransform
+            {
+                get
+                {
+                    if (!IsInstanceValid(Node))
+                        return default;
+                    // return Node.GlobalTransform * Transform;
+                    if (Node is Skeleton3D skeleton)
+                    {
+                        return skeleton.GlobalTransform * Transform;
+                    }
+                    return Node.GlobalTransform;
+                }
+                set
+                {
+                    if (!IsInstanceValid(Node))
+                        return;
+                    if (Node is Skeleton3D skeleton)
+                    {
+                        Transform = skeleton.GlobalTransform.AffineInverse() * value;
+                    }
+                    else
+                        Node.GlobalTransform = value;
+                }
+            }
+            public Transform3D Transform
+            {
+                get
+                {
+                    if (!IsInstanceValid(Node))
+                        return default;
+                    if (Node is Skeleton3D skeleton)
+                    {
+                        return skeleton.GetBoneGlobalPose(BoneIndex);
+                    }
+                    return Node.Transform;
+                }
+                set
+                {
+                    if (!IsInstanceValid(Node))
+                        return;
+                    if (Node is Skeleton3D skeleton)
+                    {
+                        skeleton.SetBoneGlobalPoseOverride(BoneIndex, value, 1f, true);
+                    }
+                    else
+                        Node.Transform = value;
+                }
+            }
+            public Vector3 GlobalPosition
+            {
+                get => GlobalTransform.Origin;
+                set
+                {
+                    var t = GlobalTransform;
+                    t.Origin = value;
+                    GlobalTransform = t;
+                }
+            }
+            public Vector3 GlobalRotation
+            {
+                get => GlobalTransform.Basis.GetEuler();
+                set
+                {
+                    var t = GlobalTransform;
+                    t.Basis = Basis.FromEuler(value).Scaled(GlobalTransform.Basis.Scale);
+                    GlobalTransform = t;
+                }
+            }
+            public Quaternion GlobalQuaternion
+            {
+                get => GlobalTransform.Basis.GetRotationQuaternion().Normalized();
+                set
+                {
+                    var t = GlobalTransform;
+                    t.Basis = new Basis(value).Scaled(GlobalTransform.Basis.Scale);
+                    GlobalTransform = t;
+                }
+            }
+
+            public BoneData(Skeleton3D skeleton, int idx)
+            {
+                Node = skeleton;
+                BoneIndex = idx;
+            }
+
+            public BoneData(Node3D node)
+            {
+                Node = node;
+                BoneIndex = -1;
+            }
+
+            public BoneData GetParent()
+            {
+                if (!IsInstanceValid(Node))
+                    return null;
+                if (Node is BoneAttachment3D boneAttachment)
+                {
+                    Skeleton3D skeleton = boneAttachment.GetUseExternalSkeleton() ? boneAttachment.GetNode<Skeleton3D>(boneAttachment.GetExternalSkeleton()) : boneAttachment.GetParent<Skeleton3D>();
+                    int idx = skeleton.GetBoneParent(boneAttachment.BoneIdx);
+                    if (idx == -1)
+                        return null;
+                    return new BoneData(skeleton, idx);
+                }
+                else if (Node is Skeleton3D skeleton)
+                {
+                    int idx = skeleton.GetBoneParent(BoneIndex);
+                    if (idx == -1)
+                        return null;
+                    return new BoneData(skeleton, idx);
+                }
+                return new BoneData(Node.GetParentNode3D());
+            }
+        }
+
+        [Export]
+        public bool Enabled = true;
+
         /// <summary>
         /// Chain length of bones
         /// </summary>
@@ -46,12 +168,12 @@ namespace DitzelGames.FastIK
 
         protected float[] BonesLength; //Target to Origin
         public float CompleteLength { get; protected set; }
-        protected Node3D[] Bones;
+        protected BoneData[] Bones;
         protected Vector3[] Positions;
         protected Vector3[] StartDirectionSucc;
         protected Quaternion[] StartRotationBone;
         protected Quaternion StartRotationTarget;
-        protected Node3D Root;
+        protected BoneData Root;
 
         public bool IsOutOfReach { get; protected set; } = false;
         public float ReachAmountSqr { get; protected set; } = 0f;
@@ -65,19 +187,19 @@ namespace DitzelGames.FastIK
         public void Init()
         {
             //initial array
-            Bones = new Node3D[ChainLength + 1];
+            Bones = new BoneData[ChainLength + 1];
             Positions = new Vector3[ChainLength + 1];
             BonesLength = new float[ChainLength];
             StartDirectionSucc = new Vector3[ChainLength + 1];
             StartRotationBone = new Quaternion[ChainLength + 1];
 
             //find root
-            Root = GetParent<Node3D>();
+            Root = new BoneData(GetParent<Node3D>());
             for (var i = 0; i <= ChainLength; i++)
             {
                 if (Root == null)
                     throw new Exception("The chain value is longer than the ancestor chain!");
-                Root = Root.GetParentNode3D();
+                Root = Root.GetParent();
             }
 
             //init target
@@ -89,7 +211,7 @@ namespace DitzelGames.FastIK
 
 
             //init data
-            var current = GetParent<Node3D>();
+            var current = new BoneData(GetParent<Node3D>());
             CompleteLength = 0;
             for (var i = Bones.Length - 1; i >= 0; i--)
             {
@@ -109,7 +231,7 @@ namespace DitzelGames.FastIK
                     CompleteLength += BonesLength[i];
                 }
 
-                current = current.GetParentNode3D();
+                current = current.GetParent();
             }
 
 
@@ -191,7 +313,7 @@ namespace DitzelGames.FastIK
                     var projectedPole = plane.Project(polePosition); // TODO: does this work?
                     var projectedBone = plane.Project(Positions[i]); // TODO: does this work?
                     var angle = (projectedBone - Positions[i - 1]).SignedAngleTo(projectedPole - Positions[i - 1], plane.Normal);
-                    Positions[i] = new Quaternion(plane.Normal, angle) * (Positions[i] - Positions[i - 1]) + Positions[i - 1];
+                    Positions[i] = new Quaternion(plane.Normal.Normalized(), angle) * (Positions[i] - Positions[i - 1]) + Positions[i - 1];
                 }
             }
 
@@ -211,32 +333,49 @@ namespace DitzelGames.FastIK
             if (Root == null)
                 return current.GlobalPosition;
             else
-                return Root.Quaternion.Inverse() * (current.GlobalPosition - Root.GlobalPosition);
-        }
-
-        private void SetPositionRootSpace(Node3D current, Vector3 position)
-        {
-            if (Root == null)
-                current.GlobalPosition = position;
-            else
-                current.GlobalPosition = Root.Quaternion * position + Root.GlobalPosition;
+                return Root.GlobalQuaternion.Inverse() * (current.GlobalPosition - Root.GlobalPosition);
         }
 
         private Quaternion GetRotationRootSpace(Node3D current)
         {
             //inverse(after) * before => rot: before -> after
             if (Root == null)
-                return current.Quaternion;
+                return current.GlobalBasis.GetRotationQuaternion();
             else
-                return current.Quaternion.Inverse() * Root.Quaternion;
+                return current.GlobalBasis.GetRotationQuaternion().Inverse() * Root.GlobalQuaternion;
         }
 
-        private void SetRotationRootSpace(Node3D current, Quaternion rotation)
+        private Vector3 GetPositionRootSpace(BoneData current)
         {
             if (Root == null)
-                current.Quaternion = rotation;
+                return current.GlobalPosition;
             else
-                current.Quaternion = Root.Quaternion * rotation;
+                return Root.GlobalQuaternion.Inverse() * (current.GlobalPosition - Root.GlobalPosition);
+        }
+
+        private void SetPositionRootSpace(BoneData current, Vector3 position)
+        {
+            if (Root == null)
+                current.GlobalPosition = position;
+            else
+                current.GlobalPosition = Root.GlobalQuaternion * position + Root.GlobalPosition;
+        }
+
+        private Quaternion GetRotationRootSpace(BoneData current)
+        {
+            //inverse(after) * before => rot: before -> after
+            if (Root == null)
+                return current.GlobalQuaternion;
+            else
+                return current.GlobalQuaternion.Inverse() * Root.GlobalQuaternion;
+        }
+
+        private void SetRotationRootSpace(BoneData current, Quaternion rotation)
+        {
+            if (Root == null)
+                current.GlobalQuaternion = rotation;
+            else
+                current.GlobalQuaternion = Root.GlobalQuaternion * rotation;
         }
     }
 }
