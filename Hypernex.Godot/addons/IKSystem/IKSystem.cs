@@ -113,7 +113,7 @@ public partial class IKSystem : Node
         OnDisable();
     }
 
-    public override void _Process(double delta)
+    public override void _PhysicsProcess(double delta)
     {
         LateUpdate(delta);
     }
@@ -253,7 +253,7 @@ public partial class IKSystem : Node
             {
                 Vector2 pos = EvaluateLoop(ref leftLoopState, ref leftTimer, loopSize, speed, 0f);
                 float y = MapValue(pos.Y, 0f, 1f, minStepHeight, maxStepHeight) * scale;
-                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale;
+                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale * lastVel.Length();
                 float x = footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
@@ -261,14 +261,16 @@ public partial class IKSystem : Node
                 {
                     var dir = DirectionToLocal(humanoid.GlobalTransform, lastVel.Normalized());
                     end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * Basis.LookingAt(dir, Vector3.Up).GetRotationQuaternion() * new Vector3(0f, y, -z);
-                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
-                    leftFootData.target.Position = end;
                 }
+                else
+                    leftTimer = 0f;
+                end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
+                leftFootData.target.Position = end;
             }
             {
                 Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0.5f);
                 float y = MapValue(pos.Y, 0f, 1f, minStepHeight, maxStepHeight) * scale;
-                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale;
+                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale * lastVel.Length();
                 float x = -footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
@@ -276,19 +278,22 @@ public partial class IKSystem : Node
                 {
                     var dir = DirectionToLocal(humanoid.GlobalTransform, lastVel.Normalized());
                     end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * Basis.LookingAt(dir, Vector3.Up).GetRotationQuaternion() * new Vector3(0f, y, -z);
-                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
-                    rightFootData.target.Position = end;
                 }
+                else
+                    rightTimer = 0f;
+                end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
+                rightFootData.target.Position = end;
             }
         }
 
         if (IsInstanceValid(hips))
         {
             hipsPos = hips.GlobalPosition;
-            if (vel.Length() > 0f)
+            // if (vel.Length() > 0f)
             {
-                lastVel = vel;
-                lastVel.Y = 0f;
+                Vector3 newvel = vel;
+                newvel.Y = 0f;
+                lastVel = newvel;
             }
             speedAvg += vel.Length();
             speedAvg *= 0.5f;

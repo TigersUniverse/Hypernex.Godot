@@ -102,7 +102,14 @@ namespace DitzelGames.FastIK
             public BoneData(Node3D node)
             {
                 Node = node;
-                BoneIndex = -1;
+                if (node is BoneAttachment3D boneAttachment)
+                {
+                    Skeleton3D skeleton = boneAttachment.GetUseExternalSkeleton() ? boneAttachment.GetNode<Skeleton3D>(boneAttachment.GetExternalSkeleton()) : boneAttachment.GetParent<Skeleton3D>();
+                    Node = skeleton;
+                    BoneIndex = boneAttachment.BoneIdx;
+                }
+                else
+                    BoneIndex = -1;
             }
 
             public BoneData GetParent()
@@ -240,10 +247,12 @@ namespace DitzelGames.FastIK
 
         public override void _Process(double delta)
         {
+            if (!Enabled)
+                return;
             ResolveIK();
         }
 
-        private void ResolveIK()
+        public void ResolveIK()
         {
             if (!IsInstanceValid(Target))
                 return;
@@ -323,7 +332,7 @@ namespace DitzelGames.FastIK
                 if (i == Positions.Length - 1)
                     SetRotationRootSpace(Bones[i], targetRotation.Inverse() * StartRotationTarget * StartRotationBone[i].Inverse());
                 else
-                    SetRotationRootSpace(Bones[i], new Quaternion(StartDirectionSucc[i], Positions[i + 1] - Positions[i]) * StartRotationBone[i].Inverse());
+                    SetRotationRootSpace(Bones[i], new Quaternion(StartDirectionSucc[i].Normalized(), (Positions[i + 1] - Positions[i]).Normalized()) * StartRotationBone[i].Inverse());
                 SetPositionRootSpace(Bones[i], Positions[i]);
             }
         }
@@ -340,9 +349,9 @@ namespace DitzelGames.FastIK
         {
             //inverse(after) * before => rot: before -> after
             if (Root == null)
-                return current.GlobalBasis.GetRotationQuaternion();
+                return current.GlobalBasis.GetRotationQuaternion().Normalized();
             else
-                return current.GlobalBasis.GetRotationQuaternion().Inverse() * Root.GlobalQuaternion;
+                return current.GlobalBasis.GetRotationQuaternion().Normalized().Inverse() * Root.GlobalQuaternion;
         }
 
         private Vector3 GetPositionRootSpace(BoneData current)
