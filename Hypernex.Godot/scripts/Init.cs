@@ -21,6 +21,8 @@ public partial class Init : Node
     [Export]
     public MainOverlay overlay;
     [Export]
+    public LoadingOverlay loadingOverlay;
+    [Export]
     public Control ui;
     [Export]
     public PackedScene localPlayerScene;

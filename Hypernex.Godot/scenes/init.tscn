@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=20 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_exjdl"]
 [ext_resource type="PackedScene" uid="uid://b4nrx2xxp1xio" path="res://scenes/player.tscn" id="9_cj1hm"]
 [ext_resource type="PackedScene" uid="uid://bc42bxyk4uvjk" path="res://scenes/big_card.tscn" id="11_6bljf"]
+[ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="14_j4y3h"]
 [ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck.tscn" id="14_tnrj2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mgffp"]
@@ -35,10 +36,11 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay", "ui")]
+[node name="Init" type="Node" node_paths=PackedStringArray("login", "overlay", "loadingOverlay", "ui")]
 script = ExtResource("1_07r2y")
 login = NodePath("UI/Login/LoginScreen")
 overlay = NodePath("UI/MainOverlay/Overlay")
+loadingOverlay = NodePath("UI/LoadingIcon/Controller")
 ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
 remotePlayerScene = ExtResource("3_gx5fr")
@@ -249,6 +251,32 @@ text = "Logout"
 [node name="ExitBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
 layout_mode = 2
 text = "Exit :("
+
+[node name="LoadingIcon" type="PanelContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -50.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Controller" type="Node" parent="UI/LoadingIcon" node_paths=PackedStringArray("bar")]
+script = ExtResource("14_j4y3h")
+bar = NodePath("../CenterContainer/ProgressBar")
+
+[node name="CenterContainer" type="CenterContainer" parent="UI/LoadingIcon"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="UI/LoadingIcon/CenterContainer"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+max_value = 1.0
+step = 0.0
 
 [node name="Window" type="Window" parent="UI"]
 title = "CCK"

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
@@ -55,7 +54,7 @@ namespace Hypernex.Tools
         }
 
         public static void DownloadFile(string url, string output, Action<string> OnDownload,
-            string knownFileHash = null, Action<DownloadProgressChangedEventArgs> DownloadProgress = null)
+            string knownFileHash = null, Action<float> DownloadProgress = null)
         {
             if (!Directory.Exists(DownloadsPath))
                 Directory.CreateDirectory(DownloadsPath);
@@ -115,7 +114,7 @@ namespace Hypernex.Tools
                     var prog = new Progress<long>(total =>
                     {
                         if (downloadMeta.progress != null)
-                            QuickInvoke.InvokeActionOnMainThread(downloadMeta.progress, total);
+                            QuickInvoke.InvokeActionOnMainThread(downloadMeta.progress, (float)total / leng);
                     });
                     await CopyAsync(httpStream, ms, 81920, prog);
                 }

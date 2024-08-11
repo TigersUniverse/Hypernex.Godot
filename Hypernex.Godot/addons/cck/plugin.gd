@@ -28,6 +28,8 @@ func export_deps(writer : ZIPPacker, path : String) -> void:
 	for dep in ResourceLoader.get_dependencies(path):
 		var dep_path := dep.get_slice("::", 2)
 		var dep_res := ResourceLoader.load(dep_path)
+		if not dep_res:
+			continue
 		if dep_res.is_class("Script"):
 			continue
 		var temp_path := "user://temp/temp.tres"

@@ -409,7 +409,7 @@ namespace Hypernex.Tools
                             LoadScene(open, o);
                         else
                             Dispose();
-                    }, knownHash);
+                    }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
                 }, worldMeta.OwnerId, fileId);
             }
         }
