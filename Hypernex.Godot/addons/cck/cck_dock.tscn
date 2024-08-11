@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://bh1jifj5n3y82"]
+[gd_scene load_steps=2 format=3 uid="uid://bh1jifj5n3y82"]
+
+[ext_resource type="Script" path="res://addons/cck/cck_window.gd" id="1_i1s5v"]
 
 [node name="CCK" type="Control"]
 layout_mode = 3
@@ -8,8 +10,25 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ExportWorld" type="Button" parent="."]
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
+[node name="Controller" type="Node" parent="." node_paths=PackedStringArray("export_world_ui", "world_name_edit")]
+script = ExtResource("1_i1s5v")
+export_world_ui = NodePath("../WorldExportUI")
+world_name_edit = NodePath("../WorldExportUI/LineEdit")
+
+[node name="WorldExportUI" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="WorldExportUI"]
+layout_mode = 2
+placeholder_text = "World File Name"
+
+[node name="ExportWorld" type="Button" parent="WorldExportUI"]
+layout_mode = 2
 text = "Export World to File"
+
+[connection signal="pressed" from="WorldExportUI/ExportWorld" to="Controller" method="export_world"]

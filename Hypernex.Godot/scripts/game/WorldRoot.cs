@@ -94,12 +94,16 @@ namespace Hypernex.Game
 
         public static void SaveToFile(string path, Node root)
         {
+            throw new NotImplementedException();
+            /*
             foreach (var child in root.FindChildren("*", owned: true))
             {
                 child.Owner = root;
             }
             PackedScene scn = new PackedScene();
             scn.Pack(root);
+            */
+            /*
             SafeScene safeScene = new SafeScene();
             ConvertDB db = new ConvertDB();
             db.Register<CSharpScriptConverter>();
@@ -111,6 +115,7 @@ namespace Hypernex.Game
             safeScene.SetupFromState(scn.GetState(), db);
             using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
             file.StoreString(safeScene.ToString());
+            */
         }
     }
 }
