@@ -60,7 +60,7 @@ namespace Hypernex.Tools
         public Action OnDisconnect { get; set; } = () => { };
 
         public bool IsOpen => client?.IsOpen ?? false;
-        public List<User> ConnectedUsers => client.ConnectedUsers;
+        public List<User> ConnectedUsers => client?.ConnectedUsers ?? new List<User>();
 
         public bool CanInvite
         {
@@ -112,9 +112,9 @@ namespace Hypernex.Tools
             get
             {
                 if (APITools.CurrentUser == null)
-                    return false;
+                    return true;
                 if (client == null)
-                    return false;
+                    return true;
                 return client.HostId == APITools.CurrentUser.Id;
             }
         }
@@ -157,6 +157,23 @@ namespace Hypernex.Tools
             int port = Convert.ToInt32(s[1]);
             InstanceProtocol instanceProtocol = instanceOpened.InstanceProtocol;
             SetupClient(ip, port, instanceProtocol);
+        }
+
+        private GameInstance(string file)
+        {
+            FocusedInstance?.Dispose();
+            gameServerId = "0";
+            instanceId = "0";
+            userIdToken = "";
+            instanceCreatorId = APITools.CurrentUser.Id;
+            worldMeta = new WorldMeta("0", APITools.CurrentUser.Id, WorldPublicity.OwnerOnly, "Local World", "", "");
+        }
+
+        public static GameInstance FromLocalFile(string file)
+        {
+            GameInstance gi = new GameInstance(file);
+            gi.LoadScene(false, file);
+            return gi;
         }
 
         private void SetupClient(string ip, int port, InstanceProtocol instanceProtocol)

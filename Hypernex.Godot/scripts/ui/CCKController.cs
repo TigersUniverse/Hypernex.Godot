@@ -126,5 +126,23 @@ namespace Hypernex.UI
                 dialog.Show();
             });
         }
+
+        public void LoadSelectedWorld()
+        {
+            if (string.IsNullOrWhiteSpace(selectedWorldPath))
+            {
+                dialog.Title = "World not found";
+                dialog.DialogText = "Please select a world file.";
+                dialog.Show();
+                return;
+            }
+            GameInstance inst = GameInstance.FromLocalFile(selectedWorldPath);
+            if (inst.IsDisposed)
+            {
+                dialog.Title = "World not found";
+                dialog.DialogText = "Please select a world file.";
+                dialog.Show();
+            }
+        }
     }
 }

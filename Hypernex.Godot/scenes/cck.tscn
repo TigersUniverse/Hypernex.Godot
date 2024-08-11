@@ -56,6 +56,10 @@ bbcode_enabled = true
 fit_content = true
 shortcut_keys_enabled = false
 
+[node name="LoadWorldFile" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Load Selected World"
+
 [node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 
@@ -103,5 +107,6 @@ text = "Upload World"
 [connection signal="canceled" from="FileDialog" to="CCK" method="ClearSelectedWorld"]
 [connection signal="file_selected" from="FileDialog" to="CCK" method="WorldSelected"]
 [connection signal="pressed" from="VBoxContainer/SelectWorldFile" to="FileDialog" method="show"]
+[connection signal="pressed" from="VBoxContainer/LoadWorldFile" to="CCK" method="LoadSelectedWorld"]
 [connection signal="item_selected" from="VBoxContainer/SelectWorldMeta" to="CCK" method="WorldMetaSelected"]
 [connection signal="pressed" from="VBoxContainer/Upload" to="CCK" method="UploadSelectedWorld"]

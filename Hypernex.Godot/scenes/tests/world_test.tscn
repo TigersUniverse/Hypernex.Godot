@@ -1,11 +1,10 @@
-[gd_scene load_steps=12 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=11 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
-[ext_resource type="Material" uid="uid://foarkyosj826" path="res://scenes/tests/world_test.tres" id="2_5nyuk"]
-[ext_resource type="AudioStream" uid="uid://ll5phgir3b0n" path="res://scenes/tests/Unity_Kevin_MacLeod.mp3" id="2_kj8dh"]
-[ext_resource type="Script" path="res://addons/cck/classes/WorldDescriptor.cs" id="3_73irx"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
-[ext_resource type="Script" path="res://addons/cck/classes/WorldScript.cs" id="5_oulgq"]
+[ext_resource type="Script" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
+[ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
+[ext_resource type="AudioStream" uid="uid://cfg6lwextysdv" path="res://temp/Unity.mp3" id="5_2rack"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -49,7 +48,6 @@ load = true
 
 [node name="WorldMesh" type="MeshInstance3D" parent="Test/World"]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
-material_override = ExtResource("2_5nyuk")
 mesh = ExtResource("3_j1wr1")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Test/World/WorldMesh"]
@@ -58,8 +56,9 @@ mesh = ExtResource("3_j1wr1")
 shape = SubResource("ConcavePolygonShape3D_1l7cg")
 
 [node name="WorldDescriptor" type="Node3D" parent="Test/World"]
-script = ExtResource("3_73irx")
+script = ExtResource("3_xf3ip")
 StartPosition = Vector3(0, 10, 0)
+metadata/typename = "WorldDescriptor"
 
 [node name="Node" type="Node" parent="Test/World/WorldDescriptor"]
 script = SubResource("GDScript_a2ttp")
@@ -70,7 +69,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 text = "HIIIII"
 
 [node name="Clock" type="Node" parent="Test/World/Label3D"]
-script = ExtResource("5_oulgq")
+script = ExtResource("4_fatwa")
 Language = 1
 Contents = "function settime()
 	local t = Time();
@@ -82,9 +81,10 @@ Contents = "function settime()
 end
 
 Runtime.OnFixedUpdate(SandboxFunc().SetAction(settime));"
+metadata/typename = "WorldScript"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Test"]
-stream = ExtResource("2_kj8dh")
+stream = ExtResource("5_2rack")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

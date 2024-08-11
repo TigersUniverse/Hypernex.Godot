@@ -6,8 +6,14 @@ public partial class LoadingOverlay : Node
 {
     [Export]
     public ProgressBar bar;
+    public Control root;
 
     public Dictionary<string, float> amounts = new Dictionary<string, float>();
+
+    public override void _Ready()
+    {
+        root = GetParent<Control>();
+    }
 
     public override void _Process(double delta)
     {
@@ -17,6 +23,7 @@ public partial class LoadingOverlay : Node
         {
             amt += kvp.Value;
         }
+        root.Visible = max != 0;
         if (max == 0)
             bar.Value = 1f;
         else
