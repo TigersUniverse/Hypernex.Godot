@@ -17,11 +17,11 @@ This client is very Work-in-Progress.
 
 ### In Progress
 
-- Godot Editor CCK
+- Godot Editor CCK (second iteration since May of 2024)
+- Avatars (since May of 2024)
 
 ### Planned
 
-- Avatars
 - VR
 - In-Game CCK(?)
 
