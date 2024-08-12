@@ -410,7 +410,7 @@ namespace Hypernex.CCK.GodotVersion
             {
                 // Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn")));
                 // return null;
-                GD.Print(resPath);
+                // GD.Print(resPath);
                 ParsedTscn tscn = ParseTscn(path.ReplaceN(path.GetExtension(), "tscn"), Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn"))));
                 foreach (var resKvp in tscn.ExtResources)
                 {
@@ -633,7 +633,7 @@ namespace Hypernex.CCK.GodotVersion
                         break;
                 }
             }
-            GD.Print("Parsed tscn");
+            // GD.Print("Parsed tscn");
             return tscn;
         }
 
