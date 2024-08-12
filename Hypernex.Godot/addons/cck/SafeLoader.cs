@@ -164,8 +164,8 @@ namespace Hypernex.CCK.GodotVersion
             {
                 // return new PackedScene();
                 Dictionary<string, Node> nodes = new Dictionary<string, Node>();
-                ParsedNode rootNode = Nodes.FirstOrDefault(x => string.IsNullOrEmpty(x.Parent));
-                string rootName = ".";// + rootNode.Name;
+                Dictionary<string, Node> subscenes = new Dictionary<string, Node>();
+                // first packed scenes
                 foreach (var parNode in Nodes)
                 {
                     if (!string.IsNullOrWhiteSpace(parNode.Instance))
@@ -174,24 +174,47 @@ namespace Hypernex.CCK.GodotVersion
                         NodePath path2 = new NodePath($"{parNode.Parent}/{parNode.Name}");
                         // GD.Print(path2);
                         Node node2 = ConvertPropertyString(parNode.Instance).As<PackedScene>().Instantiate();
-                        nodes.Add(path2.ToString(), node2);
-                        continue;
-                    }
-                    if (ClassDB.IsParentClass(parNode.Type, nameof(Script)) || string.IsNullOrWhiteSpace(parNode.Type))
-                        parNode.Type = nameof(Node);
-                    Node node = null;
-                    NodePath path = new NodePath($"{parNode.Parent}/{parNode.Name}");
-                    if (nodes.TryGetValue(path, out Node existing))
-                    {
                         foreach (var kvp in parNode.Properties)
                         {
                             if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                                 continue;
                             // GD.PrintS(kvp.Key, kvp.Value);
-                            node.Set(kvp.Key, ConvertPropertyString(kvp.Value));
+                            node2.Set(kvp.Key, ConvertPropertyString(kvp.Value));
+                        }
+                        nodes.Add(path2.ToString(), node2);
+                        subscenes.Add(path2.ToString(), node2);
+                    }
+                }
+                // then non scenes
+                foreach (var parNode in Nodes)
+                {
+                    if (!string.IsNullOrWhiteSpace(parNode.Instance))
+                        continue;
+                    NodePath path = new NodePath($"{parNode.Parent}/{parNode.Name}");
+                    if (string.IsNullOrWhiteSpace(parNode.Type))
+                    {
+                        foreach (var scn in subscenes)
+                        {
+                            string path2 = path.ToString().Replace(scn.Key.TrimPrefix("./"), ".");
+                            Node node2 = scn.Value.GetNodeOrNull(path2);
+                            // GD.PrintS(path, scn.Key, path2, node2);
+                            if (GodotObject.IsInstanceValid(node2))
+                            {
+                                foreach (var kvp in parNode.Properties)
+                                {
+                                    if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
+                                        continue;
+                                    // GD.PrintS(kvp.Key, kvp.Value);
+                                    node2.Set(kvp.Key, ConvertPropertyString(kvp.Value));
+                                }
+                                break;
+                            }
                         }
                         continue;
                     }
+                    if (ClassDB.IsParentClass(parNode.Type, nameof(Script)) || string.IsNullOrWhiteSpace(parNode.Type))
+                        parNode.Type = nameof(Node);
+                    Node node = null;
                     foreach (var kvp in parNode.Properties)
                     {
                         Script scr = null;
