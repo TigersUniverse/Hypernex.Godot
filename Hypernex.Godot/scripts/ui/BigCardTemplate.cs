@@ -31,6 +31,14 @@ namespace Hypernex.UI
         [Export]
         public Container usersContainer;
         [Export]
+        public AspectRatioContainer foregroundContainer;
+        [Export]
+        public TextureRect foreground;
+        [Export]
+        public VideoStreamPlayer videoForeground;
+        [Export]
+        public AspectRatioContainer backgroundContainer;
+        [Export]
         public TextureRect background;
         [Export]
         public VideoStreamPlayer videoBackground;
@@ -98,9 +106,14 @@ namespace Hypernex.UI
             worldMeta = null;
             gameInstance = null;
             safeInstance = null;
+            foreground.Show();
+            videoForeground.Stream = null;
+            videoForeground.Stop();
+            foregroundContainer.Ratio = 2.5f;
             background.Show();
             videoBackground.Stream = null;
             videoBackground.Stop();
+            backgroundContainer.Ratio = 2.5f;
             foreach (var child in usersContainer.GetChildren())
                 child.QueueFree();
             foreach (var child in controlsContainer.GetChildren())
@@ -143,16 +156,16 @@ namespace Hypernex.UI
             box2.AddButton("Leave", UIButtonTheme.Warning, ui => gameInstance?.Dispose());
             DownloadTools.DownloadBytes(instance.worldMeta.ThumbnailURL, b =>
             {
-                if (!IsInstanceValid(background))
+                if (!IsInstanceValid(foreground))
                     return;
                 Image img = ImageTools.LoadImage(b);
                 if (img != null)
-                    background.Texture = ImageTexture.CreateFromImage(img);
+                    foreground.Texture = ImageTexture.CreateFromImage(img);
                 else
                 {
-                    videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                    videoBackground.Play();
-                    background.Hide();
+                    videoForeground.Stream = ImageTools.LoadFFmpeg(b);
+                    videoForeground.Play();
+                    foreground.Hide();
                 }
             });
             RefreshUsers();
@@ -177,16 +190,16 @@ namespace Hypernex.UI
                         label.Text = r.result.Meta.Name.Replace("[", "[lb]");
                         DownloadTools.DownloadBytes(r.result.Meta.ThumbnailURL, b =>
                         {
-                            if (!IsInstanceValid(background))
+                            if (!IsInstanceValid(foreground))
                                 return;
                             Image img = ImageTools.LoadImage(b);
                             if (img != null)
-                                background.Texture = ImageTexture.CreateFromImage(img);
+                                foreground.Texture = ImageTexture.CreateFromImage(img);
                             else
                             {
-                                videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                                videoBackground.Play();
-                                background.Hide();
+                                videoForeground.Stream = ImageTools.LoadFFmpeg(b);
+                                videoForeground.Play();
+                                foreground.Hide();
                             }
                         });
                         RefreshUsers();
@@ -234,6 +247,21 @@ namespace Hypernex.UI
             }
             DownloadTools.DownloadBytes(user.Bio.PfpURL, b =>
             {
+                if (!IsInstanceValid(foreground))
+                    return;
+                foregroundContainer.Ratio = 1f;
+                Image img = ImageTools.LoadImage(b);
+                if (img != null)
+                    foreground.Texture = ImageTexture.CreateFromImage(img);
+                else
+                {
+                    videoForeground.Stream = ImageTools.LoadFFmpeg(b);
+                    videoForeground.Play();
+                    foreground.Hide();
+                }
+            });
+            DownloadTools.DownloadBytes(user.Bio.BannerURL, b =>
+            {
                 if (!IsInstanceValid(background))
                     return;
                 Image img = ImageTools.LoadImage(b);
@@ -266,16 +294,16 @@ namespace Hypernex.UI
             box1.AddButton("Create Instance", UIButtonTheme.Info, btn => SocketManager.CreateInstance(world, opts1[opt1.Selected], opts2[opt2.Selected]));
             DownloadTools.DownloadBytes(world.ThumbnailURL, b =>
             {
-                if (!IsInstanceValid(background))
+                if (!IsInstanceValid(foreground))
                     return;
                 Image img = ImageTools.LoadImage(b);
                 if (img != null)
-                    background.Texture = ImageTexture.CreateFromImage(img);
+                    foreground.Texture = ImageTexture.CreateFromImage(img);
                 else
                 {
-                    videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                    videoBackground.Play();
-                    background.Hide();
+                    videoForeground.Stream = ImageTools.LoadFFmpeg(b);
+                    videoForeground.Play();
+                    foreground.Hide();
                 }
             });
             Show();

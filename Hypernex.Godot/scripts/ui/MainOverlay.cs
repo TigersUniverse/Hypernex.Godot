@@ -28,6 +28,7 @@ namespace Hypernex.UI
 
         public override void _Ready()
         {
+            APITools.OnUserLogin += Login;
             cckButton.Pressed += LaunchCCK;
             logoutButton.Pressed += APITools.Logout;
             exitButton.Pressed += Exit;
@@ -38,6 +39,7 @@ namespace Hypernex.UI
 
         public override void _ExitTree()
         {
+            APITools.OnUserLogin -= Login;
             cckButton.Pressed -= LaunchCCK;
             logoutButton.Pressed -= APITools.Logout;
             exitButton.Pressed -= Exit;
@@ -45,12 +47,18 @@ namespace Hypernex.UI
             tabs.TabChanged -= ChangedTabs;
         }
 
+        private void Login(User user)
+        {
+            currentBigCard?.Free();
+            currentBigCard = null;
+        }
+
         private void ChangedTabs(long tab)
         {
             if (IsInstanceValid(currentBigCard) && tabs.GetTabIdxFromControl(currentBigCard) != tab)
             {
-                currentBigCard.QueueFree();
-                currentBigCard = null;
+                // currentBigCard.QueueFree();
+                // currentBigCard = null;
             }
         }
 
@@ -74,7 +82,7 @@ namespace Hypernex.UI
 
         public void AddCard(User user, CardTemplate.CardUserType utype)
         {
-            currentBigCard?.QueueFree();
+            currentBigCard?.Free();
             var card = bigCardUI.Instantiate<BigCardTemplate>();
             currentBigCard = card;
             tabs.AddChild(card);
@@ -85,7 +93,7 @@ namespace Hypernex.UI
 
         public void AddCard(WorldMeta worldMeta)
         {
-            currentBigCard?.QueueFree();
+            currentBigCard?.Free();
             var card = bigCardUI.Instantiate<BigCardTemplate>();
             currentBigCard = card;
             tabs.AddChild(card);
@@ -96,7 +104,7 @@ namespace Hypernex.UI
 
         public void AddCard(SafeInstance instance)
         {
-            currentBigCard?.QueueFree();
+            currentBigCard?.Free();
             var card = bigCardUI.Instantiate<BigCardTemplate>();
             currentBigCard = card;
             tabs.AddChild(card);

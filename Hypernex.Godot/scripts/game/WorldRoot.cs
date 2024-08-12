@@ -39,6 +39,18 @@ namespace Hypernex.Game
                 script.AddSibling(runner);
                 Runners.Add(runner);
             }
+            if (worldObject is AudioStreamPlayer audio)
+            {
+                audio.Bus = "World";
+            }
+            if (worldObject is AudioStreamPlayer2D audio2d)
+            {
+                audio2d.Bus = "World";
+            }
+            if (worldObject is AudioStreamPlayer3D audio3d)
+            {
+                audio3d.Bus = "World";
+            }
             worldObject.Owner = this;
             Objects.Add(worldObject);
             foreach (var child in worldObject.GetChildren())

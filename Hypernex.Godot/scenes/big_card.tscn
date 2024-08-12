@@ -1,21 +1,76 @@
-[gd_scene load_steps=4 format=3 uid="uid://bc42bxyk4uvjk"]
+[gd_scene load_steps=5 format=3 uid="uid://bc42bxyk4uvjk"]
 
 [ext_resource type="Script" path="res://scripts/ui/BigCardTemplate.cs" id="1_3gxw0"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="2_2xvhd"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="3_p0uxf"]
 
-[node name="BigCard" type="Control" node_paths=PackedStringArray("label", "usersLabel", "controlsContainer", "usersContainer", "background", "videoBackground")]
+[sub_resource type="Theme" id="Theme_cbfv0"]
+RichTextLabel/colors/default_color = Color(1, 1, 1, 1)
+RichTextLabel/colors/font_outline_color = Color(0, 0, 0, 1)
+RichTextLabel/constants/outline_size = 6
+RichTextLabel/font_sizes/bold_font_size = 32
+RichTextLabel/font_sizes/bold_italics_font_size = 32
+RichTextLabel/font_sizes/italics_font_size = 32
+RichTextLabel/font_sizes/mono_font_size = 32
+RichTextLabel/font_sizes/normal_font_size = 32
+
+[node name="BigCard" type="Control" node_paths=PackedStringArray("label", "usersLabel", "controlsContainer", "usersContainer", "foregroundContainer", "foreground", "videoForeground", "backgroundContainer", "background", "videoBackground")]
 custom_minimum_size = Vector2(600, 500)
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_cbfv0")
 script = ExtResource("1_3gxw0")
 label = NodePath("VBoxContainer/HBoxContainer/Label")
 usersLabel = NodePath("VBoxContainer/UsersLabel")
 controlsContainer = NodePath("VBoxContainer/Controls/HBoxContainer")
 usersContainer = NodePath("VBoxContainer/Users/HBoxContainer")
-background = NodePath("VBoxContainer/HBoxContainer/Image/TextureRect")
-videoBackground = NodePath("VBoxContainer/HBoxContainer/Image/VideoStreamPlayer")
+foregroundContainer = NodePath("VBoxContainer/HBoxContainer/Image")
+foreground = NodePath("VBoxContainer/HBoxContainer/Image/Image/TextureRect")
+videoForeground = NodePath("VBoxContainer/HBoxContainer/Image/Image/VideoStreamPlayer")
+backgroundContainer = NodePath("Background")
+background = NodePath("Background/Image/TextureRect")
+videoBackground = NodePath("Background/Image/VideoStreamPlayer")
 cardUI = ExtResource("2_2xvhd")
+metadata/_edit_lock_ = true
+
+[node name="Background" type="AspectRatioContainer" parent="."]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+ratio = 2.5
+stretch_mode = 3
+
+[node name="Image" type="Control" parent="Background"]
+clip_contents = true
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Background/Image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Background/Image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+volume_db = -80.0
+expand = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -29,12 +84,17 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Image" type="Control" parent="VBoxContainer/HBoxContainer"]
+[node name="Image" type="AspectRatioContainer" parent="VBoxContainer/HBoxContainer"]
 clip_contents = true
 custom_minimum_size = Vector2(500, 200)
 layout_mode = 2
+ratio = 2.5
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer/Image"]
+[node name="Image" type="Control" parent="VBoxContainer/HBoxContainer/Image"]
+clip_contents = true
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer/Image/Image"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -44,7 +104,7 @@ grow_vertical = 2
 texture = ExtResource("3_p0uxf")
 expand_mode = 1
 
-[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VBoxContainer/HBoxContainer/Image"]
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VBoxContainer/HBoxContainer/Image/Image"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,6 +117,7 @@ expand = true
 [node name="Label" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 bbcode_enabled = true
 text = "My World"
 fit_content = true
@@ -71,8 +132,6 @@ layout_mode = 2
 
 [node name="UsersLabel" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.1
 bbcode_enabled = true
 text = "Users"
 fit_content = true
