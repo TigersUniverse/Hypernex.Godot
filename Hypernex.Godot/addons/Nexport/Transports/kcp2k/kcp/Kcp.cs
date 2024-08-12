@@ -120,7 +120,7 @@ namespace kcp2k
         // ikcp_segment_new
         // we keep the original function and add our pooling to it.
         // this way we'll never miss it anywhere.
-        Segment SegmentNew() => SegmentPool.Take();
+        Segment? SegmentNew() => SegmentPool.Take();
 
         // ikcp_segment_delete
         // we keep the original function and add our pooling to it.
@@ -308,7 +308,7 @@ namespace kcp2k
             for (int i = 0; i < count; i++)
             {
                 int size = len > (int)mss ? (int)mss : len;
-                Segment seg = SegmentNew();
+                Segment? seg = SegmentNew();
                 while (seg == null)
                     seg = SegmentNew();
 
@@ -820,7 +820,6 @@ namespace kcp2k
             {
                 if (snd_queue.Count == 0) break;
 
-                // WARNING: This segment was null and it crashed the Unity Editor. May be unstable...
                 Segment newseg = snd_queue.Dequeue();
 
                 newseg.conv = conv;

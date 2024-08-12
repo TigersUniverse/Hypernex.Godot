@@ -1,16 +1,23 @@
-<Project Sdk="Godot.NET.Sdk/4.2.1">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>11</LangVersion>
+        <TargetFrameworks>net48;net7.0;netstandard2.1</TargetFrameworks>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="MessagePack">
-      <HintPath>.\MessagePack.dll</HintPath>
-    </Reference>
-    <Reference Include="MessagePack.Annotations">
-      <HintPath>.\MessagePack.Annotations.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugType>none</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.CSharp" Condition="'$(TargetFramework)' == 'net48'" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MessagePack" Version="2.5.140" />
+      <PackageReference Include="ZstdSharp.Port" Version="0.7.4" />
+    </ItemGroup>
 
 </Project>
