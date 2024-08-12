@@ -12,6 +12,7 @@ public partial class IKSystem : Node
         Contact,
         FollowThru,
         ThruApex,
+        Max,
     }
 
     [Serializable]
@@ -23,6 +24,8 @@ public partial class IKSystem : Node
     }
 
     [ExportGroup("Settings")]
+    [Export]
+    public Node3D forwardNode;
     [Export]
     public Skeleton3D humanoid;
     // [Range(0f, 1f)]
@@ -86,6 +89,7 @@ public partial class IKSystem : Node
     public BoneAttachment3D rightFoot;
 
     public float footDistance;
+    public float hipsDistance;
 
     public Vector3 leftFootPos;
     public Vector3 rightFootPos;
@@ -130,10 +134,7 @@ public partial class IKSystem : Node
 
     private static Vector3 DirectionToLocal(Transform3D t, Vector3 v)
     {
-        var inv = t.AffineInverse();
-        return inv * v - inv * Vector3.Zero;
-        var val = inv.Basis.GetRotationQuaternion().Normalized() * v;
-        return val;
+        return t.Basis.Inverse() * v;
     }
 
     private void LateUpdate(double delta)
@@ -248,40 +249,50 @@ public partial class IKSystem : Node
 
         if (moveFeet)
         {
-            float speed = vel.Length();
+            float speed = lastVel.Length();
             float scale = 1f / humanoid.GlobalBasis.Scale.Z;
+            float unitScaleHeight = scale * hipsDistance;
+            float unitScaleLength = scale;
+            float scaleLength = lastVel.Length();
             {
                 Vector2 pos = EvaluateLoop(ref leftLoopState, ref leftTimer, loopSize, speed, 0f);
-                float y = MapValue(pos.Y, 0f, 1f, minStepHeight, maxStepHeight) * scale;
-                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale * lastVel.Length();
+                float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight);
+                float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
                 float x = footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
+                float t = 0f;
                 if (lastVel.Length() > 0f)
                 {
-                    var dir = DirectionToLocal(humanoid.GlobalTransform, lastVel.Normalized());
-                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * Basis.LookingAt(dir, Vector3.Up).GetRotationQuaternion() * new Vector3(0f, y, -z);
+                    var dir = DirectionToLocal(forwardNode.GlobalTransform, lastVel.Normalized()).Normalized();
+                    t = Mathf.Atan2(dir.Z, dir.X);
+                    end += new Vector3(0f, y, -z).Rotated(Vector3.Up, t);
                 }
                 else
                     leftTimer = 0f;
-                end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
+                end += new Vector3(x, 0f, 0f);
                 leftFootData.target.Position = end;
             }
             {
-                Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0.5f);
-                float y = MapValue(pos.Y, 0f, 1f, minStepHeight, maxStepHeight) * scale;
-                float z = MapValue(pos.X, -1f, 1f, minStepLength, maxStepLength) * scale * lastVel.Length();
+                rightLoopState = (IKLoopState)(((int)leftLoopState + 2) % (int)IKLoopState.Max);
+                rightTimer = leftTimer;
+
+                Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0f);
+                float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight);
+                float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
                 float x = -footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
+                float t = 0f;
                 if (lastVel.Length() > 0f)
                 {
-                    var dir = DirectionToLocal(humanoid.GlobalTransform, lastVel.Normalized());
-                    end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * Basis.LookingAt(dir, Vector3.Up).GetRotationQuaternion() * new Vector3(0f, y, -z);
+                    var dir = DirectionToLocal(forwardNode.GlobalTransform, lastVel.Normalized()).Normalized();
+                    t = Mathf.Atan2(dir.Z, dir.X);
+                    end += new Vector3(0f, y, -z).Rotated(Vector3.Up, t);
                 }
                 else
                     rightTimer = 0f;
-                end += humanoid.Transform.Basis.GetRotationQuaternion().Normalized() * new Vector3(x, 0f, 0f);
+                end += new Vector3(x, 0f, 0f);
                 rightFootData.target.Position = end;
             }
         }
@@ -307,6 +318,10 @@ public partial class IKSystem : Node
         leftTimer = 0f;
         rightTimer = 0f;
         OnDisable();
+        if (!IsInstanceValid(forwardNode))
+        {
+            forwardNode = humanoid;
+        }
         if (IsInstanceValid(humanoid) /*&& humanoid.avatar && humanoid.avatar.isHuman*/)
         {
             /*
@@ -319,12 +334,13 @@ public partial class IKSystem : Node
             direction = humanoid.GetBoneTransform(HumanBodyBones.Head).position - humanoid.GetBoneTransform(HumanBodyBones.Hips).position;
             */
             direction = head.GlobalPosition - hips.GlobalPosition;
-            float scl = direction.Length();
+            float scl = /*direction.Length()*/ 1f / humanoid.GlobalBasis.Scale.Z;
             footDistance = leftFoot.GlobalPosition.DistanceTo(rightFoot.GlobalPosition);
+            hipsDistance = hips.GlobalPosition.DistanceTo(head.GlobalPosition);
             float scale = 1f / humanoid.GlobalBasis.Scale.Z;
 
             Vector3 right = -humanoid.GlobalBasis.X.Normalized();
-            Vector3 forward = humanoid.GlobalBasis.Z.Normalized(); // no -z because model front is +z
+            Vector3 forward = -humanoid.GlobalBasis.Z.Normalized();
             Vector3 up = humanoid.GlobalBasis.Y.Normalized();
 
             // hips and head
@@ -423,7 +439,7 @@ public partial class IKSystem : Node
     // https://github.com/MMMaellon/renik/blob/master/RenIK%20Foot%20Placement.png
     private Vector2 EvaluateLoop(ref IKLoopState state, ref float offset, float speed, float dt, float phase)
     {
-        float realOffset = offset + phase;
+        float realOffset = Mathf.Clamp(offset + phase, 0f, 1f);
         Vector2 apexPt = new Vector2(speed, speed * 0.7f);
         Vector2 buildupPt = new Vector2(speed * 0.8f, speed * 0.5f);
         Vector2 contactPt = new Vector2(speed * 0.3f, 0f);
