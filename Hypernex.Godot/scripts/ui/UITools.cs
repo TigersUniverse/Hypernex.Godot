@@ -33,6 +33,7 @@ namespace Hypernex.UI
             ui.Text = text;
             ui.BbcodeEnabled = true;
             ui.FitContent = true;
+            ui.AutowrapMode = TextServer.AutowrapMode.Off;
             ui.ScrollActive = false;
             ui.ShortcutKeysEnabled = false;
             ui.MetaClicked += v => callback?.Invoke(ui, v);

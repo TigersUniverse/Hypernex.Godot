@@ -177,6 +177,5 @@ public partial class Init : Node
         ui.Show();
         overlay.root.Hide();
         login.root.Show();
-        login.TryLoginWith();
     }
 }
