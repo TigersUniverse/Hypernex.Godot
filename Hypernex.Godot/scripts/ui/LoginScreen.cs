@@ -13,6 +13,8 @@ namespace Hypernex.UI
         [Export]
         public VBoxContainer root;
         [Export]
+        public LineEdit serverAddressEdit;
+        [Export]
         public LineEdit usernameEdit;
         [Export]
         public LineEdit passwordEdit;
@@ -29,6 +31,7 @@ namespace Hypernex.UI
         {
             LoadedConfig(ConfigManager.LoadedConfig);
             loginButton.Pressed += TryLogin;
+            // serverAddressEdit.TextSubmitted += Submit;
             usernameEdit.TextSubmitted += Submit;
             passwordEdit.TextSubmitted += Submit;
             loginOptions.ItemSelected += AccountSelected;
@@ -38,6 +41,7 @@ namespace Hypernex.UI
         public override void _ExitTree()
         {
             loginButton.Pressed -= TryLogin;
+            // serverAddressEdit.TextSubmitted -= Submit;
             usernameEdit.TextSubmitted -= Submit;
             passwordEdit.TextSubmitted -= Submit;
             loginOptions.ItemSelected -= AccountSelected;
@@ -102,9 +106,10 @@ namespace Hypernex.UI
             }
             else
             {
+                string addr = string.IsNullOrWhiteSpace(serverAddressEdit.Text) ? "127.0.0.1" : serverAddressEdit.Text;
                 HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
                 {
-                    TargetDomain = "192.168.1.10",
+                    TargetDomain = addr,
                     IsHTTP = true,
                 };
                 TryLogin(settings);
@@ -114,6 +119,7 @@ namespace Hypernex.UI
         public void TryLogin(HypernexSettings settings)
         {
             loginButton.Disabled = true;
+            loginOptions.Selected = 0;
             APITools.Create(settings);
             APITools.Login((s, m) =>
             {

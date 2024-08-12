@@ -77,15 +77,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LoginScreen" type="Node" parent="UI/Login" node_paths=PackedStringArray("root", "usernameEdit", "passwordEdit", "twoFactorEdit", "loginButton", "loginOptions", "messagePopup")]
+[node name="LoginScreen" type="Node" parent="UI/Login" node_paths=PackedStringArray("root", "serverAddressEdit", "usernameEdit", "passwordEdit", "twoFactorEdit", "loginButton", "loginOptions", "messagePopup")]
 script = ExtResource("2_qliqn")
 root = NodePath("..")
+serverAddressEdit = NodePath("../ServerAddress")
 usernameEdit = NodePath("../Username")
 passwordEdit = NodePath("../Password")
 twoFactorEdit = NodePath("../2FA")
 loginButton = NodePath("../LoginBtn")
 loginOptions = NodePath("../LoginOptions")
 messagePopup = NodePath("../../AcceptDialog")
+
+[node name="ServerAddress" type="LineEdit" parent="UI/Login"]
+layout_mode = 2
+placeholder_text = "Server Address"
+alignment = 1
 
 [node name="Username" type="LineEdit" parent="UI/Login"]
 layout_mode = 2
@@ -109,6 +115,7 @@ text = "Login"
 
 [node name="LoginOptions" type="OptionButton" parent="UI/Login"]
 layout_mode = 2
+allow_reselect = true
 
 [node name="MainOverlay" type="PanelContainer" parent="UI"]
 layout_mode = 1
