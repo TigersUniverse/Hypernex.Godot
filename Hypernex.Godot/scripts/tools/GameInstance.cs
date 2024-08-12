@@ -440,13 +440,11 @@ namespace Hypernex.Tools
         {
             if (!authed && IsOpen)
             {
-                /*
                 __SendMessage(new JoinAuth
                 {
                     UserId = APITools.CurrentUser.Id,
                     TempToken = userIdToken,
                 });
-                */
                 return;
             }
             if (!string.IsNullOrEmpty(hostId) && (host == null || (host != null && host.Id != hostId)))
