@@ -54,12 +54,28 @@ namespace Hypernex.UI
 
         public override void _Ready()
         {
+            videoForeground.Finished += FGLoop;
+            videoBackground.Finished += BGLoop;
             usersLabel.MetaClicked += OnClick;
         }
 
         public override void _ExitTree()
         {
+            videoForeground.Finished -= FGLoop;
+            videoBackground.Finished -= BGLoop;
             usersLabel.MetaClicked -= OnClick;
+        }
+
+        private void FGLoop()
+        {
+            videoForeground.StreamPosition = 0;
+            videoForeground.Play();
+        }
+
+        private void BGLoop()
+        {
+            videoBackground.StreamPosition = 0;
+            videoBackground.Play();
         }
 
         private void OnClick(Variant meta)
