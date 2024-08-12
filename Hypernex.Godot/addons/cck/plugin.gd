@@ -39,7 +39,14 @@ static func export_deps(writer : ZIPPacker, path : String) -> void:
 		if dep_res.is_class("Script"):
 			continue
 		var temp_path := "user://temp/temp.tres"
-		if dep_res.is_class("Texture"):
+		if dep_res.is_class("PackedScene"):
+			# write tscn
+			ResourceSaver.save(dep_res, "user://temp/temp.tscn")
+			var dep_file := FileAccess.get_file_as_bytes("user://temp/temp.tscn")
+			writer.start_file(dep_path.replacen("res://", "").replacen("." + dep_path.get_extension(), ".tscn"))
+			writer.write_file(dep_file)
+			writer.close_file()
+		elif dep_res.is_class("Texture"):
 			# write raw file
 			var dep_file := FileAccess.get_file_as_bytes(dep_path)
 			writer.start_file(dep_path.replacen("res://", ""))

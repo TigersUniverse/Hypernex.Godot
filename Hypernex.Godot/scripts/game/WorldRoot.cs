@@ -88,7 +88,14 @@ namespace Hypernex.Game
             SafeLoader loader = new SafeLoader();
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
-            loader.ReadZip(path);
+            try
+            {
+                loader.ReadZip(path);
+            }
+            catch (Exception e)
+            {
+                Logger.CurrentLogger.Critical(e);
+            }
             PackedScene scn = loader.scene;
             if (!IsInstanceValid(loader.scene))
             {

@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
+using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Tools;
@@ -18,9 +20,16 @@ namespace Hypernex.Game.Tests
 
         public override async void _Ready()
         {
+            GDLogger logger = new GDLogger();
+            logger.SetLogger();
             await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
-            var root = WorldRoot.LoadFromFile("user://my_world.hnw");
-            AddChild(root);
+            new Thread(() =>
+            {
+                var root = WorldRoot.LoadFromFile("user://slender.hnw");
+                // Thread.Sleep(1000);
+                CallDeferred(Node.MethodName.AddChild, root);
+            }).Start();
+            // AddChild(root);
             // RunTest();
         }
 

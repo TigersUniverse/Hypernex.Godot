@@ -139,8 +139,8 @@ namespace Hypernex.UI
             GameInstance inst = GameInstance.FromLocalFile(selectedWorldPath);
             if (inst.IsDisposed)
             {
-                dialog.Title = "World not found";
-                dialog.DialogText = "Please select a world file.";
+                dialog.Title = "World not valid";
+                dialog.DialogText = "Please select a valid world file.";
                 dialog.Show();
             }
         }

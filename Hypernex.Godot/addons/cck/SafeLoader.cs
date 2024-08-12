@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -35,6 +36,26 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedExtResources[id];
                     return new Variant();
                 }
+                if (prop.Trim().StartsWith("["))
+                {
+                    List<string> items = ParseArrayItems(prop.Trim());
+                    Godot.Collections.Array arr = new Godot.Collections.Array();
+                    foreach (var item in items)
+                    {
+                        arr.Add(ConvertPropertyString(item));
+                    }
+                    return arr;
+                }
+                if (prop.Trim().StartsWith("{"))
+                {
+                    Dictionary<string, string> items = ParseDictionaryItems(prop.Trim());
+                    Godot.Collections.Dictionary dict = new Godot.Collections.Dictionary();
+                    foreach (var item in items)
+                    {
+                        dict.Add(item.Key, ConvertPropertyString(item.Value));
+                    }
+                    return dict;
+                }
                 return SafeLoader.ConvertPropertyString(prop);
             }
 
@@ -57,6 +78,7 @@ namespace Hypernex.CCK.GodotVersion
         {
             public string Name;
             public string Parent;
+            public string Instance;
             public string Type;
             public Dictionary<string, string> Properties = new Dictionary<string, string>();
         }
@@ -76,6 +98,7 @@ namespace Hypernex.CCK.GodotVersion
             public List<ParsedNode> Nodes = new List<ParsedNode>();
             public List<ParsedConnection> Connections = new List<ParsedConnection>();
 
+            public Dictionary<string, Resource> LoadedSubResources = new Dictionary<string, Resource>();
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
             public Variant ConvertPropertyString(string prop)
@@ -95,6 +118,9 @@ namespace Hypernex.CCK.GodotVersion
                     int endIdx = prop.Find("\")", startIdx);
                     string id = prop.Substr(startIdx + 2, endIdx - startIdx - 2);
 
+                    if (LoadedSubResources.ContainsKey(id))
+                        return LoadedSubResources[id];
+
                     var sub = SubResources[id];
                     if (ClassDB.IsParentClass(sub.Type, nameof(Script)))
                         return new Variant();
@@ -104,21 +130,68 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         if (kvp.Key == Resource.PropertyName.ResourcePath)
                             continue;
+                        // GD.PrintS(kvp.Key, kvp.Value);
                         res.Set(kvp.Key, ConvertPropertyString(kvp.Value));
                     }
+                    LoadedSubResources.TryAdd(id, res);
                     return res;
+                }
+                if (prop.Trim().StartsWith("["))
+                {
+                    List<string> items = ParseArrayItems(prop.Trim());
+                    Godot.Collections.Array arr = new Godot.Collections.Array();
+                    foreach (var item in items)
+                    {
+                        arr.Add(ConvertPropertyString(item));
+                    }
+                    return arr;
+                }
+                if (prop.Trim().StartsWith("{"))
+                {
+                    Dictionary<string, string> items = ParseDictionaryItems(prop.Trim());
+                    Godot.Collections.Dictionary dict = new Godot.Collections.Dictionary();
+                    foreach (var item in items)
+                    {
+                        dict.Add(item.Key, ConvertPropertyString(item.Value));
+                    }
+                    // GD.Print(dict);
+                    return dict;
                 }
                 return SafeLoader.ConvertPropertyString(prop);
             }
 
             public PackedScene ToPackedScene(Dictionary<string, Script> scripts)
             {
+                // return new PackedScene();
                 Dictionary<string, Node> nodes = new Dictionary<string, Node>();
+                ParsedNode rootNode = Nodes.FirstOrDefault(x => string.IsNullOrEmpty(x.Parent));
+                string rootName = ".";// + rootNode.Name;
                 foreach (var parNode in Nodes)
                 {
-                    if (ClassDB.IsParentClass(parNode.Type, nameof(Script)))
+                    if (!string.IsNullOrWhiteSpace(parNode.Instance))
+                    {
+                        // TODO: this isn't secure, packed scene might contain malicious data
+                        NodePath path2 = new NodePath($"{parNode.Parent}/{parNode.Name}");
+                        // GD.Print(path2);
+                        Node node2 = ConvertPropertyString(parNode.Instance).As<PackedScene>().Instantiate();
+                        nodes.Add(path2.ToString(), node2);
+                        continue;
+                    }
+                    if (ClassDB.IsParentClass(parNode.Type, nameof(Script)) || string.IsNullOrWhiteSpace(parNode.Type))
                         parNode.Type = nameof(Node);
                     Node node = null;
+                    NodePath path = new NodePath($"{parNode.Parent}/{parNode.Name}");
+                    if (nodes.TryGetValue(path, out Node existing))
+                    {
+                        foreach (var kvp in parNode.Properties)
+                        {
+                            if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
+                                continue;
+                            // GD.PrintS(kvp.Key, kvp.Value);
+                            node.Set(kvp.Key, ConvertPropertyString(kvp.Value));
+                        }
+                        continue;
+                    }
                     foreach (var kvp in parNode.Properties)
                     {
                         Script scr = null;
@@ -145,23 +218,35 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                             continue;
+                        // GD.PrintS(kvp.Key, kvp.Value);
                         node.Set(kvp.Key, ConvertPropertyString(kvp.Value));
                     }
-                    NodePath path = new NodePath($"{parNode.Parent}/{parNode.Name}");
+                    if (string.IsNullOrEmpty(parNode.Parent))
+                    {
+                        nodes.Add(".", node);
+                        continue;
+                    }
                     nodes.Add(path.ToString(), node);
                 }
-                Node root = nodes.FirstOrDefault(x => x.Key.StartsWith('/')).Value;
+                Node root = nodes.FirstOrDefault().Value;
+                // GD.Print(root.Name);
                 Node lastParent = root;
                 List<string> paths = new List<string>(nodes.Keys);
                 int k = 0;
-                while (paths.Count > 0 && k < 20) // TODO: don't use while (if possible?)
+                while (paths.Any(x => x != ".") /*&& k < 20000*/) // TODO: don't use while (if possible?)
                 {
                     for (int i = 0; i < paths.Count; i++)
                     {
+                        // GD.PrintS(paths[i], GetParent(paths[i]));
                         Node parent = root.GetNodeOrNull(GetParent(paths[i]));
                         if (GodotObject.IsInstanceValid(parent))
                         {
                             parent.AddChild(nodes[paths[i]]);
+                            // GD.Print(paths[i]);
+                            foreach (var ch in nodes[paths[i]].FindChildren("*", "", true, false))
+                            {
+                                ch.Owner = root;
+                            }
                             nodes[paths[i]].Owner = root;
                             paths.RemoveAt(i);
                             i--;
@@ -193,6 +278,8 @@ namespace Hypernex.CCK.GodotVersion
 
         public static NodePath GetParent(NodePath path)
         {
+            // if (path.ToString() == ".")
+                // return new NodePath(".");
             List<string> names = new List<string>();
             for (int i = 0; i < path.GetNameCount() - 1; i++)
             {
@@ -256,6 +343,7 @@ namespace Hypernex.CCK.GodotVersion
         public ZipReader reader;
         public ParsedTscn world;
         public PackedScene scene;
+        public Dictionary<string, Resource> cachedResources = new Dictionary<string, Resource>();
         public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
 
         public void ReadZip(string path)
@@ -276,23 +364,45 @@ namespace Hypernex.CCK.GodotVersion
                     Resource res = LoadFile(resKvp.Value);
                     world.LoadedExtResources.Add(resKvp.Key, res);
                 }
+                GD.Print("world to packed scene start");
                 scene = world.ToPackedScene(validScripts);
+            }
+            else
+            {
+                GD.PrintErr("Failed to find world.txt");
             }
             reader.Close();
         }
 
         public Resource LoadFile(string path)
         {
+            if (cachedResources.ContainsKey(path))
+                return cachedResources[path];
+            cachedResources.Add(path, null);
             string resPath = path.ReplaceN("res://", "");
             Resource res = null;
             if (reader.FileExists(resPath))
                 res = ReadData(path, reader.ReadFile(resPath));
+            else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tscn")))
+            {
+                // Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn")));
+                // return null;
+                GD.Print(resPath);
+                ParsedTscn tscn = ParseTscn(path.ReplaceN(path.GetExtension(), "tscn"), Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn"))));
+                foreach (var resKvp in tscn.ExtResources)
+                {
+                    Resource res2 = LoadFile(resKvp.Value);
+                    tscn.LoadedExtResources.Add(resKvp.Key, res2);
+                }
+                res = tscn.ToPackedScene(validScripts);
+            }
             else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
                 res = ReadData(path.ReplaceN(path.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
             else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
                 res = ReadData(path.ReplaceN(path.GetExtension(), "asset"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "asset")));
             else
                 res = LoadScript(path);
+            cachedResources[path] = res;
             return res;
         }
 
@@ -314,8 +424,10 @@ namespace Hypernex.CCK.GodotVersion
             else*/ if (path.ToLower().EndsWith(".asset"))
             {
                 DirAccess.MakeDirAbsolute("user://temp/");
-                string tempPath = "user://temp/temp.asset";
+                string tempPath = $"user://temp/{path.GetFile()}.asset";
                 FileAccess file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Write);
+                if (file == null)
+                    GD.PrintErr($"{FileAccess.GetOpenError()} ({tempPath})");
                 file.StoreBuffer(data);
                 file.Close();
                 file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Read);
@@ -394,8 +506,8 @@ namespace Hypernex.CCK.GodotVersion
             if (prop.Trim().Contains("Object(", StringComparison.OrdinalIgnoreCase))
                 return new Variant();
             // prevent long parsing times
-            if (prop.Length >= 4096 * 2)
-                return new Variant();
+            // if (prop.Length >= 4096 * 2)
+            //     return new Variant();
             return GD.StrToVar(prop);
             foreach (var key in Enum.GetNames<Variant.Type>())
             {
@@ -450,8 +562,11 @@ namespace Hypernex.CCK.GodotVersion
         public static ParsedTscn ParseTscn(string path, string data)
         {
             if (!data.StartsWith("[gd_scene"))
+            {
+                GD.PrintErr("World isn't a scene!");
                 return null;
-            data = data.ReplaceLineEndings("\n");
+            }
+            data = data.Replace("\r", "");
             ParsedTscn tscn = new ParsedTscn();
             for (int i = 0; i < data.Length; i++)
             {
@@ -480,9 +595,12 @@ namespace Hypernex.CCK.GodotVersion
                             node.Properties.Add(key, val);
                         }
                         node.Name = attribs["name"].Replace("\"", "");
-                        node.Type = attribs["type"].Replace("\"", "");
+                        if (attribs.ContainsKey("type"))
+                            node.Type = attribs["type"].Replace("\"", "");
                         if (attribs.ContainsKey("parent"))
                             node.Parent = attribs["parent"].Replace("\"", "");
+                        if (attribs.ContainsKey("instance"))
+                            node.Instance = attribs["instance"];
                         tscn.Nodes.Add(node);
                         break;
                     case "connection":
@@ -492,6 +610,7 @@ namespace Hypernex.CCK.GodotVersion
                         break;
                 }
             }
+            GD.Print("Parsed tscn");
             return tscn;
         }
 
@@ -499,7 +618,7 @@ namespace Hypernex.CCK.GodotVersion
         {
             if (!data.StartsWith("[gd_resource"))
                 return null;
-            data = data.ReplaceLineEndings("\n");
+            data = data.Replace("\r", "");
             ParsedTres tres = new ParsedTres();
             for (int i = 0; i < data.Length; i++)
             {
@@ -545,6 +664,8 @@ namespace Hypernex.CCK.GodotVersion
             int escapesArray = 0;
             int escapesDict = 0;
 
+            List<char> charArr = new List<char>();
+
             for (int i = eqIdx + 2; i < data.Length; i++)
             {
                 newOffset = i;
@@ -556,7 +677,9 @@ namespace Hypernex.CCK.GodotVersion
                 }
 
                 if (isQuote || data[i] != '\n')
-                    value += data[i];
+                {
+                    charArr.Add(data[i]);
+                }
 
                 // check for string
                 if (data[i] == '"')
@@ -569,27 +692,202 @@ namespace Hypernex.CCK.GodotVersion
                 }
 
                 // check for arrays
-                if (data[i] == '[')
                 {
-                    escapesArray++;
-                }
-                if (data[i] == ']')
-                {
-                    escapesArray--;
+                    if (data[i] == '[')
+                    {
+                        escapesArray++;
+                    }
+                    if (data[i] == ']')
+                    {
+                        escapesArray--;
+                    }
                 }
 
                 // check for dictionaries
-                if (data[i] == '{')
                 {
-                    escapesDict++;
-                }
-                if (data[i] == '}')
-                {
-                    escapesDict--;
+                    if (data[i] == '{')
+                    {
+                        escapesDict++;
+                    }
+                    if (data[i] == '}')
+                    {
+                        escapesDict--;
+                    }
                 }
             }
 
+            value = string.Join("", charArr);
             return true;
+        }
+
+        public static Dictionary<string, string> ParseDictionaryItems(string data)
+        {
+            int escapes = 0;
+            bool isQuote = false;
+            int escapesArray = 0;
+            int escapesDict = 0;
+            bool hasDict = false;
+
+            List<char> charArr = new List<char>();
+            Dictionary<string, string> splits = new Dictionary<string, string>();
+            string key = string.Empty;
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                // check for end
+                if (escapes == 0 && escapesArray == 0 && escapesDict == 0 && hasDict)
+                {
+                    break;
+                }
+
+                if (escapesDict == 1 && escapes == 0 && escapesArray == 0 && data[i] == ':')
+                {
+                    key = string.Join("", charArr).Replace("\"", "");
+                    charArr.Clear();
+                    continue;
+                }
+                if (escapesDict == 1 && escapes == 0 && escapesArray == 0 && data[i] == ',')
+                {
+                    splits.TryAdd(key, string.Join("", charArr));
+                    charArr.Clear();
+                    continue;
+                }
+                charArr.Add(data[i]);
+
+                // check for string
+                if (data[i] == '"')
+                {
+                    if (isQuote)
+                        escapes--;
+                    else
+                        escapes++;
+                    isQuote = !isQuote;
+                }
+
+                // check for arrays
+                {
+                    if (data[i] == '[')
+                    {
+                        escapesArray++;
+                    }
+                    if (data[i] == ']')
+                    {
+                        escapesArray--;
+                    }
+                }
+
+                // check for dictionaries
+                {
+                    if (data[i] == '{')
+                    {
+                        escapesDict++;
+                        hasDict = true;
+                        charArr.RemoveAt(charArr.Count - 1);
+                    }
+                    if (data[i] == '}')
+                    {
+                        escapesDict--;
+                        charArr.RemoveAt(charArr.Count - 1);
+                    }
+                }
+
+                // check for objects
+                {
+                    if (data[i] == '(')
+                    {
+                        escapesDict++;
+                    }
+                    if (data[i] == ')')
+                    {
+                        escapesDict--;
+                    }
+                }
+            }
+            splits.TryAdd(key, string.Join("", charArr));
+
+            return splits;
+        }
+
+        public static List<string> ParseArrayItems(string data)
+        {
+            int escapes = 0;
+            bool isQuote = false;
+            int escapesArray = 0;
+            int escapesDict = 0;
+            bool hasArray = false;
+
+            List<char> charArr = new List<char>();
+            List<string> splits = new List<string>();
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                // check for end
+                if (escapes == 0 && escapesArray == 0 && escapesDict == 0 && hasArray)
+                {
+                    break;
+                }
+
+                if (escapesArray == 1 && escapes == 0 && escapesDict == 0 && data[i] == ',')
+                {
+                    splits.Add(string.Join("", charArr));
+                    charArr.Clear();
+                    continue;
+                }
+
+                charArr.Add(data[i]);
+
+                // check for string
+                if (data[i] == '"')
+                {
+                    if (isQuote)
+                        escapes--;
+                    else
+                        escapes++;
+                    isQuote = !isQuote;
+                }
+
+                // check for arrays
+                {
+                    if (data[i] == '[')
+                    {
+                        escapesArray++;
+                        hasArray = true;
+                        charArr.RemoveAt(charArr.Count - 1);
+                    }
+                    if (data[i] == ']')
+                    {
+                        escapesArray--;
+                        charArr.RemoveAt(charArr.Count - 1);
+                    }
+                }
+
+                // check for dictionaries
+                {
+                    if (data[i] == '{')
+                    {
+                        escapesDict++;
+                    }
+                    if (data[i] == '}')
+                    {
+                        escapesDict--;
+                    }
+                }
+
+                // check for objects
+                {
+                    if (data[i] == '(')
+                    {
+                        escapesDict++;
+                    }
+                    if (data[i] == ')')
+                    {
+                        escapesDict--;
+                    }
+                }
+            }
+            splits.Add(string.Join("", charArr));
+
+            return splits;
         }
 
         public static Dictionary<string, string> ParseTag(string data, int offset, out string tag, out int newOffset)
