@@ -19,7 +19,8 @@ namespace Hypernex.Player
 
         public override void _Ready()
         {
-            cam.MakeCurrent();
+            if (IsInstanceValid(cam))
+                cam.MakeCurrent();
             inputs = root.GetPart<PlayerInputs>();
             gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
         }

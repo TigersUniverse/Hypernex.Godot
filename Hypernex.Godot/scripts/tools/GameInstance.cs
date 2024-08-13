@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Godot;
 using Hypernex.CCK;
 using Hypernex.Game;
@@ -374,16 +375,22 @@ namespace Hypernex.Tools
         {
             try
             {
-                World = WorldRoot.LoadFromFile(s);
-                if (World == null)
+                new Thread(() =>
                 {
-                    Dispose();
-                    return;
-                }
-                if (open)
-                    Open();
-                FocusedInstance = this;
-                OnGameInstanceLoaded?.Invoke(this, worldMeta);
+                    World = WorldRoot.LoadFromFile(s);
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        if (World == null)
+                        {
+                            Dispose();
+                            return;
+                        }
+                        if (open)
+                            Open();
+                        FocusedInstance = this;
+                        OnGameInstanceLoaded?.Invoke(this, worldMeta);
+                    });
+                }).Start();
             }
             catch (Exception)
             {
