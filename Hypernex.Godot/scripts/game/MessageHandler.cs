@@ -40,13 +40,6 @@ namespace Hypernex.Game
                     PlayerManagement.HandleWeightedObjectUpdate(gameInstance, weightedObjectUpdate);
                     break;
                 }
-                case "Hypernex.Networking.Messages.ResetWeightedObjects":
-                {
-                    ResetWeightedObjects resetWeightedObjects =
-                        (ResetWeightedObjects) Convert.ChangeType(msgMeta.Data, typeof(ResetWeightedObjects));
-                    PlayerManagement.HandleResetWeightedObject(gameInstance, resetWeightedObjects);
-                    break;
-                }
                 case "Hypernex.Networking.Messages.WorldObjectUpdate":
                 {
                     WorldObjectUpdate worldObjectUpdate =

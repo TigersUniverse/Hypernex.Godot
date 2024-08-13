@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Hypernex.Networking.Messages;
+using Hypernex.Networking.Messages.Data;
 using Hypernex.Player;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
@@ -79,9 +80,11 @@ namespace Hypernex.Game
                         AvatarId = AvatarId,
                         IsSpeaking = GetPart<PlayerChat>()?.IsSpeaking ?? false,
                         IsPlayerVR = GetViewport().UseXR,
-                        PlayerAssignedTags = new List<string>(),
-                        ExtraneousData = new Dictionary<string, object>(),
-                        WeightedObjects = new Dictionary<string, float>(),
+                        IsFBT = false,
+                        VRIKJson = "",
+                        // PlayerAssignedTags = new List<string>(),
+                        // ExtraneousData = new Dictionary<string, object>(),
+                        // WeightedObjects = new Dictionary<string, float>(),
                     });
                 }
             }
@@ -97,16 +100,23 @@ namespace Hypernex.Game
             Instance.SendMessage(new PlayerObjectUpdate()
             {
                 Auth = GetJoinAuth(),
-                Object = new Networking.Messages.Data.NetworkedObject()
-                {
-                    ObjectLocation = "root",
-                    // IgnoreObjectLocation = false,
-                    Position = Pos.ToFloat3(),
-                    Rotation = Rot.ToFloat4(),
-                    Size = Vector3.One.ToFloat3(),
-                },
+                Objects = GetObjects(),
             }, Nexport.MessageChannel.Unreliable);
             oldPosition = Pos;
+        }
+
+        public Dictionary<int, NetworkedObject> GetObjects()
+        {
+            Dictionary<int, NetworkedObject> dict = new Dictionary<int, NetworkedObject>();
+            dict.Add(0, new Networking.Messages.Data.NetworkedObject()
+            {
+                ObjectLocation = "root",
+                IgnoreObjectLocation = true,
+                Position = Pos.ToFloat3(),
+                Rotation = Rot.ToFloat4(),
+                Size = Vector3.One.ToFloat3(),
+            });
+            return dict;
         }
 
         public void NetworkUpdate(PlayerUpdate playerUpdate)
@@ -125,10 +135,10 @@ namespace Hypernex.Game
 
         public void NetworkObjectUpdate(PlayerObjectUpdate playerObjectUpdate)
         {
-            if (playerObjectUpdate.Object.ObjectLocation.ToLower() == "root")
+            if (playerObjectUpdate.Objects.TryGetValue(0, out var val))
             {
-                Pos = playerObjectUpdate.Object.Position.ToGodot3();
-                Rot = playerObjectUpdate.Object.Rotation.ToGodotQuat();
+                Pos = val.Position.ToGodot3();
+                Rot = val.Rotation.ToGodotQuat();
             }
         }
 

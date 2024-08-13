@@ -106,6 +106,8 @@ namespace Hypernex.UI
                 users = gameInstance.ConnectedUsers.Select(x => x.Id).ToArray();
             }
             usersLabel.Text = string.Format(usersLabelFormat, users.Length);
+            foreach (var child in usersContainer.GetChildren())
+                child.QueueFree();
             foreach (var user in users)
             {
                 var node = cardUI.Instantiate<CardTemplate>();

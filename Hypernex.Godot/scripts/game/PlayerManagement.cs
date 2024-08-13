@@ -63,20 +63,6 @@ namespace Hypernex.Game
                     $"PlayerRoot not found for {gameInstance.gameServerId}/{gameInstance.instanceId}/{weightedObjectUpdate.Auth.UserId}");
         }
 
-        public static void HandleResetWeightedObject(GameInstance gameInstance,
-            ResetWeightedObjects resetWeightedObjects)
-        {
-            if (resetWeightedObjects.Auth.UserId == APITools.CurrentUser?.Id ||
-                string.IsNullOrEmpty(resetWeightedObjects.Auth.UserId))
-                return;
-            PlayerRoot netPlayer = GetOrCreateNetPlayer(gameInstance, resetWeightedObjects.Auth.UserId);
-            if (netPlayer != null)
-                netPlayer.ResetWeightedObjects();
-            else
-                Logger.CurrentLogger.Debug(
-                    $"PlayerRoot not found for {gameInstance.gameServerId}/{gameInstance.instanceId}/{resetWeightedObjects.Auth.UserId}");
-        }
-
         public static void HandlePlayerObjectUpdate(GameInstance gameInstance, PlayerObjectUpdate playerObjectUpdate)
         {
             if (playerObjectUpdate.Auth.UserId == APITools.CurrentUser?.Id || string.IsNullOrEmpty(playerObjectUpdate.Auth.UserId))
