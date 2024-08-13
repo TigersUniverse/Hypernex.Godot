@@ -14,7 +14,6 @@ namespace Hypernex.Player
         public bool textChatOpen;
         public Vector2 lastMousePosition;
         public Vector2 lastMouseDelta;
-        public Vector2 totalMousePosition;
 
         public override void _Ready()
         {
@@ -33,7 +32,7 @@ namespace Hypernex.Player
                 return;
             if (@event is InputEventMouseMotion mouseMotion)
             {
-                lastMouseDelta -= mouseMotion.Relative;
+                lastMouseDelta = mouseMotion.Relative * -0.01f;
             }
         }
 
@@ -49,8 +48,6 @@ namespace Hypernex.Player
                 return;
             var position = GetViewport().GetMousePosition();
             lastMousePosition = position;
-            totalMousePosition += lastMouseDelta * 0.005f;
-            lastMouseDelta = Vector2.Zero;
             ReadInput();
         }
 

@@ -44,6 +44,8 @@ namespace Hypernex.Tools
         private static bool ignoreUserRefresh;
         private static readonly Dictionary<string, long> InstanceDateTimes = new();
 
+        private static ActivityManager.UpdateActivityHandler updateActivity = result => { };
+
         private static bool IsInitialized => discord != null;
 
         private static string GetSpacedStatus(Status status)
@@ -83,7 +85,7 @@ namespace Hypernex.Tools
                             ? statusSpaced
                             : APITools.CurrentUser.Bio.StatusText
                     }
-                }, result => { });
+                }, updateActivity);
             } catch(Exception){}
         }
 
@@ -119,7 +121,7 @@ namespace Hypernex.Tools
                     Details = "Logging In",
                     Timestamps = new ActivityTimestamps {Start = startTime},
                     Assets = new ActivityAssets {LargeImage = "logo"}
-                }, result => { });
+                }, updateActivity);
                 APITools.OnUserLogin += user =>
                 {
                     // if (ignoreUserRefresh)
@@ -136,7 +138,7 @@ namespace Hypernex.Tools
                         Details = "Logging In",
                         Timestamps = new ActivityTimestamps {Start = startTime},
                         Assets = new ActivityAssets {LargeImage = "logo"}
-                    }, result => { });
+                    }, updateActivity);
                 };
             }
             catch (Exception e)
@@ -177,7 +179,7 @@ namespace Hypernex.Tools
                             ? statusSpaced
                             : APITools.CurrentUser.Bio.StatusText
                     }
-                }, result => { });
+                }, updateActivity);
             } catch(Exception){}
         }
 

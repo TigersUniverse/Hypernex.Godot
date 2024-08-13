@@ -25,6 +25,11 @@ namespace Hypernex.Game
             AddChild(player);
         }
 
+        public void RespawnPlayer(PlayerRoot player)
+        {
+            player.Pos = descriptor.StartPosition;
+        }
+
         public void AddObject(Node worldObject)
         {
             if (Objects.Contains(worldObject))

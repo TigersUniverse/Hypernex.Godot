@@ -4,6 +4,7 @@ using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Networking.Messages.Data;
 using Hypernex.Sandboxing.SandboxedTypes;
+using Hypernex.Sandboxing.SandboxedTypes.World;
 using Nexbox;
 using Nexbox.Interpreters;
 
@@ -55,7 +56,7 @@ namespace Hypernex.Sandboxing
                         throw new Exception("Unknown NexboxScript language");
                 }
                 interpreter.StartSandbox(o => OnLog(o));
-                ForwardTypes();
+                ForwardWorldTypes();
                 runtime = new Runtime(this);
                 interpreter.CreateGlobal("item", new Item(GetParent()));
                 interpreter.CreateGlobal("Runtime", runtime);
@@ -71,7 +72,18 @@ namespace Hypernex.Sandboxing
             interpreter = null;
         }
 
-        public void ForwardTypes()
+        public override void _Process(double delta)
+        {
+            runtime?.Update();
+            runtime?.LateUpdate();
+        }
+
+        public override void _PhysicsProcess(double delta)
+        {
+            runtime?.FixedUpdate();
+        }
+
+        public void ForwardWorldTypes()
         {
             interpreter.ForwardType("float2", typeof(float2));
             interpreter.ForwardType("float3", typeof(float3));
@@ -81,6 +93,7 @@ namespace Hypernex.Sandboxing
             interpreter.ForwardType("UI", typeof(SandboxedTypes.UI));
             interpreter.ForwardType("Time", typeof(SandboxedTypes.Time));
             interpreter.ForwardType("UtcTime", typeof(UtcTime));
+            interpreter.ForwardType("LocalAvatar", typeof(LocalAvatar));
         }
     }
 }

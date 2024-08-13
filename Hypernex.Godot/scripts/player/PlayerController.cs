@@ -29,8 +29,9 @@ namespace Hypernex.Player
         {
             if (inputs == null)
                 return;
-            Rotation = new Vector3(0f, inputs.totalMousePosition.X, 0f);
-            root.view.Rotation = new Vector3(inputs.totalMousePosition.Y, 0f, 0f);
+            Rotation += new Vector3(0f, inputs.lastMouseDelta.X, 0f);
+            root.view.Rotation = new Vector3(Mathf.Clamp(root.view.Rotation.X + inputs.lastMouseDelta.Y, -Mathf.Pi * 0.5f, Mathf.Pi * 0.5f), 0f, 0f);
+            inputs.lastMouseDelta = Vector2.Zero;
         }
 
         public override void _PhysicsProcess(double delta)
