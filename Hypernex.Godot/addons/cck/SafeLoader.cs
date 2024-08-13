@@ -170,7 +170,6 @@ namespace Hypernex.CCK.GodotVersion
                 {
                     if (!string.IsNullOrWhiteSpace(parNode.Instance))
                     {
-                        // TODO: this isn't secure, packed scene might contain malicious data
                         NodePath path2 = new NodePath($"{parNode.Parent}/{parNode.Name}");
                         // GD.Print(path2);
                         Node node2 = ConvertPropertyString(parNode.Instance).As<PackedScene>().Instantiate();
@@ -251,7 +250,7 @@ namespace Hypernex.CCK.GodotVersion
                     }
                     nodes.Add(path.ToString(), node);
                 }
-                Node root = nodes.FirstOrDefault().Value;
+                Node root = nodes.FirstOrDefault(x => x.Key == ".").Value;
                 // GD.Print(root.Name);
                 Node lastParent = root;
                 List<string> paths = new List<string>(nodes.Keys);
@@ -274,9 +273,13 @@ namespace Hypernex.CCK.GodotVersion
                             paths.RemoveAt(i);
                             i--;
                         }
+                        // else
+                        //     GD.PrintS(paths[i], GetParent(paths[i]));
+                            // GD.Print(paths[i]);
                     }
                     k++;
                 }
+                // GD.PrintS(string.Join(", ", paths));
                 PackedScene scene = new PackedScene();
                 scene.Pack(root);
                 return scene;
