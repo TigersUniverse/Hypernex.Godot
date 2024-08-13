@@ -172,7 +172,13 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         NodePath path2 = new NodePath($"{parNode.Parent}/{parNode.Name}");
                         // GD.Print(path2);
-                        Node node2 = ConvertPropertyString(parNode.Instance).As<PackedScene>().Instantiate();
+                        Variant prop = ConvertPropertyString(parNode.Instance);
+                        if (prop.VariantType == Variant.Type.Nil)
+                        {
+                            // GD.Print(path2);
+                            continue;
+                        }
+                        Node node2 = prop.As<PackedScene>().Instantiate();
                         foreach (var kvp in parNode.Properties)
                         {
                             if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -381,23 +387,29 @@ namespace Hypernex.CCK.GodotVersion
                 GD.PrintErr(err);
                 return;
             }
-            if (reader.FileExists("world.txt"))
+            try
             {
-                string worldPath = Encoding.UTF8.GetString(reader.ReadFile("world.txt"));
-                world = ParseTscn(path, Encoding.UTF8.GetString(reader.ReadFile(worldPath)));
-                foreach (var resKvp in world.ExtResources)
+                if (reader.FileExists("world.txt"))
                 {
-                    Resource res = LoadFile(resKvp.Value);
-                    world.LoadedExtResources.Add(resKvp.Key, res);
+                    string worldPath = Encoding.UTF8.GetString(reader.ReadFile("world.txt"));
+                    world = ParseTscn(path, Encoding.UTF8.GetString(reader.ReadFile(worldPath)));
+                    foreach (var resKvp in world.ExtResources)
+                    {
+                        Resource res = LoadFile(resKvp.Value);
+                        world.LoadedExtResources.Add(resKvp.Key, res);
+                    }
+                    GD.Print("world to packed scene start");
+                    scene = world.ToPackedScene(validScripts);
                 }
-                GD.Print("world to packed scene start");
-                scene = world.ToPackedScene(validScripts);
+                else
+                {
+                    GD.PrintErr("Failed to find world.txt");
+                }
             }
-            else
+            finally
             {
-                GD.PrintErr("Failed to find world.txt");
+                reader.Close();
             }
-            reader.Close();
         }
 
         public Resource LoadFile(string path)
@@ -407,9 +419,7 @@ namespace Hypernex.CCK.GodotVersion
             cachedResources.Add(path, null);
             string resPath = path.ReplaceN("res://", "");
             Resource res = null;
-            if (reader.FileExists(resPath))
-                res = ReadData(path, reader.ReadFile(resPath));
-            else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tscn")))
+            if (resPath.GetExtension().Equals("tscn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tscn")))
             {
                 // Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn")));
                 // return null;
@@ -422,6 +432,8 @@ namespace Hypernex.CCK.GodotVersion
                 }
                 res = tscn.ToPackedScene(validScripts);
             }
+            else if (reader.FileExists(resPath))
+                res = ReadData(path, reader.ReadFile(resPath));
             else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
                 res = ReadData(path.ReplaceN(path.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
             else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
@@ -451,12 +463,12 @@ namespace Hypernex.CCK.GodotVersion
             {
                 DirAccess.MakeDirAbsolute("user://temp/");
                 string tempPath = $"user://temp/{path.GetFile()}.asset";
-                FileAccess file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Write);
-                if (file == null)
+                FileAccess file2 = FileAccess.Open(tempPath, FileAccess.ModeFlags.Write);
+                if (file2 == null)
                     GD.PrintErr($"{FileAccess.GetOpenError()} ({tempPath})");
-                file.StoreBuffer(data);
-                file.Close();
-                file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Read);
+                file2.StoreBuffer(data);
+                file2.Close();
+                FileAccess file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Read);
                 string type = file.GetPascalString();
                 if (ClassDB.IsParentClass(type, nameof(Script)))
                     return null;
