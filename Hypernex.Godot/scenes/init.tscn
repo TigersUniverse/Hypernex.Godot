@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=17 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -15,19 +15,6 @@
 [ext_resource type="PackedScene" uid="uid://bc42bxyk4uvjk" path="res://scenes/big_card.tscn" id="11_6bljf"]
 [ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="14_j4y3h"]
 [ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck.tscn" id="14_tnrj2"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mgffp"]
-sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-
-[sub_resource type="Sky" id="Sky_t3dit"]
-sky_material = SubResource("ProceduralSkyMaterial_mgffp")
-
-[sub_resource type="Environment" id="Environment_ukjnl"]
-background_mode = 2
-sky = SubResource("Sky_t3dit")
-tonemap_mode = 2
-glow_enabled = true
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8o0g"]
 corner_radius_top_left = 3
@@ -47,14 +34,6 @@ loadingOverlay = NodePath("UI/LoadingIcon/Controller")
 ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
 remotePlayerScene = ExtResource("3_gx5fr")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_ukjnl")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
-visible = false
-shadow_enabled = true
 
 [node name="ThemeManager" type="Node" parent="."]
 script = ExtResource("4_ju6j5")

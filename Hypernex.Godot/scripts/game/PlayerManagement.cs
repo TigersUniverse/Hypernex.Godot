@@ -24,7 +24,7 @@ namespace Hypernex.Game
             return null;
         }
 
-        private static PlayerRoot GetOrCreateNetPlayer(GameInstance instance, string userid)
+        public static PlayerRoot GetOrCreateNetPlayer(GameInstance instance, string userid)
         {
             if (!Players.ContainsKey(instance))
                 return null;

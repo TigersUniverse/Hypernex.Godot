@@ -198,6 +198,7 @@ namespace Hypernex.Tools
                 SocketManager.LeaveInstance(gameServerId, instanceId);
                 QuickInvoke.InvokeActionOnMainThread(OnDisconnect);
             };
+            OnClientConnect += user => PlayerManagement.GetOrCreateNetPlayer(this, user.Id);
             // OnClientConnect += user => ScriptEvents?.OnUserJoin.Invoke(user.Id);
             OnMessage += (meta, channel) => MessageHandler.HandleMessage(this, meta, channel);
             OnClientDisconnect += user => PlayerManagement.PlayerLeave(this, user);
