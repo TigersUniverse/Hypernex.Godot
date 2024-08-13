@@ -26,6 +26,8 @@ namespace Hypernex.UI
         public OptionButton loginOptions;
         [Export]
         public AcceptDialog messagePopup;
+        [Export]
+        public bool useHttp = false;
 
         public override void _Ready()
         {
@@ -66,7 +68,7 @@ namespace Hypernex.UI
             HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
             {
                 TargetDomain = user.Server,
-                IsHTTP = true,
+                IsHTTP = useHttp,
             };
             TryLogin(settings);
         }
@@ -86,7 +88,7 @@ namespace Hypernex.UI
                 HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
                 {
                     TargetDomain = user.Server,
-                    IsHTTP = true,
+                    IsHTTP = useHttp,
                 };
                 TryLogin(settings);
             }
@@ -100,7 +102,7 @@ namespace Hypernex.UI
                 HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
                 {
                     TargetDomain = user.Server,
-                    IsHTTP = true,
+                    IsHTTP = useHttp,
                 };
                 TryLogin(settings);
             }
@@ -110,7 +112,7 @@ namespace Hypernex.UI
                 HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
                 {
                     TargetDomain = addr,
-                    IsHTTP = true,
+                    IsHTTP = useHttp,
                 };
                 TryLogin(settings);
             }

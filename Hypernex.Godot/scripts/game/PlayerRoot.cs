@@ -27,11 +27,13 @@ namespace Hypernex.Game
         public Node3D Controller => /*GetViewport().UseXR ? GetPart<XRPlayerController>().xrBody :*/ GetPart<PlayerController>();
         public Vector3 Pos { get => Controller.Position; set => Controller.Position = value; }
         public Quaternion Rot { get => Controller.Quaternion; set => Controller.Quaternion = value; }
-        private Vector3 oldPosition;
         public bool IsLocal => Local == this;
         public string AvatarId;
         public AvatarRoot Avatar;
         public Action OnUserSet = () => { };
+
+        public Vector3 targetPos;
+        public Quaternion targetRot;
 
         public T GetPart<T>() where T : Node
         {
@@ -96,7 +98,12 @@ namespace Hypernex.Game
                         // PlayerAssignedTags = new List<string>(),
                         // ExtraneousData = new Dictionary<string, object>(),
                         // WeightedObjects = new Dictionary<string, float>(),
-                    });
+                    }, Nexport.MessageChannel.Unreliable);
+                    Instance.SendMessage(new PlayerObjectUpdate()
+                    {
+                        Auth = GetJoinAuth(),
+                        Objects = GetObjects(),
+                    }, Nexport.MessageChannel.Unreliable);
                 }
             }
         }
@@ -104,16 +111,12 @@ namespace Hypernex.Game
         public override void _PhysicsProcess(double delta)
         {
             if (!IsLocal)
-                return;
-            float tolerance = 0.05f;
-            if (Mathf.IsEqualApprox(Pos.X, oldPosition.X, tolerance) && Mathf.IsEqualApprox(Pos.Y, oldPosition.Y, tolerance) && Mathf.IsEqualApprox(Pos.Z, oldPosition.Z, tolerance))
-                return;
-            Instance.SendMessage(new PlayerObjectUpdate()
             {
-                Auth = GetJoinAuth(),
-                Objects = GetObjects(),
-            }, Nexport.MessageChannel.Unreliable);
-            oldPosition = Pos;
+                float lerpSpeed = 10f;
+                Pos = Pos.Lerp(targetPos, (float)delta * lerpSpeed);
+                Rot = Rot.Slerp(targetRot, (float)delta * lerpSpeed);
+                return;
+            }
         }
 
         public Dictionary<int, NetworkedObject> GetObjects()
@@ -178,8 +181,8 @@ namespace Hypernex.Game
         {
             if (playerObjectUpdate.Objects.TryGetValue(0, out var val))
             {
-                Pos = val.Position.ToGodot3();
-                Rot = val.Rotation.ToGodotQuat();
+                targetPos = val.Position.ToGodot3();
+                targetRot = val.Rotation.ToGodotQuat();
             }
         }
 

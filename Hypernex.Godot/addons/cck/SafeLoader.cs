@@ -531,6 +531,7 @@ namespace Hypernex.CCK.GodotVersion
                         return null;
                 }
                 img.GenerateMipmaps();
+                // img.Compress(Image.CompressMode.S3Tc, Image.CompressSource.Generic);
                 ImageTexture tex = ImageTexture.CreateFromImage(img);
                 return tex;
             }
@@ -687,12 +688,24 @@ namespace Hypernex.CCK.GodotVersion
             key = string.Empty;
             value = string.Empty;
             newOffset = offset;
-            int startTagIdx = data.Find('[', offset);
-            int eqIdx = data.Find('=', offset);
-            if (startTagIdx != -1 && startTagIdx < eqIdx)
-                return false;
+            
+            int eqIdx = -1;
+            for (int i = offset; i < data.Length; i++)
+            {
+                if (data[i] == '[')
+                {
+                    return false;
+                }
+                if (data[i] == '=')
+                {
+                    eqIdx = i;
+                    break;
+                }
+            }
             if (eqIdx == -1)
+            {
                 return false;
+            }
             key = data.Substr(offset, eqIdx - 1 - offset).Replace("\n", string.Empty);
             
             int escapes = 0;

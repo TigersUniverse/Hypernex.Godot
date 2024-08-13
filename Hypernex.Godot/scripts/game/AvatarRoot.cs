@@ -18,8 +18,10 @@ namespace Hypernex.Game
 
         public override void _PhysicsProcess(double delta)
         {
-            descriptor.GetSkeleton().Position = target.Position;
-            descriptor.GetSkeleton().Rotation = target.Rotation + new Vector3(0f, Mathf.Pi, 0f);
+            Vector3 scale = descriptor.GetSkeleton().Scale;
+            descriptor.GetSkeleton().GlobalPosition = target.GlobalPosition;
+            descriptor.GetSkeleton().GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
+            descriptor.GetSkeleton().Scale = scale;
         }
 
         public void AddObject(Node worldObject)
@@ -63,9 +65,9 @@ namespace Hypernex.Game
             ikSystem.humanoid = descriptor.GetSkeleton();
             ikSystem.SnapBackStrength = 1f;
             ikSystem.minStepHeight = 0f;
-            ikSystem.maxStepHeight = 0.3f;
-            ikSystem.minStepLength = -0.3f;
-            ikSystem.maxStepLength = 0.3f;
+            ikSystem.maxStepHeight = 0.4f;
+            ikSystem.minStepLength = -0.4f;
+            ikSystem.maxStepLength = 0.4f;
             ikSystem.head = GetBone("Head");
             ikSystem.hips = GetBone("Hips");
             ikSystem.leftHand = GetBone("LeftHand");

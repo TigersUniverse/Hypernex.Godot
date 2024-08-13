@@ -70,6 +70,7 @@ twoFactorEdit = NodePath("../2FA")
 loginButton = NodePath("../LoginBtn")
 loginOptions = NodePath("../LoginOptions")
 messagePopup = NodePath("../../AcceptDialog")
+useHttp = true
 
 [node name="ServerAddress" type="LineEdit" parent="UI/Login"]
 layout_mode = 2
