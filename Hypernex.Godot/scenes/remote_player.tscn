@@ -8,9 +8,10 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_i7wyo"]
 
-[node name="Player" type="Node3D" node_paths=PackedStringArray("view")]
+[node name="Player" type="Node3D" node_paths=PackedStringArray("view", "username")]
 script = ExtResource("1_2jxjk")
 view = NodePath("CharacterBody3D/View")
+username = NodePath("CharacterBody3D/View/Label3D")
 parts = [NodePath("CharacterBody3D"), NodePath("Chat")]
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("root")]
@@ -20,7 +21,13 @@ accel = 100.0
 speed = 5.0
 
 [node name="View" type="Node3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+
+[node name="Label3D" type="Label3D" parent="CharacterBody3D/View"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+billboard = 1
+double_sided = false
+text = "Username"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -29,6 +36,7 @@ disabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+visible = false
 mesh = SubResource("CapsuleMesh_i7wyo")
 
 [node name="Voice" type="AudioStreamPlayer3D" parent="CharacterBody3D"]

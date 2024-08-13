@@ -232,8 +232,6 @@ namespace Hypernex.CCK.GodotVersion
                             continue;
                         if (scr == null)
                             continue;
-                        // if (scr != null)
-                        //     scr = ConvertPropertyString(kvp.Value).As<Script>();
                         if (scr is CSharpScript css)
                             node = css.New().As<Node>();
                         if (scr is GDScript gds)

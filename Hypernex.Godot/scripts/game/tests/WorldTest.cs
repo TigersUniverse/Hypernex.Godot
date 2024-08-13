@@ -14,6 +14,8 @@ namespace Hypernex.Game.Tests
     public partial class WorldTest : Node
     {
         [Export]
+        public Node3D target;
+        [Export]
         public bool save = false;
         [Export]
         public bool load = false;
@@ -29,8 +31,16 @@ namespace Hypernex.Game.Tests
                 // Thread.Sleep(1000);
                 CallDeferred(Node.MethodName.AddChild, root);
             }).Start();
-            // AddChild(root);
+            var avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
+            AddChild(avatar);
+            avatar.AttachTo(target);
             // RunTest();
+        }
+
+        public override void _Process(double delta)
+        {
+            float s = Time.GetTicksMsec() / 1000f;
+            target.Position = new Vector3(Mathf.Cos(s), 0f, Mathf.Sin(s));
         }
 
         public void RunTest()

@@ -17,6 +17,8 @@ namespace Hypernex.Game
         [Export]
         public Node3D view;
         [Export]
+        public Label3D username;
+        [Export]
         public NodePath[] parts = Array.Empty<NodePath>();
         public Node[] Parts => parts.Select(x => GetNode(x)).ToArray();
         public string UserId { get; private set; }
@@ -28,6 +30,7 @@ namespace Hypernex.Game
         private Vector3 oldPosition;
         public bool IsLocal => Local == this;
         public string AvatarId;
+        public AvatarRoot Avatar;
         public Action OnUserSet = () => { };
 
         public T GetPart<T>() where T : Node
@@ -46,7 +49,10 @@ namespace Hypernex.Game
             APITools.APIObject.GetUser(r =>
             {
                 if (r.success)
+                {
                     User = r.result.UserData;
+                    username.Text = User.GetUsersName();
+                }
             }, UserId, isUserId: true);
             GetPart<PlayerChat>()?.UserSet();
             OnUserSet?.Invoke();
@@ -65,6 +71,11 @@ namespace Hypernex.Game
         {
             // Position = Vector3.Zero;
             UpdateLoop();
+            if (IsInstanceValid(Avatar))
+                Avatar.QueueFree();
+            Avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
+            AddChild(Avatar);
+            Avatar.AttachTo(Controller);
         }
 
         private async void UpdateLoop()
@@ -121,6 +132,36 @@ namespace Hypernex.Game
 
         public void NetworkUpdate(PlayerUpdate playerUpdate)
         {
+            if (playerUpdate.AvatarId != AvatarId)
+            {
+                AvatarId = playerUpdate.AvatarId;
+                APITools.APIObject.GetAvatarMeta(result =>
+                {
+                    AvatarMeta avatarMeta = result.result.Meta;
+                    string fileId = avatarMeta.Builds.First(x => x.BuildPlatform == BuildPlatform.Windows).FileId;
+                    string fileURL = $"{APITools.APIObject.Settings.APIURL}file/{avatarMeta.OwnerId}/{fileId}";
+                    if (result.success)
+                    {
+                        string knownHash = string.Empty;
+                        APITools.APIObject.GetFileMeta(fileMetaResult =>
+                        {
+                            if (fileMetaResult.success)
+                                knownHash = fileMetaResult.result.FileMeta.Hash;
+                            DownloadTools.DownloadFile(fileURL, $"{avatarMeta.Id}.hna", o =>
+                            {
+                                if (!string.IsNullOrEmpty(o))
+                                {
+                                    if (IsInstanceValid(Avatar))
+                                        Avatar.QueueFree();
+                                    Avatar = AvatarRoot.LoadFromFile(o);
+                                    AddChild(Avatar);
+                                    Avatar.AttachTo(Controller);
+                                }
+                            }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
+                        }, avatarMeta.OwnerId, fileId);
+                    }
+                }, playerUpdate.AvatarId);
+            }
         }
 
         public void VoiceUpdate(PlayerVoice playerVoice)

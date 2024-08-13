@@ -250,13 +250,15 @@ public partial class IKSystem : Node
         if (moveFeet)
         {
             float speed = lastVel.Length();
+            // speed = 1f;
             float scale = 1f / humanoid.GlobalBasis.Scale.Z;
             float unitScaleHeight = scale * hipsDistance;
             float unitScaleLength = scale;
             float scaleLength = lastVel.Length();
+            // scaleLength = 1f;
             {
                 Vector2 pos = EvaluateLoop(ref leftLoopState, ref leftTimer, loopSize, speed, 0f);
-                float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight);
+                float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight) * scaleLength;
                 float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
                 float x = footDistance * 0.5f * scale;
 
@@ -265,8 +267,8 @@ public partial class IKSystem : Node
                 if (lastVel.Length() > 0f)
                 {
                     var dir = DirectionToLocal(forwardNode.GlobalTransform, lastVel.Normalized()).Normalized();
-                    t = Mathf.Atan2(dir.Z, dir.X);
-                    end += new Vector3(0f, y, -z).Rotated(Vector3.Up, t);
+                    t = Mathf.Atan2(dir.X, dir.Z);
+                    end += new Vector3(0f, y, z).Rotated(Vector3.Up, t);
                 }
                 else
                     leftTimer = 0f;
@@ -278,7 +280,7 @@ public partial class IKSystem : Node
                 rightTimer = leftTimer;
 
                 Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0f);
-                float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight);
+                float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight) * scaleLength;
                 float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
                 float x = -footDistance * 0.5f * scale;
 
@@ -287,8 +289,8 @@ public partial class IKSystem : Node
                 if (lastVel.Length() > 0f)
                 {
                     var dir = DirectionToLocal(forwardNode.GlobalTransform, lastVel.Normalized()).Normalized();
-                    t = Mathf.Atan2(dir.Z, dir.X);
-                    end += new Vector3(0f, y, -z).Rotated(Vector3.Up, t);
+                    t = Mathf.Atan2(dir.X, dir.Z);
+                    end += new Vector3(0f, y, z).Rotated(Vector3.Up, t);
                 }
                 else
                     rightTimer = 0f;
@@ -340,7 +342,7 @@ public partial class IKSystem : Node
             float scale = 1f / humanoid.GlobalBasis.Scale.Z;
 
             Vector3 right = -humanoid.GlobalBasis.X.Normalized();
-            Vector3 forward = -humanoid.GlobalBasis.Z.Normalized();
+            Vector3 forward = humanoid.GlobalBasis.Z.Normalized();
             Vector3 up = humanoid.GlobalBasis.Y.Normalized();
 
             // hips and head
