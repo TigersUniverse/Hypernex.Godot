@@ -120,7 +120,10 @@ namespace Hypernex.Game
             if (IsInstanceValid(Avatar) && !Init.IsVRLoaded)
             {
                 if (IsLocal)
+                {
                     Avatar.ProcessIk(false, true, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
+                    Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
+                }
                 else
                     Avatar.ProcessIk(false, false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);
             }
@@ -160,7 +163,7 @@ namespace Hypernex.Game
                     ObjectLocation = "head",
                     IgnoreObjectLocation = true,
                     Position = Avatar.HeadTransform.Position.ToFloat3(),
-                    Rotation = Avatar.HeadTransform.Basis.Orthonormalized().GetRotationQuaternion().ToFloat4(),
+                    Rotation = Avatar.HeadTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
                     Size = Vector3.One.ToFloat3(),
                 });
                 dict.Add(LeftHandId, new NetworkedObject()
@@ -168,7 +171,7 @@ namespace Hypernex.Game
                     ObjectLocation = "left_hand",
                     IgnoreObjectLocation = true,
                     Position = Avatar.LeftHandTransform.Position.ToFloat3(),
-                    Rotation = Avatar.LeftHandTransform.Basis.Orthonormalized().GetRotationQuaternion().ToFloat4(),
+                    Rotation = Avatar.LeftHandTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
                     Size = Vector3.One.ToFloat3(),
                 });
                 dict.Add(RightHandId, new NetworkedObject()
@@ -176,7 +179,7 @@ namespace Hypernex.Game
                     ObjectLocation = "right_hand",
                     IgnoreObjectLocation = true,
                     Position = Avatar.RightHandTransform.Position.ToFloat3(),
-                    Rotation = Avatar.RightHandTransform.Basis.Orthonormalized().GetRotationQuaternion().ToFloat4(),
+                    Rotation = Avatar.RightHandTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
                     Size = Vector3.One.ToFloat3(),
                 });
             }
