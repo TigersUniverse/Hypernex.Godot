@@ -129,6 +129,17 @@ namespace Hypernex.Tools
             });
         }
 
+        public static void GetAvatarMeta(string avatarId, Action<AvatarMeta> callback)
+        {
+            APIObject.GetAvatarMeta(result =>
+            {
+                if (result.success)
+                    QuickInvoke.InvokeActionOnMainThread(callback, result.result.Meta);
+                else
+                    QuickInvoke.InvokeActionOnMainThread(callback, (AvatarMeta)null);
+            }, avatarId);
+        }
+
         public static void GetWorldMeta(string worldId, Action<WorldMeta> callback)
         {
             if (CachedWorldMeta.Any(x => x.Id == worldId))
@@ -149,6 +160,49 @@ namespace Hypernex.Tools
                 else
                     QuickInvoke.InvokeActionOnMainThread(callback, (WorldMeta)null);
             }, worldId);
+        }
+
+        public static void UploadAvatar(string fullPath, AvatarMeta meta, Action<bool, string> callback = null)
+        {
+            AvatarMeta metaFinal = new AvatarMeta(meta.Id, meta.OwnerId, meta.Publicity, meta.Name, meta.Description, meta.ImageURL);
+            try
+            {
+                FileStream fs = new FileStream(fullPath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Delete | FileShare.Read);
+                if (fs.Length > 1048576 * 90)
+                {
+                    string tempDir = Path.Combine(OS.GetUserDataDir(), "file_parts");
+                    Directory.CreateDirectory(tempDir);
+                    APIObject.UploadPart(result =>
+                    {
+                        fs.Dispose();
+                        Directory.Delete(tempDir, true);
+                        if (result.success)
+                            Logger.CurrentLogger.Log("Uploaded avatar!");
+                        else
+                            Logger.CurrentLogger.Error($"Failed to upload avatar! {result.message}");
+                        if (callback != null)
+                            QuickInvoke.InvokeActionOnMainThread(callback, result.success, result.message);
+                    }, CurrentUser, CurrentToken, fs, tempDir, avatarMeta: metaFinal);
+                }
+                else
+                {
+                    APIObject.UploadAvatar(result =>
+                    {
+                        fs.Dispose();
+                        if (result.success)
+                            Logger.CurrentLogger.Log("Uploaded avatar!");
+                        else
+                            Logger.CurrentLogger.Error($"Failed to upload avatar! {result.message}");
+                        if (callback != null)
+                            QuickInvoke.InvokeActionOnMainThread(callback, result.success, result.message);
+                    }, CurrentUser, CurrentToken, fs, metaFinal);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.CurrentLogger.Error(e);
+                callback?.Invoke(false, e.Message);
+            }
         }
 
         public static void UploadWorld(string fullPath, WorldMeta meta, Action<bool, string> callback = null)

@@ -77,7 +77,6 @@ namespace Hypernex.Game
 
         public override void _Ready()
         {
-            // Position = Vector3.Zero;
             UpdateLoop();
             LoadAvatar("user://skeleton.hna");
         }

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://j14hews4kqtu"]
+[gd_scene load_steps=3 format=3 uid="uid://j14hews4kqtu"]
 
 [ext_resource type="Script" path="res://scripts/ui/CCKController.cs" id="1_r2ofs"]
+[ext_resource type="Script" path="res://scripts/ui/CCKUploadController.cs" id="2_rjuw4"]
 
 [node name="CCKController" type="Control"]
 layout_mode = 3
@@ -10,28 +11,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CCK" type="Node" parent="." node_paths=PackedStringArray("worldLabel", "worldOptions", "worldMetaLabel", "dialog", "worldNameEdit", "worldDescriptionEdit")]
+[node name="CCK" type="Node" parent="." node_paths=PackedStringArray("dialog")]
 script = ExtResource("1_r2ofs")
-worldLabel = NodePath("../VBoxContainer/WorldFileLabel")
-worldOptions = NodePath("../VBoxContainer/SelectWorldMeta")
-worldMetaLabel = NodePath("../VBoxContainer/WorldMetaLabel")
 dialog = NodePath("../AcceptDialog")
-worldNameEdit = NodePath("../VBoxContainer/WorldNameEdit")
-worldDescriptionEdit = NodePath("../VBoxContainer/WorldDescEdit")
-
-[node name="FileDialog" type="FileDialog" parent="."]
-title = "Open a File"
-initial_position = 2
-ok_button_text = "Open"
-file_mode = 0
-access = 2
-filters = PackedStringArray("*.hnw;Hypernex World")
-use_native_dialog = true
 
 [node name="AcceptDialog" type="AcceptDialog" parent="."]
 initial_position = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,74 +26,197 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="World" type="VBoxContainer" parent="ScrollContainer/TabContainer"]
+layout_mode = 2
+
+[node name="FileUploader" type="Node" parent="ScrollContainer/TabContainer/World" node_paths=PackedStringArray("cck", "worldLabel", "worldOptions", "worldMetaLabel", "worldNameEdit", "worldDescriptionEdit")]
+script = ExtResource("2_rjuw4")
+cck = NodePath("../../../../CCK")
+worldLabel = NodePath("../WorldFileLabel")
+worldOptions = NodePath("../SelectWorldMeta")
+worldMetaLabel = NodePath("../WorldMetaLabel")
+worldNameEdit = NodePath("../WorldNameEdit")
+worldDescriptionEdit = NodePath("../WorldDescEdit")
+
+[node name="FileDialog" type="FileDialog" parent="ScrollContainer/TabContainer/World"]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(335, 159)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.hna;Hypernex World")
+use_native_dialog = true
+
+[node name="Label" type="Label" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Local World File"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SelectWorldFile" type="Button" parent="VBoxContainer"]
+[node name="SelectWorldFile" type="Button" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 text = "Select World File"
 
-[node name="WorldFileLabel" type="RichTextLabel" parent="VBoxContainer"]
+[node name="WorldFileLabel" type="RichTextLabel" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 bbcode_enabled = true
 fit_content = true
 shortcut_keys_enabled = false
 
-[node name="LoadWorldFile" type="Button" parent="VBoxContainer"]
+[node name="LoadWorldFile" type="Button" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 text = "Load Selected World"
 
-[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="VBoxContainer"]
+[node name="Label2" type="Label" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Online World Asset"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SelectWorldMeta" type="OptionButton" parent="VBoxContainer"]
+[node name="SelectWorldMeta" type="OptionButton" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 allow_reselect = true
 
-[node name="WorldMetaLabel" type="RichTextLabel" parent="VBoxContainer"]
+[node name="WorldMetaLabel" type="RichTextLabel" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 bbcode_enabled = true
 fit_content = true
 shortcut_keys_enabled = false
 
-[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="VBoxContainer"]
+[node name="Label3" type="Label" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "World Information"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="WorldNameEdit" type="LineEdit" parent="VBoxContainer"]
+[node name="WorldNameEdit" type="LineEdit" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 placeholder_text = "World Name"
 
-[node name="WorldDescEdit" type="TextEdit" parent="VBoxContainer"]
+[node name="WorldDescEdit" type="TextEdit" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 placeholder_text = "World Description"
 scroll_fit_content_height = true
 
-[node name="Upload" type="Button" parent="VBoxContainer"]
+[node name="Upload" type="Button" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 text = "Upload World"
 
-[connection signal="visibility_changed" from="." to="CCK" method="RefreshWorlds"]
-[connection signal="canceled" from="FileDialog" to="CCK" method="ClearSelectedWorld"]
-[connection signal="file_selected" from="FileDialog" to="CCK" method="WorldSelected"]
-[connection signal="pressed" from="VBoxContainer/SelectWorldFile" to="FileDialog" method="show"]
-[connection signal="pressed" from="VBoxContainer/LoadWorldFile" to="CCK" method="LoadSelectedWorld"]
-[connection signal="item_selected" from="VBoxContainer/SelectWorldMeta" to="CCK" method="WorldMetaSelected"]
-[connection signal="pressed" from="VBoxContainer/Upload" to="CCK" method="UploadSelectedWorld"]
+[node name="Avatar" type="VBoxContainer" parent="ScrollContainer/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="FileUploader" type="Node" parent="ScrollContainer/TabContainer/Avatar" node_paths=PackedStringArray("cck", "worldLabel", "worldOptions", "worldMetaLabel", "worldNameEdit", "worldDescriptionEdit")]
+script = ExtResource("2_rjuw4")
+cck = NodePath("../../../../CCK")
+fileType = 1
+worldLabel = NodePath("../AvatarFileLabel")
+worldOptions = NodePath("../AvatarSelectMeta")
+worldMetaLabel = NodePath("../AvatarMetaLabel")
+worldNameEdit = NodePath("../AvatarNameEdit")
+worldDescriptionEdit = NodePath("../AvatarDescEdit")
+
+[node name="FileDialog" type="FileDialog" parent="ScrollContainer/TabContainer/Avatar"]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(335, 159)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.hna;Hypernex Avatar")
+use_native_dialog = true
+
+[node name="Label" type="Label" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Local Avatar File"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AvatarSelectFile" type="Button" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+text = "Select Avatar File"
+
+[node name="AvatarFileLabel" type="RichTextLabel" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+shortcut_keys_enabled = false
+
+[node name="AvatarLoadFile" type="Button" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+disabled = true
+text = "Load Selected Avatar"
+
+[node name="HSeparator" type="HSeparator" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Online Avatar Asset"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AvatarSelectMeta" type="OptionButton" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+allow_reselect = true
+
+[node name="AvatarMetaLabel" type="RichTextLabel" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+shortcut_keys_enabled = false
+
+[node name="HSeparator2" type="HSeparator" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Avatar Information"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AvatarNameEdit" type="LineEdit" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+placeholder_text = "Avatar Name"
+
+[node name="AvatarDescEdit" type="TextEdit" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+placeholder_text = "Avatar Description"
+scroll_fit_content_height = true
+
+[node name="Upload" type="Button" parent="ScrollContainer/TabContainer/Avatar"]
+layout_mode = 2
+text = "Upload Avatar"
+
+[connection signal="visibility_changed" from="ScrollContainer/TabContainer/World" to="ScrollContainer/TabContainer/World/FileUploader" method="RefreshWorlds"]
+[connection signal="canceled" from="ScrollContainer/TabContainer/World/FileDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="ClearSelectedWorld"]
+[connection signal="file_selected" from="ScrollContainer/TabContainer/World/FileDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldSelected"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/World/SelectWorldFile" to="ScrollContainer/TabContainer/World/FileDialog" method="show"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/World/LoadWorldFile" to="ScrollContainer/TabContainer/World/FileUploader" method="LoadSelectedWorld"]
+[connection signal="item_selected" from="ScrollContainer/TabContainer/World/SelectWorldMeta" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldMetaSelected"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/World/Upload" to="ScrollContainer/TabContainer/World/FileUploader" method="UploadSelectedWorld"]
+[connection signal="visibility_changed" from="ScrollContainer/TabContainer/Avatar" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="RefreshWorlds"]
+[connection signal="canceled" from="ScrollContainer/TabContainer/Avatar/FileDialog" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="ClearSelectedWorld"]
+[connection signal="file_selected" from="ScrollContainer/TabContainer/Avatar/FileDialog" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="WorldSelected"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/Avatar/AvatarSelectFile" to="ScrollContainer/TabContainer/Avatar/FileDialog" method="show"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/Avatar/AvatarLoadFile" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="LoadSelectedWorld"]
+[connection signal="item_selected" from="ScrollContainer/TabContainer/Avatar/AvatarSelectMeta" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="WorldMetaSelected"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/Avatar/Upload" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="UploadSelectedWorld"]
