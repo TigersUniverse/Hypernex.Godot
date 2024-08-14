@@ -92,16 +92,16 @@ namespace Hypernex.Game
                 root.GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
                 root.Scale = scale;
 
+                ikSystem.hips.GlobalPosition = head.Origin + (Vector3.Down * ikSystem.hipsDistance);
+                Vector3 headScl = ikSystem.headTarget.Scale;
+                ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
+                ikSystem.headTarget.Scale = headScl;
+
                 if (!vr)
                 {
                     CalcIk();
                     return;
                 }
-
-                ikSystem.hips.GlobalPosition = head.Origin + (Vector3.Down * ikSystem.hipsDistance);
-                Vector3 headScl = ikSystem.headTarget.Scale;
-                ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
-                ikSystem.headTarget.Scale = headScl;
 
                 Vector3 leftScl = ikSystem.leftHandData.target.Scale;
                 ikSystem.leftHandData.target.GlobalTransform = leftHand.RotatedLocal(Vector3.Up, Mathf.Pi);

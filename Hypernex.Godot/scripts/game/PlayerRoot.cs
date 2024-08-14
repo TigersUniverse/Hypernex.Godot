@@ -112,7 +112,7 @@ namespace Hypernex.Game
         {
             if (IsInstanceValid(Avatar) && !Init.IsVRLoaded)
             {
-                Avatar.ProcessIk(false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);
+                Avatar.ProcessIk(false, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
             }
         }
 
