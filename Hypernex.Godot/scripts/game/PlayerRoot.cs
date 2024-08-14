@@ -108,6 +108,14 @@ namespace Hypernex.Game
             }
         }
 
+        public override void _Process(double delta)
+        {
+            if (IsInstanceValid(Avatar) && !Init.IsVRLoaded)
+            {
+                Avatar.ProcessIk(false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);
+            }
+        }
+
         public override void _PhysicsProcess(double delta)
         {
             if (!IsLocal)

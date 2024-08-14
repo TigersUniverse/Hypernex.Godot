@@ -137,7 +137,7 @@ public partial class IKSystem : Node
         return t.Basis.Inverse() * v;
     }
 
-    private float GetScale()
+    public float GetScale()
     {
         return humanoid.GlobalBasis.Scale.Z;
     }
@@ -156,10 +156,12 @@ public partial class IKSystem : Node
             rightFootData.ik.Enabled = footIk;
         if (IsInstanceValid(hips) && IsInstanceValid(head) && IsInstanceValid(headTarget))
         {
-            hips.Position = hips.GetParentNode3D().ToLocal(headTarget.GlobalPosition) - hips.GetParentNode3D().ToLocal(direction);
+            // hips.Position = hips.GetParentNode3D().ToLocal(headTarget.GlobalPosition) - hips.GetParentNode3D().ToLocal(direction);
             // hips.Position = hips.GetParentNode3D().InverseTransformPoint(headTarget.GlobalPosition) - hips.GetParentNode3D().InverseTransformVector(direction);
+            Vector3 scl = head.Scale;
             head.GlobalPosition = headTarget.GlobalPosition;
             head.GlobalBasis = headTarget.GlobalBasis;
+            head.Scale = scl;
         }
 
         Vector3 vel = hips.GlobalPosition - hipsPos;
@@ -371,12 +373,14 @@ public partial class IKSystem : Node
                 leftHandData.pole.GlobalPosition = head.GlobalPosition - right * scl - forward * scl + up * 0.5f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
-                leftHand.AddChild(ik);
+                // leftHand.AddChild(ik);
+                ik.Enabled = false;
                 ik.Target = leftHandData.target;
                 ik.Pole = leftHandData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                ik.Init();
+                // ik.Init();
+                leftHand.AddChild(ik);
                 leftHandData.ik = ik;
             }
             // right hand
@@ -389,12 +393,14 @@ public partial class IKSystem : Node
                 rightHandData.pole.GlobalPosition = head.GlobalPosition + right * scl - forward * scl + up * 0.5f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
-                rightHand.AddChild(ik);
+                // rightHand.AddChild(ik);
+                ik.Enabled = false;
                 ik.Target = rightHandData.target;
                 ik.Pole = rightHandData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                ik.Init();
+                // ik.Init();
+                rightHand.AddChild(ik);
                 rightHandData.ik = ik;
             }
 
@@ -404,16 +410,18 @@ public partial class IKSystem : Node
                 humanoid.AddChild(leftFootData.target);
                 leftFootData.target.GlobalTransform = leftFoot.GlobalTransform;
                 leftFootData.pole = new Node3D() { Name = "LeftFoot_Pole" };
-                hips.AddChild(leftFootData.pole);
+                leftUpperLeg.AddChild(leftFootData.pole);
                 leftFootData.pole.GlobalPosition = leftUpperLeg.GlobalPosition - right * 0.25f * scl + forward * 1.5f * scl + up * 0.9f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
-                leftFoot.AddChild(ik);
+                // leftFoot.AddChild(ik);
+                ik.Enabled = false;
                 ik.Target = leftFootData.target;
                 ik.Pole = leftFootData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                ik.Init();
+                // ik.Init();
+                leftFoot.AddChild(ik);
                 leftFootData.ik = ik;
                 leftFootPos = leftFoot.GlobalPosition;
             }
@@ -423,16 +431,18 @@ public partial class IKSystem : Node
                 humanoid.AddChild(rightFootData.target);
                 rightFootData.target.GlobalTransform = rightFoot.GlobalTransform;
                 rightFootData.pole = new Node3D() { Name = "RightFoot_Pole" };
-                hips.AddChild(rightFootData.pole);
+                rightUpperLeg.AddChild(rightFootData.pole);
                 rightFootData.pole.GlobalPosition = rightUpperLeg.GlobalPosition + right * 0.25f * scl + forward * 1.5f * scl + up * 0.9f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
-                rightFoot.AddChild(ik);
+                // rightFoot.AddChild(ik);
+                ik.Enabled = false;
                 ik.Target = rightFootData.target;
                 ik.Pole = rightFootData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                ik.Init();
+                // ik.Init();
+                rightFoot.AddChild(ik);
                 rightFootData.ik = ik;
                 rightFootPos = rightFoot.GlobalPosition;
             }
@@ -522,12 +532,12 @@ public partial class IKSystem : Node
         DestroyIKData(rightHandData);
         DestroyIKData(leftFootData);
         DestroyIKData(rightFootData);
-        head.OverridePose = false;
-        hips.OverridePose = false;
-        leftHand.OverridePose = false;
-        rightHand.OverridePose = false;
-        leftFoot.OverridePose = false;
-        rightFoot.OverridePose = false;
+        // head.OverridePose = false;
+        // hips.OverridePose = false;
+        // leftHand.OverridePose = false;
+        // rightHand.OverridePose = false;
+        // leftFoot.OverridePose = false;
+        // rightFoot.OverridePose = false;
     }
 
 #if false

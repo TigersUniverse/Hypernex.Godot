@@ -95,6 +95,7 @@ namespace DitzelGames.FastIK
 
             public BoneData(Skeleton3D skeleton, int idx)
             {
+                throw new Exception();
                 Node = skeleton;
                 BoneIndex = idx;
             }
@@ -105,7 +106,7 @@ namespace DitzelGames.FastIK
                 if (node is BoneAttachment3D boneAttachment)
                 {
                     Skeleton3D skeleton = boneAttachment.GetUseExternalSkeleton() ? boneAttachment.GetNode<Skeleton3D>(boneAttachment.GetExternalSkeleton()) : boneAttachment.GetParent<Skeleton3D>();
-                    Node = skeleton;
+                    // Node = skeleton;
                     BoneIndex = boneAttachment.BoneIdx;
                 }
                 else
@@ -116,12 +117,36 @@ namespace DitzelGames.FastIK
             {
                 if (!IsInstanceValid(Node))
                     return null;
+                /*
                 if (Node is BoneAttachment3D boneAttachment)
                 {
                     Skeleton3D skeleton = boneAttachment.GetUseExternalSkeleton() ? boneAttachment.GetNode<Skeleton3D>(boneAttachment.GetExternalSkeleton()) : boneAttachment.GetParent<Skeleton3D>();
                     int idx = skeleton.GetBoneParent(boneAttachment.BoneIdx);
                     if (idx == -1)
                         return null;
+                    // /*
+                    foreach (var ch in skeleton.GetChildren())
+                    {
+                        if (ch is BoneAttachment3D b)
+                        {
+                            if (b.BoneIdx == idx)
+                            {
+                                // boneAttachment.Reparent(b);
+                                return new BoneData(b);
+                            }
+                        }
+                    }
+                    return new BoneData(Node.GetParentNode3D());
+                    BoneAttachment3D a = new BoneAttachment3D()
+                    {
+                        BoneIdx = idx,
+                        OverridePose = true,
+                        Transform = skeleton.GetBoneGlobalRest(idx),
+                    };
+                    skeleton.AddChild(a);
+                    // boneAttachment.Reparent(a);
+                    return new BoneData(a);
+                    // *
                     return new BoneData(skeleton, idx);
                 }
                 else if (Node is Skeleton3D skeleton)
@@ -131,6 +156,7 @@ namespace DitzelGames.FastIK
                         return null;
                     return new BoneData(skeleton, idx);
                 }
+                */
                 return new BoneData(Node.GetParentNode3D());
             }
         }
@@ -259,7 +285,7 @@ namespace DitzelGames.FastIK
 
             if (BonesLength.Length != ChainLength)
                 Init();
-
+            
             //Fabric
 
             //  root

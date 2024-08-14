@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=18 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/ui/FriendsController.cs" id="4_1wv3s"]
 [ext_resource type="Theme" uid="uid://1cua8ppjbi8u" path="res://themes/main_theme.tres" id="4_f5hfe"]
 [ext_resource type="Script" path="res://scripts/ui/ThemeManager.cs" id="4_ju6j5"]
+[ext_resource type="PackedScene" uid="uid://d3kcsxyx7aa6i" path="res://scenes/vr_rig.tscn" id="4_yte2b"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="5_m63s1"]
 [ext_resource type="Script" path="res://scripts/ui/RequestsController.cs" id="6_0f1ly"]
 [ext_resource type="Script" path="res://scripts/ui/WorldsController.cs" id="7_yw38d"]
@@ -34,6 +35,7 @@ loadingOverlay = NodePath("UI/LoadingIcon/Controller")
 ui = NodePath("UI")
 localPlayerScene = ExtResource("9_cj1hm")
 remotePlayerScene = ExtResource("3_gx5fr")
+vrRigScene = ExtResource("4_yte2b")
 
 [node name="ThemeManager" type="Node" parent="."]
 script = ExtResource("4_ju6j5")

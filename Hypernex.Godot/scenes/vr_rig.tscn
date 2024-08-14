@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3 uid="uid://d3kcsxyx7aa6i"]
+
+[ext_resource type="Script" path="res://scripts/VRRig.cs" id="1_1xyfp"]
+
+[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "openMenuWarning")]
+script = ExtResource("1_1xyfp")
+origin = NodePath("SubViewport/Origin")
+head = NodePath("SubViewport/Origin/Head")
+leftHand = NodePath("SubViewport/Origin/Left")
+rightHand = NodePath("SubViewport/Origin/Right")
+openMenuWarning = NodePath("SubViewport/Origin/Head/Label3D")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+use_xr = true
+use_debanding = true
+use_occlusion_culling = true
+vrs_mode = 3
+size = Vector2i(0, 0)
+
+[node name="Origin" type="XROrigin3D" parent="SubViewport"]
+
+[node name="Head" type="XRCamera3D" parent="SubViewport/Origin"]
+
+[node name="Label3D" type="Label3D" parent="SubViewport/Origin/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+double_sided = false
+no_depth_test = true
+modulate = Color(1, 0, 0, 1)
+text = "Menu is open!
+Use desktop."
+
+[node name="Left" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"left_hand"
+
+[node name="Right" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"right_hand"

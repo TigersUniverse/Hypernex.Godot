@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
@@ -15,14 +16,6 @@ namespace Hypernex.Game
         public Node3D target;
         public List<Node> Objects = new List<Node>();
         public List<ScriptRunner> Runners = new List<ScriptRunner>();
-
-        public override void _PhysicsProcess(double delta)
-        {
-            Vector3 scale = descriptor.GetSkeleton().Scale;
-            descriptor.GetSkeleton().GlobalPosition = target.GlobalPosition;
-            descriptor.GetSkeleton().GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
-            descriptor.GetSkeleton().Scale = scale;
-        }
 
         public void AddObject(Node worldObject)
         {
@@ -56,46 +49,158 @@ namespace Hypernex.Game
             InitIk();
         }
 
-        public void InitIk()
+        public async void InitIk()
         {
             if (IsInstanceValid(ikSystem))
                 ikSystem.QueueFree();
             ikSystem = new IKSystem();
             // ikSystem.forwardNode = target;
             ikSystem.humanoid = descriptor.GetSkeleton();
-            ikSystem.SnapBackStrength = 1f;
+            ikSystem.SnapBackStrength = 0f;
             ikSystem.minStepHeight = 0f;
             ikSystem.maxStepHeight = 0.4f;
             ikSystem.minStepLength = -0.4f;
             ikSystem.maxStepLength = 0.4f;
-            ikSystem.head = GetBone("Head");
-            ikSystem.hips = GetBone("Hips");
-            ikSystem.leftHand = GetBone("LeftHand");
-            ikSystem.rightHand = GetBone("RightHand");
-            ikSystem.leftUpperLeg = GetBone("LeftUpperLeg");
-            ikSystem.rightUpperLeg = GetBone("RightUpperLeg");
-            ikSystem.leftFoot = GetBone("LeftFoot");
-            ikSystem.rightFoot = GetBone("RightFoot");
+            CreateBoneTree();
+            ikSystem.head = FindBone("Head");
+            ikSystem.hips = FindBone("Hips");
+            ikSystem.leftHand = FindBone("LeftHand");
+            ikSystem.rightHand = FindBone("RightHand");
+            ikSystem.leftUpperLeg = FindBone("LeftUpperLeg");
+            ikSystem.rightUpperLeg = FindBone("RightUpperLeg");
+            ikSystem.leftFoot = FindBone("LeftFoot");
+            ikSystem.rightFoot = FindBone("RightFoot");
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             AddChild(ikSystem);
         }
 
-        public BoneAttachment3D GetBone(string bone)
+        private void CalcIk()
+        {
+            ikSystem.leftHandData.ik.ResolveIK();
+            ikSystem.rightHandData.ik.ResolveIK();
+            ikSystem.leftFootData.ik.ResolveIK();
+            ikSystem.rightFootData.ik.ResolveIK();
+        }
+
+        public void ProcessIk(bool vr, Transform3D head, Transform3D leftHand, Transform3D rightHand)
+        {
+            if (IsInstanceValid(ikSystem) && ikSystem.IsNodeReady())
+            {
+                Node3D root = ikSystem.humanoid;
+                Vector3 scale = root.Scale;
+                root.GlobalPosition = target.GlobalPosition;
+                root.GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
+                root.Scale = scale;
+
+                if (!vr)
+                {
+                    CalcIk();
+                    return;
+                }
+
+                ikSystem.hips.GlobalPosition = head.Origin + (Vector3.Down * ikSystem.hipsDistance);
+                Vector3 headScl = ikSystem.headTarget.Scale;
+                ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
+                ikSystem.headTarget.Scale = headScl;
+
+                Vector3 leftScl = ikSystem.leftHandData.target.Scale;
+                ikSystem.leftHandData.target.GlobalTransform = leftHand.RotatedLocal(Vector3.Up, Mathf.Pi);
+                ikSystem.leftHandData.target.Scale = leftScl;
+
+                Vector3 rightScl = ikSystem.rightHandData.target.Scale;
+                ikSystem.rightHandData.target.GlobalTransform = rightHand.RotatedLocal(Vector3.Up, Mathf.Pi);
+                ikSystem.rightHandData.target.Scale = rightScl;
+
+                CalcIk();
+            }
+        }
+
+        public void ResetPose(BoneAttachment3D bone)
+        {
+            bone.Transform = descriptor.GetSkeleton().GetBoneGlobalRest(bone.BoneIdx);
+        }
+
+        public void ResetPose(string bone)
         {
             foreach (var ch in descriptor.GetSkeleton().GetChildren())
             {
                 if (ch is BoneAttachment3D boneAttachment)
                 {
                     if (boneAttachment.BoneName == bone)
+                    {
+                        ResetPose(boneAttachment);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public void CreateBoneTree(int idx)
+        {
+            Skeleton3D skeleton = descriptor.GetSkeleton();
+            int parent = skeleton.GetBoneParent(idx);
+            BoneAttachment3D bone = SetupBone(idx);
+            if (parent == -1)
+                skeleton.AddChild(bone);
+            else
+                FindBone(parent).AddChild(bone);
+            bone.SetExternalSkeleton(bone.GetPathTo(skeleton));
+            int[] children = skeleton.GetBoneChildren(idx);
+            foreach (var ch in children)
+            {
+                CreateBoneTree(ch);
+            }
+        }
+
+        public void CreateBoneTree()
+        {
+            Skeleton3D skeleton = descriptor.GetSkeleton();
+            List<int> bones = skeleton.GetParentlessBones().ToList();
+            foreach (var idx in bones)
+            {
+                CreateBoneTree(idx);
+            }
+        }
+
+        public BoneAttachment3D SetupBone(int idx)
+        {
+            Skeleton3D skeleton = descriptor.GetSkeleton();
+            BoneAttachment3D final = new BoneAttachment3D();
+            final.SetUseExternalSkeleton(true);
+            final.Name = skeleton.GetBoneName(idx);
+            final.BoneIdx = idx;
+            final.OverridePose = true;
+            final.Transform = descriptor.GetSkeleton().GetBoneRest(idx);
+            return final;
+        }
+
+        public Node3D FindBone(int idx)
+        {
+            foreach (var ch in descriptor.GetSkeleton().FindChildren("*", owned: false))
+            {
+                if (ch is BoneAttachment3D boneAttachment)
+                {
+                    if (boneAttachment.BoneIdx == idx || (!string.IsNullOrEmpty(boneAttachment.BoneName) && boneAttachment.BoneName == descriptor.GetSkeleton().GetBoneName(idx)))
                         return boneAttachment;
                 }
             }
-            BoneAttachment3D final = new BoneAttachment3D();
-            final.Name = bone;
-            final.BoneName = bone;
-            final.OverridePose = true;
-            final.Transform = descriptor.GetSkeleton().GetBoneGlobalPose(descriptor.GetSkeleton().FindBone(bone));
-            descriptor.GetSkeleton().AddChild(final);
-            return final;
+            return null;
+        }
+
+        public BoneAttachment3D FindBone(string bone)
+        {
+            foreach (var ch in descriptor.GetSkeleton().FindChildren("*", owned: false))
+            {
+                if (ch is BoneAttachment3D boneAttachment)
+                {
+                    if (boneAttachment.BoneName == bone || (boneAttachment.BoneIdx != -1 && boneAttachment.BoneIdx == descriptor.GetSkeleton().FindBone(bone)))
+                    {
+                        GD.Print(bone);
+                        return boneAttachment;
+                    }
+                }
+            }
+            return null;
         }
 
         public static AvatarRoot LoadFromFile(string path)

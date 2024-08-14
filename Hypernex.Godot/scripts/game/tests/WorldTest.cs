@@ -16,22 +16,30 @@ namespace Hypernex.Game.Tests
         [Export]
         public Node3D target;
         [Export]
+        public Node3D target2;
+        [Export]
+        public Node3D target3;
+        [Export]
         public bool save = false;
         [Export]
         public bool load = false;
+
+        private AvatarRoot avatar;
 
         public override async void _Ready()
         {
             GDLogger logger = new GDLogger();
             logger.SetLogger();
             await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
+            /*
             new Thread(() =>
             {
                 var root = WorldRoot.LoadFromFile("user://slender.hnw");
                 // Thread.Sleep(1000);
                 CallDeferred(Node.MethodName.AddChild, root);
             }).Start();
-            var avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
+            */
+            avatar = AvatarRoot.LoadFromFile("user://gman.hna");
             AddChild(avatar);
             avatar.AttachTo(target);
             // RunTest();
@@ -41,6 +49,7 @@ namespace Hypernex.Game.Tests
         {
             float s = Time.GetTicksMsec() / 1000f;
             target.Position = new Vector3(Mathf.Cos(s), 0f, Mathf.Sin(s));
+            avatar.ProcessIk(true, target3.GlobalTransform, target2.GlobalTransform, target2.GlobalTransform);
         }
 
         public void RunTest()

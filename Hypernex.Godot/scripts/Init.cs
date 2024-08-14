@@ -28,8 +28,16 @@ public partial class Init : Node
     public PackedScene localPlayerScene;
     [Export]
     public PackedScene remotePlayerScene;
+    [Export]
+    public PackedScene vrRigScene;
+
+    public Node3D vrRig;
+
     public static Node worldsRoot;
     private static IntPtr fliteLibHandle = IntPtr.Zero;
+
+    public static XRInterface xrInterface;
+    public static bool IsVRLoaded => xrInterface != null && xrInterface.IsInitialized();
 
     public override void _Ready()
     {
@@ -155,6 +163,19 @@ public partial class Init : Node
         }
     }
 
+    public void InitXR()
+    {
+        xrInterface = XRServer.FindInterface("OpenXR");
+        if (xrInterface != null && xrInterface.IsInitialized())
+        {
+            DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
+            if (xrInterface is OpenXRInterface openxr)
+            {
+                Engine.PhysicsTicksPerSecond = (int)openxr.DisplayRefreshRate;
+            }
+        }
+    }
+
     public void SetupAndRunGame()
     {
         APITools.OnUserLogin += user =>
@@ -173,6 +194,13 @@ public partial class Init : Node
             overlay.root.Hide();
             login.root.Show();
         };
+
+        InitXR();
+        if (IsVRLoaded)
+        {
+            vrRig = vrRigScene.Instantiate<Node3D>();
+            AddChild(vrRig);
+        }
 
         ui.Show();
         overlay.root.Hide();
