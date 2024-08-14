@@ -405,6 +405,8 @@ namespace Hypernex.CCK.GodotVersion
 
         public void ReadZip(string path)
         {
+            if (charArr == null)
+                charArr = new List<char>();
             reader = new ZipReader();
             Error err = reader.Open(path);
             if (err != Error.Ok)
@@ -684,7 +686,7 @@ namespace Hypernex.CCK.GodotVersion
             return tscn;
         }
 
-        // [ThreadStatic]
+        [ThreadStatic]
         public static List<char> charArr = new List<char>();
 
         public static ParsedTres ParseTres(string path, string data)

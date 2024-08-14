@@ -117,7 +117,8 @@ namespace Hypernex.Game
                 if (IsLocal && !Init.IsVRLoaded)
                 {
                     Avatar.ProcessIk(false, true, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
-                    Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
+                    if (IsInstanceValid(Avatar.ikSystem))
+                        Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
                 }
                 else if (!IsLocal)
                     Avatar.ProcessIk(false, false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);
