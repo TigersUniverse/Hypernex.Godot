@@ -1,5 +1,6 @@
 using Godot;
 using Hypernex.Game;
+using Hypernex.Player;
 
 public partial class VRRig : Node3D
 {
@@ -17,7 +18,7 @@ public partial class VRRig : Node3D
 
     public override void _Ready()
     {
-        XRServer.WorldScale = 1.5d;
+        XRServer.WorldScale = 1d;
     }
 
     public override void _Process(double delta)
@@ -27,9 +28,13 @@ public partial class VRRig : Node3D
         {
             origin.GlobalPosition = PlayerRoot.Local.Controller.GlobalPosition;
             origin.GlobalRotation = PlayerRoot.Local.Controller.GlobalRotation;
+            PlayerInputs inputs = PlayerRoot.Local.GetPart<PlayerInputs>();
+            inputs.move = leftHand.GetVector2("primary") * new Vector2(1f, -1f);
+            inputs.lastMouseDelta.X = -rightHand.GetVector2("primary").X * (float)delta * Mathf.Pi;
             if (IsInstanceValid(PlayerRoot.Local.Avatar))
             {
                 PlayerRoot.Local.Avatar.ProcessIk(true, true, head.GlobalTransform, leftHand.GlobalTransform, rightHand.GlobalTransform);
+                PlayerRoot.Local.Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
             }
         }
     }

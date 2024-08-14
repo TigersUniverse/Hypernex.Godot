@@ -30,6 +30,8 @@ namespace Hypernex.Player
         {
             if (Input.MouseMode == Input.MouseModeEnum.Visible)
                 return;
+            if (Init.IsVRLoaded)
+                return;
             if (@event is InputEventMouseMotion mouseMotion)
             {
                 lastMouseDelta = mouseMotion.Relative * -0.01f;
@@ -58,6 +60,8 @@ namespace Hypernex.Player
 
         public virtual void ReadInput()
         {
+            if (Init.IsVRLoaded)
+                return;
             if (Input.IsActionJustReleased("chat_text"))
             {
                 textChatOpen = true;

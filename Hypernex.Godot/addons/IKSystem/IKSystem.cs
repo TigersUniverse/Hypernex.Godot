@@ -350,6 +350,7 @@ public partial class IKSystem : Node
             footDistance = leftFoot.GlobalPosition.DistanceTo(rightFoot.GlobalPosition);
             hipsDistance = hips.GlobalPosition.DistanceTo(head.GlobalPosition);
             float scale = 1f / GetScale();
+            float handPoleDist = -0.5f;
 
             Vector3 right = -humanoid.GlobalBasis.X.Normalized();
             Vector3 forward = humanoid.GlobalBasis.Z.Normalized();
@@ -370,7 +371,7 @@ public partial class IKSystem : Node
                 leftHandData.target.GlobalTransform = leftHand.GlobalTransform;
                 leftHandData.pole = new Node3D() { Name = "LeftHand_Pole" };
                 head.AddChild(leftHandData.pole);
-                leftHandData.pole.GlobalPosition = head.GlobalPosition - right * scl - forward * scl + up * 0.5f * scl;
+                leftHandData.pole.GlobalPosition = head.GlobalPosition - right * scl - forward * scl + up * handPoleDist * scl;
 
                 FastIKFabric ik = new FastIKFabric();
                 // leftHand.AddChild(ik);
@@ -390,7 +391,7 @@ public partial class IKSystem : Node
                 rightHandData.target.GlobalTransform = rightHand.GlobalTransform;
                 rightHandData.pole = new Node3D() { Name = "RightHand_Pole" };
                 head.AddChild(rightHandData.pole);
-                rightHandData.pole.GlobalPosition = head.GlobalPosition + right * scl - forward * scl + up * 0.5f * scl;
+                rightHandData.pole.GlobalPosition = head.GlobalPosition + right * scl - forward * scl + up * handPoleDist * scl;
 
                 FastIKFabric ik = new FastIKFabric();
                 // rightHand.AddChild(ik);

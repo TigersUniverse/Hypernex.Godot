@@ -117,14 +117,14 @@ namespace Hypernex.Game
 
         public override void _Process(double delta)
         {
-            if (IsInstanceValid(Avatar) && !Init.IsVRLoaded)
+            if (IsInstanceValid(Avatar))
             {
-                if (IsLocal)
+                if (IsLocal && !Init.IsVRLoaded)
                 {
                     Avatar.ProcessIk(false, true, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
                     Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
                 }
-                else
+                else if (!IsLocal)
                     Avatar.ProcessIk(false, false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);
             }
         }
