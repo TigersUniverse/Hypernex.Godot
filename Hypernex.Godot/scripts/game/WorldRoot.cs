@@ -93,6 +93,13 @@ namespace Hypernex.Game
             SafeLoader loader = new SafeLoader();
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
+            if (IsInstanceValid(Init.Instance))
+            {
+                QuickInvoke.InvokeActionOnMainThread(() =>
+                {
+                    Init.Instance.loadingOverlay.isLoading++;
+                });
+            }
             try
             {
                 loader.ReadZip(path);
@@ -100,6 +107,13 @@ namespace Hypernex.Game
             catch (Exception e)
             {
                 Logger.CurrentLogger.Critical(e);
+            }
+            if (IsInstanceValid(Init.Instance))
+            {
+                QuickInvoke.InvokeActionOnMainThread(() =>
+                {
+                    Init.Instance.loadingOverlay.isLoading--;
+                });
             }
             PackedScene scn = loader.scene;
             if (!IsInstanceValid(loader.scene))
