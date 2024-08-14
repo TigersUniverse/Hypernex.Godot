@@ -13,6 +13,11 @@ namespace Hypernex.Game
 {
     public partial class PlayerRoot : Node3D
     {
+        public const int RootId = 0;
+        public const int HeadId = 1;
+        public const int LeftHandId = 2;
+        public const int RightHandId = 3;
+
         public static PlayerRoot Local { get; private set; }
         [Export]
         public Node3D view;
@@ -32,8 +37,8 @@ namespace Hypernex.Game
         public AvatarRoot Avatar;
         public Action OnUserSet = () => { };
 
-        public Vector3 targetPos;
-        public Quaternion targetRot;
+        public Dictionary<int, Vector3> targetPos = new Dictionary<int, Vector3>();
+        public Dictionary<int, Quaternion> targetRot = new Dictionary<int, Quaternion>();
 
         public T GetPart<T>() where T : Node
         {
@@ -75,6 +80,8 @@ namespace Hypernex.Game
             UpdateLoop();
             if (IsInstanceValid(Avatar))
                 Avatar.QueueFree();
+            targetPos.Clear();
+            targetRot.Clear();
             Avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
             AddChild(Avatar);
             Avatar.AttachTo(Controller);
@@ -112,7 +119,10 @@ namespace Hypernex.Game
         {
             if (IsInstanceValid(Avatar) && !Init.IsVRLoaded)
             {
-                Avatar.ProcessIk(false, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
+                if (IsLocal)
+                    Avatar.ProcessIk(false, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
+                else
+                    Avatar.ProcessIk(false, Avatar.HeadTransform.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
             }
         }
 
@@ -121,8 +131,13 @@ namespace Hypernex.Game
             if (!IsLocal)
             {
                 float lerpSpeed = 10f;
-                Pos = Pos.Lerp(targetPos, (float)delta * lerpSpeed);
-                Rot = Rot.Slerp(targetRot, (float)delta * lerpSpeed);
+                LerpTarget(RootId, Controller, (float)delta * lerpSpeed);
+                if (IsInstanceValid(Avatar))
+                {
+                    LerpTarget(HeadId, Avatar.HeadTransform, (float)delta * lerpSpeed);
+                    LerpTarget(LeftHandId, Avatar.LeftHandTransform, (float)delta * lerpSpeed);
+                    LerpTarget(RightHandId, Avatar.RightHandTransform, (float)delta * lerpSpeed);
+                }
                 return;
             }
         }
@@ -130,7 +145,7 @@ namespace Hypernex.Game
         public Dictionary<int, NetworkedObject> GetObjects()
         {
             Dictionary<int, NetworkedObject> dict = new Dictionary<int, NetworkedObject>();
-            dict.Add(0, new Networking.Messages.Data.NetworkedObject()
+            dict.Add(RootId, new NetworkedObject()
             {
                 ObjectLocation = "root",
                 IgnoreObjectLocation = true,
@@ -138,7 +153,55 @@ namespace Hypernex.Game
                 Rotation = Rot.ToFloat4(),
                 Size = Vector3.One.ToFloat3(),
             });
+            if (IsInstanceValid(Avatar))
+            {
+                dict.Add(HeadId, new NetworkedObject()
+                {
+                    ObjectLocation = "head",
+                    IgnoreObjectLocation = true,
+                    Position = Avatar.HeadTransform.Position.ToFloat3(),
+                    Rotation = Avatar.HeadTransform.Basis.Orthonormalized().GetRotationQuaternion().ToFloat4(),
+                    Size = Vector3.One.ToFloat3(),
+                });
+                dict.Add(LeftHandId, new NetworkedObject()
+                {
+                    ObjectLocation = "left_hand",
+                    IgnoreObjectLocation = true,
+                    Position = Avatar.LeftHandTransform.Position.ToFloat3(),
+                    Rotation = Avatar.LeftHandTransform.Basis.Orthonormalized().GetRotationQuaternion().ToFloat4(),
+                    Size = Vector3.One.ToFloat3(),
+                });
+                dict.Add(RightHandId, new NetworkedObject()
+                {
+                    ObjectLocation = "right_hand",
+                    IgnoreObjectLocation = true,
+                    Position = Avatar.RightHandTransform.Position.ToFloat3(),
+                    Rotation = Avatar.RightHandTransform.Basis.Orthonormalized().GetRotationQuaternion().ToFloat4(),
+                    Size = Vector3.One.ToFloat3(),
+                });
+            }
             return dict;
+        }
+
+        public void LerpTarget(int id, Node3D node, float speed)
+        {
+            if (targetPos.ContainsKey(id) && targetRot.ContainsKey(id))
+            {
+                Vector3 scl = node.Scale;
+                node.Position = node.Position.Lerp(targetPos[id], speed);
+                node.Basis = node.Basis.Slerp(new Basis(targetRot[id]), speed);
+                node.Scale = scl;
+            }
+        }
+
+        public void SetTarget(int id, Vector3 position, Quaternion rotation)
+        {
+            if (!targetPos.ContainsKey(id))
+                targetPos.Add(id, Vector3.Zero);
+            if (!targetRot.ContainsKey(id))
+                targetRot.Add(id, Quaternion.Identity);
+            targetPos[id] = position;
+            targetRot[id] = rotation;
         }
 
         public void NetworkUpdate(PlayerUpdate playerUpdate)
@@ -164,6 +227,8 @@ namespace Hypernex.Game
                                 {
                                     if (IsInstanceValid(Avatar))
                                         Avatar.QueueFree();
+                                    targetPos.Clear();
+                                    targetRot.Clear();
                                     Avatar = AvatarRoot.LoadFromFile(o);
                                     AddChild(Avatar);
                                     Avatar.AttachTo(Controller);
@@ -187,10 +252,21 @@ namespace Hypernex.Game
 
         public void NetworkObjectUpdate(PlayerObjectUpdate playerObjectUpdate)
         {
-            if (playerObjectUpdate.Objects.TryGetValue(0, out var val))
+            if (playerObjectUpdate.Objects.TryGetValue(RootId, out var body))
             {
-                targetPos = val.Position.ToGodot3();
-                targetRot = val.Rotation.ToGodotQuat();
+                SetTarget(RootId, body.Position.ToGodot3(), body.Rotation.ToGodotQuat());
+            }
+            if (playerObjectUpdate.Objects.TryGetValue(HeadId, out var head))
+            {
+                SetTarget(HeadId, head.Position.ToGodot3(), head.Rotation.ToGodotQuat());
+            }
+            if (playerObjectUpdate.Objects.TryGetValue(LeftHandId, out var leftHand))
+            {
+                SetTarget(LeftHandId, leftHand.Position.ToGodot3(), leftHand.Rotation.ToGodotQuat());
+            }
+            if (playerObjectUpdate.Objects.TryGetValue(RightHandId, out var rightHand))
+            {
+                SetTarget(RightHandId, rightHand.Position.ToGodot3(), rightHand.Rotation.ToGodotQuat());
             }
         }
 

@@ -17,6 +17,10 @@ namespace Hypernex.Game
         public List<Node> Objects = new List<Node>();
         public List<ScriptRunner> Runners = new List<ScriptRunner>();
 
+        public Node3D HeadTransform => ikSystem.headTarget;
+        public Node3D LeftHandTransform => ikSystem.leftHandData.target;
+        public Node3D RightHandTransform => ikSystem.rightHandData.target;
+
         public void AddObject(Node worldObject)
         {
             if (Objects.Contains(worldObject))
@@ -195,7 +199,6 @@ namespace Hypernex.Game
                 {
                     if (boneAttachment.BoneName == bone || (boneAttachment.BoneIdx != -1 && boneAttachment.BoneIdx == descriptor.GetSkeleton().FindBone(bone)))
                     {
-                        GD.Print(bone);
                         return boneAttachment;
                     }
                 }

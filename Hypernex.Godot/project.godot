@@ -72,5 +72,10 @@ occlusion_culling/use_occlusion_culling=true
 
 [xr]
 
+openxr/enabled=true
+openxr/foveation_level=2
+openxr/foveation_dynamic=true
+openxr/submit_depth_buffer=true
 openxr/startup_alert=false
+openxr/extensions/eye_gaze_interaction=true
 shaders/enabled=true
