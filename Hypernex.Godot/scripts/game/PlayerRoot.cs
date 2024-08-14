@@ -221,6 +221,8 @@ namespace Hypernex.Game
 
         public void LoadAvatar(string path)
         {
+            if (IsInstanceValid(loadingSprite))
+                loadingSprite.Visible = false;
             targetPos.Clear();
             targetRot.Clear();
             new Thread(() =>
