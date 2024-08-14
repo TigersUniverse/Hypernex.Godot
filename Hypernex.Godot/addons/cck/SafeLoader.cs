@@ -105,18 +105,21 @@ namespace Hypernex.CCK.GodotVersion
             {
                 if (prop.Trim().StartsWith("ExtResource"))
                 {
-                    int startIdx = prop.Find("(\"");
-                    int endIdx = prop.Find("\")", startIdx);
-                    string id = prop.Substr(startIdx + 2, endIdx - startIdx - 2);
+                    int startIdx = prop.Find("(");
+                    int endIdx = prop.Find(")", startIdx);
+                    int begin = prop[startIdx + 1] == '"' ? 2 : 1;
+                    int end = prop[startIdx + 1] == '"' ? 3 : 1;
+                    string id = prop.Substr(startIdx + begin, endIdx - startIdx - end);
                     if (LoadedExtResources.ContainsKey(id))
                         return LoadedExtResources[id];
+                    // GD.Print($"Failed {id}");
                     return new Variant();
                 }
                 if (prop.Trim().StartsWith("SubResource"))
                 {
-                    int startIdx = prop.Find("(\"");
-                    int endIdx = prop.Find("\")", startIdx);
-                    string id = prop.Substr(startIdx + 2, endIdx - startIdx - 2);
+                    int startIdx = prop.Find("(");
+                    int endIdx = prop.Find(")", startIdx);
+                    string id = prop.Substr(startIdx + 2, endIdx - startIdx - 3);
 
                     if (LoadedSubResources.ContainsKey(id))
                         return LoadedSubResources[id];
@@ -163,6 +166,9 @@ namespace Hypernex.CCK.GodotVersion
             public PackedScene ToPackedScene(Dictionary<string, Script> scripts)
             {
                 // return new PackedScene();
+                Stopwatch sw = new Stopwatch();
+                GD.Print($"Begin compile");
+                sw.Start();
                 Dictionary<string, Node> nodes = new Dictionary<string, Node>();
                 Dictionary<string, Node> subscenes = new Dictionary<string, Node>();
                 // first packed scenes
@@ -175,7 +181,7 @@ namespace Hypernex.CCK.GodotVersion
                         Variant prop = ConvertPropertyString(parNode.Instance);
                         if (prop.VariantType == Variant.Type.Nil)
                         {
-                            // GD.Print(path2);
+                            // GD.Print($"inst={parNode.Instance} path2={path2}");
                             continue;
                         }
                         Node node2 = prop.As<PackedScene>().Instantiate();
@@ -257,9 +263,11 @@ namespace Hypernex.CCK.GodotVersion
                 Node root = nodes.FirstOrDefault(x => x.Key == ".").Value;
                 // GD.Print(root.Name);
                 Node lastParent = root;
-                List<string> paths = new List<string>(nodes.Keys);
+                List<string> paths = new List<string>(nodes.Keys/*nodes.Keys.OrderBy(x => new NodePath(x).GetNameCount())*/);
                 int k = 0;
-                while (paths.Any(x => x != ".") /*&& k < 20000*/) // TODO: don't use while (if possible?)
+                int maxk = 20000;
+                int prevCount = paths.Count;
+                while (paths.Any(x => x != ".") /*&& k < maxk*/) // TODO: don't use while (if possible?)
                 {
                     for (int i = 0; i < paths.Count; i++)
                     {
@@ -269,10 +277,12 @@ namespace Hypernex.CCK.GodotVersion
                         {
                             parent.AddChild(nodes[paths[i]]);
                             // GD.Print(paths[i]);
+                            // /*
                             foreach (var ch in nodes[paths[i]].FindChildren("*", "", true, false))
                             {
                                 ch.Owner = root;
                             }
+                            // */
                             nodes[paths[i]].Owner = root;
                             paths.RemoveAt(i);
                             i--;
@@ -281,11 +291,28 @@ namespace Hypernex.CCK.GodotVersion
                         //     GD.PrintS(paths[i], GetParent(paths[i]));
                             // GD.Print(paths[i]);
                     }
+                    if (paths.Count == prevCount)
+                    {
+                        GD.Print("This should not happen");
+                        k = maxk;
+                        break;
+                    }
+                    prevCount = paths.Count;
                     k++;
                 }
+                if (k >= maxk)
+                {
+                    GD.Print(string.Join(" ", paths));
+                }
+                sw.Stop();
+                GD.Print($"End compile {sw.ElapsedMilliseconds}ms");
                 // GD.PrintS(string.Join(", ", paths));
+                GD.Print($"Begin pack");
+                sw.Restart();
                 PackedScene scene = new PackedScene();
                 scene.Pack(root);
+                sw.Stop();
+                GD.Print($"End pack {sw.ElapsedMilliseconds}ms");
                 return scene;
             }
         }
@@ -393,10 +420,10 @@ namespace Hypernex.CCK.GodotVersion
                     world = ParseTscn(path, Encoding.UTF8.GetString(reader.ReadFile(worldPath)));
                     foreach (var resKvp in world.ExtResources)
                     {
+                        // GD.PrintS(resKvp.Key, resKvp.Value);
                         Resource res = LoadFile(resKvp.Value);
                         world.LoadedExtResources.Add(resKvp.Key, res);
                     }
-                    GD.Print("world to packed scene start");
                     scene = world.ToPackedScene(validScripts);
                 }
                 else
@@ -545,7 +572,8 @@ namespace Hypernex.CCK.GodotVersion
             // prevent long parsing times
             // if (prop.Length >= 4096 * 2)
             //     return new Variant();
-            return GD.StrToVar(prop);
+            Variant va = GD.StrToVar(prop);
+            return va;
             foreach (var key in Enum.GetNames<Variant.Type>())
             {
                 if (prop.StartsWith(key, StringComparison.OrdinalIgnoreCase))
@@ -603,7 +631,10 @@ namespace Hypernex.CCK.GodotVersion
                 GD.PrintErr("World isn't a scene!");
                 return null;
             }
-            data = data.Replace("\r", "");
+            data = data.Replace("\r", null);
+            Stopwatch sw = new Stopwatch();
+            GD.Print("Begin parse");
+            sw.Start();
             ParsedTscn tscn = new ParsedTscn();
             for (int i = 0; i < data.Length; i++)
             {
@@ -612,7 +643,7 @@ namespace Hypernex.CCK.GodotVersion
                 switch (tag.ToLower())
                 {
                     case "ext_resource":
-                        tscn.ExtResources.Add(attribs["id"].Replace("\"", ""), attribs["path"].Replace("\"", ""));
+                        tscn.ExtResources.Add(attribs["id"], attribs["path"]);
                         break;
                     case "sub_resource":
                         ParsedSubTres sub = new ParsedSubTres();
@@ -621,8 +652,8 @@ namespace Hypernex.CCK.GodotVersion
                             i = off;
                             sub.Properties.Add(key, val);
                         }
-                        sub.Type = attribs["type"].Replace("\"", "");
-                        tscn.SubResources.Add(attribs["id"].Replace("\"", ""), sub);
+                        sub.Type = attribs["type"];
+                        tscn.SubResources.Add(attribs["id"], sub);
                         break;
                     case "node":
                         ParsedNode node = new ParsedNode();
@@ -631,11 +662,11 @@ namespace Hypernex.CCK.GodotVersion
                             i = off;
                             node.Properties.Add(key, val);
                         }
-                        node.Name = attribs["name"].Replace("\"", "");
+                        node.Name = attribs["name"];
                         if (attribs.ContainsKey("type"))
-                            node.Type = attribs["type"].Replace("\"", "");
+                            node.Type = attribs["type"];
                         if (attribs.ContainsKey("parent"))
-                            node.Parent = attribs["parent"].Replace("\"", "");
+                            node.Parent = attribs["parent"];
                         if (attribs.ContainsKey("instance"))
                             node.Instance = attribs["instance"];
                         tscn.Nodes.Add(node);
@@ -647,15 +678,20 @@ namespace Hypernex.CCK.GodotVersion
                         break;
                 }
             }
+            sw.Stop();
+            GD.Print($"End parse {sw.ElapsedMilliseconds}ms");
             // GD.Print("Parsed tscn");
             return tscn;
         }
+
+        // [ThreadStatic]
+        public static List<char> charArr = new List<char>();
 
         public static ParsedTres ParseTres(string path, string data)
         {
             if (!data.StartsWith("[gd_resource"))
                 return null;
-            data = data.Replace("\r", "");
+            data = data.Replace("\r", null);
             ParsedTres tres = new ParsedTres();
             for (int i = 0; i < data.Length; i++)
             {
@@ -664,10 +700,10 @@ namespace Hypernex.CCK.GodotVersion
                 switch (tag.ToLower())
                 {
                     case "gd_resource":
-                        tres.Type = attribs["type"].Replace("\"", "");
+                        tres.Type = attribs["type"].Replace("\"", null);
                         break;
                     case "ext_resource":
-                        tres.ExtResources.Add(attribs["id"].Replace("\"", ""), attribs["path"].Replace("\"", ""));
+                        tres.ExtResources.Add(attribs["id"].Replace("\"", null), attribs["path"].Replace("\"", null));
                         break;
                     case "resource":
                         while (ParseProperty(data, i, out var key, out var val, out var off))
@@ -706,14 +742,15 @@ namespace Hypernex.CCK.GodotVersion
             {
                 return false;
             }
-            key = data.Substr(offset, eqIdx - 1 - offset).Replace("\n", string.Empty);
+            key = data.Substr(offset, eqIdx - 1 - offset).Replace("\n", null);
             
             int escapes = 0;
             bool isQuote = false;
             int escapesArray = 0;
             int escapesDict = 0;
 
-            List<char> charArr = new List<char>();
+            // List<char> charArr = new List<char>();
+            charArr.Clear();
 
             for (int i = eqIdx + 2; i < data.Length; i++)
             {
@@ -765,7 +802,8 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
 
-            value = string.Join("", charArr);
+            // value = new string(charArr.ToArray());
+            value = new string(charArr.ToArray());
             return true;
         }
 
@@ -777,7 +815,8 @@ namespace Hypernex.CCK.GodotVersion
             int escapesDict = 0;
             bool hasDict = false;
 
-            List<char> charArr = new List<char>();
+            // List<char> charArr = new List<char>();
+            charArr.Clear();
             Dictionary<string, string> splits = new Dictionary<string, string>();
             string key = string.Empty;
 
@@ -791,17 +830,19 @@ namespace Hypernex.CCK.GodotVersion
 
                 if (escapesDict == 1 && escapes == 0 && escapesArray == 0 && data[i] == ':')
                 {
-                    key = string.Join("", charArr).Replace("\"", "");
+                    key = new string(charArr.ToArray()).Replace("\"", null);
                     charArr.Clear();
                     continue;
                 }
                 if (escapesDict == 1 && escapes == 0 && escapesArray == 0 && data[i] == ',')
                 {
-                    splits.TryAdd(key, string.Join("", charArr));
+                    splits.TryAdd(key, new string(charArr.ToArray()));
                     charArr.Clear();
                     continue;
                 }
-                charArr.Add(data[i]);
+
+                if (data[i] != '{' && data[i] != '}')
+                    charArr.Add(data[i]);
 
                 // check for string
                 if (data[i] == '"')
@@ -831,12 +872,10 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         escapesDict++;
                         hasDict = true;
-                        charArr.RemoveAt(charArr.Count - 1);
                     }
                     if (data[i] == '}')
                     {
                         escapesDict--;
-                        charArr.RemoveAt(charArr.Count - 1);
                     }
                 }
 
@@ -852,7 +891,7 @@ namespace Hypernex.CCK.GodotVersion
                     }
                 }
             }
-            splits.TryAdd(key, string.Join("", charArr));
+            splits.TryAdd(key, new string(charArr.ToArray()));
 
             return splits;
         }
@@ -865,7 +904,8 @@ namespace Hypernex.CCK.GodotVersion
             int escapesDict = 0;
             bool hasArray = false;
 
-            List<char> charArr = new List<char>();
+            // List<char> charArr = new List<char>();
+            charArr.Clear();
             List<string> splits = new List<string>();
 
             for (int i = 0; i < data.Length; i++)
@@ -878,12 +918,13 @@ namespace Hypernex.CCK.GodotVersion
 
                 if (escapesArray == 1 && escapes == 0 && escapesDict == 0 && data[i] == ',')
                 {
-                    splits.Add(string.Join("", charArr));
+                    splits.Add(new string(charArr.ToArray()));
                     charArr.Clear();
                     continue;
                 }
 
-                charArr.Add(data[i]);
+                if (data[i] != '[' && data[i] != ']')
+                    charArr.Add(data[i]);
 
                 // check for string
                 if (data[i] == '"')
@@ -901,12 +942,10 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         escapesArray++;
                         hasArray = true;
-                        charArr.RemoveAt(charArr.Count - 1);
                     }
                     if (data[i] == ']')
                     {
                         escapesArray--;
-                        charArr.RemoveAt(charArr.Count - 1);
                     }
                 }
 
@@ -934,7 +973,7 @@ namespace Hypernex.CCK.GodotVersion
                     }
                 }
             }
-            splits.Add(string.Join("", charArr));
+            splits.Add(new string(charArr.ToArray()));
 
             return splits;
         }
@@ -974,7 +1013,7 @@ namespace Hypernex.CCK.GodotVersion
                     case 1:
                         if (data[i] == '=')
                             state = 2; // value state
-                        else
+                        else if (data[i] != '"')
                             key += data[i];
                         break;
                     case 2:
@@ -985,7 +1024,7 @@ namespace Hypernex.CCK.GodotVersion
                             key = string.Empty;
                             val = string.Empty;
                         }
-                        else
+                        else if (data[i] != '"')
                             val += data[i];
                         break;
                 }
