@@ -49,7 +49,7 @@ namespace Hypernex.Game.Tests
         {
             float s = Time.GetTicksMsec() / 1000f;
             target.Position = new Vector3(Mathf.Cos(s), 0f, Mathf.Sin(s));
-            avatar.ProcessIk(true, target3.GlobalTransform, target2.GlobalTransform, target2.GlobalTransform);
+            avatar.ProcessIk(true, true, target3.GlobalTransform, target2.GlobalTransform, target2.GlobalTransform);
         }
 
         public void RunTest()

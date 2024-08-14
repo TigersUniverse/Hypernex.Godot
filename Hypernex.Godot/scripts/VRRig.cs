@@ -29,7 +29,7 @@ public partial class VRRig : Node3D
             origin.GlobalRotation = PlayerRoot.Local.Controller.GlobalRotation;
             if (IsInstanceValid(PlayerRoot.Local.Avatar))
             {
-                PlayerRoot.Local.Avatar.ProcessIk(true, head.GlobalTransform, leftHand.GlobalTransform, rightHand.GlobalTransform);
+                PlayerRoot.Local.Avatar.ProcessIk(true, true, head.GlobalTransform, leftHand.GlobalTransform, rightHand.GlobalTransform);
             }
         }
     }

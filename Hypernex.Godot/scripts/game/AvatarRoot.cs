@@ -86,7 +86,7 @@ namespace Hypernex.Game
             ikSystem.rightFootData.ik.ResolveIK();
         }
 
-        public void ProcessIk(bool vr, Transform3D head, Transform3D leftHand, Transform3D rightHand)
+        public void ProcessIk(bool vr, bool useHead, Transform3D head, Transform3D leftHand, Transform3D rightHand)
         {
             if (IsInstanceValid(ikSystem) && ikSystem.IsNodeReady())
             {
@@ -96,10 +96,17 @@ namespace Hypernex.Game
                 root.GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
                 root.Scale = scale;
 
-                ikSystem.hips.GlobalPosition = head.Origin + (Vector3.Down * ikSystem.hipsDistance);
-                Vector3 headScl = ikSystem.headTarget.Scale;
-                ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
-                ikSystem.headTarget.Scale = headScl;
+                if (useHead)
+                {
+                    ikSystem.hips.GlobalPosition = head.Origin + (Vector3.Down * ikSystem.hipsDistance);
+                    Vector3 headScl = ikSystem.headTarget.Scale;
+                    ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
+                    ikSystem.headTarget.Scale = headScl;
+                }
+                else
+                {
+                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                }
 
                 if (!vr)
                 {

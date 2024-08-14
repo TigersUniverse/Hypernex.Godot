@@ -120,9 +120,9 @@ namespace Hypernex.Game
             if (IsInstanceValid(Avatar) && !Init.IsVRLoaded)
             {
                 if (IsLocal)
-                    Avatar.ProcessIk(false, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
+                    Avatar.ProcessIk(false, true, view.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
                 else
-                    Avatar.ProcessIk(false, Avatar.HeadTransform.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
+                    Avatar.ProcessIk(false, false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);
             }
         }
 
