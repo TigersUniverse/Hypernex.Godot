@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Hypernex.Configuration;
+using Hypernex.Game;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
 
@@ -134,7 +136,7 @@ namespace Hypernex.UI
                             worldMetaLabel.Text = $"Existing world selected: {meta.Name.Replace("[", "[lb]")}";
                         }
                         selectedWorldMeta = meta;
-                        selectedAvatarMeta = null;
+                        selectedAvatarMeta = new AvatarMeta(string.Empty, APITools.CurrentUser?.Id ?? string.Empty, AvatarPublicity.OwnerOnly, string.Empty, string.Empty, string.Empty);
                     });
                     break;
                 case CCKFileType.Avatar:
@@ -149,7 +151,7 @@ namespace Hypernex.UI
                             worldMetaLabel.Text = $"Existing avatar selected: {meta.Name.Replace("[", "[lb]")}";
                         }
                         selectedAvatarMeta = meta;
-                        selectedWorldMeta = null;
+                        selectedWorldMeta = new WorldMeta(string.Empty, APITools.CurrentUser?.Id ?? string.Empty, WorldPublicity.OwnerOnly, string.Empty, string.Empty, string.Empty);
                     });
                     break;
             }
@@ -173,6 +175,10 @@ namespace Hypernex.UI
                 selectedWorldMeta.Name = worldNameEdit.Text;
             if (!string.IsNullOrWhiteSpace(worldDescriptionEdit.Text))
                 selectedWorldMeta.Description = worldDescriptionEdit.Text;
+            if (!string.IsNullOrWhiteSpace(worldNameEdit.Text))
+                selectedAvatarMeta.Name = worldNameEdit.Text;
+            if (!string.IsNullOrWhiteSpace(worldDescriptionEdit.Text))
+                selectedAvatarMeta.Description = worldDescriptionEdit.Text;
             switch (fileType)
             {
                 case CCKFileType.World:
@@ -210,17 +216,36 @@ namespace Hypernex.UI
 
         public void LoadSelectedWorld()
         {
-            if (fileType != CCKFileType.World)
-                return;
-            if (string.IsNullOrWhiteSpace(selectedWorldPath))
+            switch (fileType)
             {
-                cck.Popup($"{fileType} not found", $"Please select a {fileType} file");
-                return;
-            }
-            GameInstance inst = GameInstance.FromLocalFile(selectedWorldPath);
-            if (inst.IsDisposed)
-            {
-                cck.Popup($"{fileType} not valid", $"Please select a valid {fileType} file");
+                case CCKFileType.World:
+                {
+                    if (string.IsNullOrWhiteSpace(selectedWorldPath))
+                    {
+                        cck.Popup("World not found", "Please select a world file");
+                        break;
+                    }
+                    GameInstance inst = GameInstance.FromLocalFile(selectedWorldPath);
+                    if (inst.IsDisposed)
+                    {
+                        cck.Popup("World not valid", "Please select a valid world file");
+                    }
+                    break;
+                }
+                case CCKFileType.Avatar:
+                {
+                    if (string.IsNullOrEmpty(selectedAvatarMeta.Id))
+                    {
+                        cck.Popup("Avatar not found", "Please select an already uploaded avatar");
+                        break;
+                    }
+                    ConfigManager.SelectedConfigUser.CurrentAvatar = selectedAvatarMeta.Id;
+                    if (IsInstanceValid(PlayerRoot.Local))
+                    {
+                        PlayerRoot.Local.AvatarId = selectedAvatarMeta.Id;
+                    }
+                    break;
+                }
             }
         }
     }

@@ -119,7 +119,7 @@ cckButton = NodePath("../TabContainer/Settings/CCKBtn")
 cckWindow = NodePath("../../Window")
 logoutButton = NodePath("../TabContainer/Settings/LogoutBtn")
 exitButton = NodePath("../TabContainer/Settings/ExitBtn")
-currentInstanceIdx = 2
+currentInstanceIdx = 3
 bigCardUI = ExtResource("11_6bljf")
 
 [node name="TabContainer" type="TabContainer" parent="UI/MainOverlay"]
@@ -225,12 +225,8 @@ size_flags_vertical = 3
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Worlds/ScrollContainer"]
 layout_mode = 2
 
-[node name="Current Instance" parent="UI/MainOverlay/TabContainer" instance=ExtResource("11_6bljf")]
-visible = false
-layout_mode = 2
-usersLabelFormat = "[center]Users ({0})[/center][right][url]Refresh[/url][/right][right][url=leave]Leave[/url][/right]"
-
 [node name="Settings" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
+visible = false
 layout_mode = 2
 
 [node name="CCKBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
@@ -244,6 +240,10 @@ text = "Logout"
 [node name="ExitBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
 layout_mode = 2
 text = "Exit :("
+
+[node name="Current Instance" parent="UI/MainOverlay/TabContainer" instance=ExtResource("11_6bljf")]
+layout_mode = 2
+usersLabelFormat = "[center]Users ({0})[/center][right][url]Refresh[/url][/right][right][url=leave]Leave[/url][/right]"
 
 [node name="LoadingIcon" type="PanelContainer" parent="UI"]
 layout_mode = 1

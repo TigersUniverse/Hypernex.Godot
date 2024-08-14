@@ -180,6 +180,7 @@ public partial class Init : Node
     {
         APITools.OnUserLogin += user =>
         {
+            ConfigManager.SelectedConfigUser = ConfigManager.LoadedConfig.GetConfigUserFromUserId(user.Id);
             ui.Show();
             login.root.Hide();
             overlay.root.Show();

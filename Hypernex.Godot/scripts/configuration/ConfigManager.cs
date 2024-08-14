@@ -63,7 +63,7 @@ namespace Hypernex.Configuration
             if (SelectedConfigUser != null)
             {
                 ConfigUser docConfigUser = config.GetConfigUserFromUserId(SelectedConfigUser.UserId);
-                if(docConfigUser != null)
+                if (docConfigUser != null)
                     docConfigUser.Clone(SelectedConfigUser);
             }
             TomlDocument document = TomletMain.DocumentFrom(typeof(Config), config);

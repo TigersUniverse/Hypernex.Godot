@@ -160,7 +160,6 @@ shortcut_keys_enabled = false
 
 [node name="AvatarLoadFile" type="Button" parent="ScrollContainer/TabContainer/Avatar"]
 layout_mode = 2
-disabled = true
 text = "Load Selected Avatar"
 
 [node name="HSeparator" type="HSeparator" parent="ScrollContainer/TabContainer/Avatar"]

@@ -53,6 +53,22 @@ namespace Hypernex.Tools
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
+        public static string GetFilePath(string name)
+        {
+            if (!Directory.Exists(DownloadsPath))
+                Directory.CreateDirectory(DownloadsPath);
+            string fileOutput = Path.Combine(DownloadsPath, name);
+            return fileOutput;
+        }
+
+        public static string CopyToFile(string output, Stream stream)
+        {
+            string path = GetFilePath(output);
+            using FileStream fs = File.OpenWrite(path);
+            stream.CopyTo(fs, 81920);
+            return path;
+        }
+
         public static void DownloadFile(string url, string output, Action<string> OnDownload,
             string knownFileHash = null, Action<float> DownloadProgress = null)
         {

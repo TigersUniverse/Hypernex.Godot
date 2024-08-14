@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Godot;
+using Hypernex.Configuration;
 using Hypernex.Networking.Messages;
 using Hypernex.Networking.Messages.Data;
 using Hypernex.Player;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
 using HypernexSharp.APIObjects;
+using HypernexSharp.Socketing.SocketMessages;
 
 namespace Hypernex.Game
 {
@@ -22,6 +24,10 @@ namespace Hypernex.Game
         public static PlayerRoot Local { get; private set; }
         [Export]
         public Node3D view;
+        [Export]
+        public ProgressBar loadingBar;
+        [Export]
+        public Sprite3D loadingSprite;
         [Export]
         public Label3D username;
         [Export]
@@ -37,6 +43,7 @@ namespace Hypernex.Game
         public string AvatarId;
         public AvatarRoot Avatar;
         public Action OnUserSet = () => { };
+        private Dictionary<string, string> assetTokens = new Dictionary<string, string>();
 
         public Dictionary<int, Vector3> targetPos = new Dictionary<int, Vector3>();
         public Dictionary<int, Quaternion> targetRot = new Dictionary<int, Quaternion>();
@@ -78,7 +85,17 @@ namespace Hypernex.Game
         public override void _Ready()
         {
             UpdateLoop();
-            LoadAvatar("user://skeleton.hna");
+            ChangeAvatar(ConfigManager.SelectedConfigUser.CurrentAvatar);
+            // LoadAvatar("user://skeleton.hna");
+        }
+
+        public override void _ExitTree()
+        {
+            if (IsLocal)
+            {
+                foreach (var token in assetTokens)
+                    APITools.APIObject.RemoveAssetToken(_ => { }, APITools.CurrentUser, APITools.CurrentToken, token.Key, token.Value);
+            }
         }
 
         private async void UpdateLoop()
@@ -227,30 +244,90 @@ namespace Hypernex.Game
         {
             if (playerUpdate.AvatarId != AvatarId)
             {
-                AvatarId = playerUpdate.AvatarId;
-                APITools.APIObject.GetAvatarMeta(result =>
-                {
-                    AvatarMeta avatarMeta = result.result.Meta;
-                    string fileId = avatarMeta.Builds.First(x => x.BuildPlatform == BuildPlatform.Windows).FileId;
-                    string fileURL = $"{APITools.APIObject.Settings.APIURL}file/{avatarMeta.OwnerId}/{fileId}";
-                    if (result.success)
-                    {
-                        string knownHash = string.Empty;
-                        APITools.APIObject.GetFileMeta(fileMetaResult =>
-                        {
-                            if (fileMetaResult.success)
-                                knownHash = fileMetaResult.result.FileMeta.Hash;
-                            DownloadTools.DownloadFile(fileURL, $"{avatarMeta.Id}.hna", o =>
-                            {
-                                if (!string.IsNullOrEmpty(o))
-                                {
-                                    LoadAvatar(o);
-                                }
-                            }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
-                        }, avatarMeta.OwnerId, fileId);
-                    }
-                }, playerUpdate.AvatarId);
+                ChangeAvatar(playerUpdate.AvatarId);
             }
+        }
+
+        private void ReportDownloadProgress(string id, float amount)
+        {
+            if (IsInstanceValid(loadingBar) && IsInstanceValid(loadingSprite) && AvatarId == id)
+            {
+                loadingBar.Value = amount;
+                loadingSprite.Visible = amount < 1f;
+            }
+        }
+
+        private void GetAvatarToken(string id, Action<string> callback)
+        {
+            APITools.APIObject.AddAssetToken(result =>
+            {
+                if (result.success)
+                {
+                    QuickInvoke.InvokeActionOnMainThread(callback, result.result.token.content);
+                }
+            }, APITools.CurrentUser, APITools.CurrentToken, id);
+        }
+
+        private void DownloadAvatar(AvatarMeta avatarMeta, string token)
+        {
+            string fileId = avatarMeta.Builds.First(x => x.BuildPlatform == BuildPlatform.Windows).FileId;
+            string fileURL = $"{APITools.APIObject.Settings.APIURL}file/{avatarMeta.OwnerId}/{fileId}";
+            if (!string.IsNullOrEmpty(token))
+                fileURL += $"/{token}";
+            string knownHash = string.Empty;
+            APITools.APIObject.GetFileMeta(fileMetaResult =>
+            {
+                if (fileMetaResult.success)
+                {
+                    knownHash = fileMetaResult.result.FileMeta.Hash;
+                    DownloadTools.DownloadFile(fileURL, $"{avatarMeta.Id}.hna", o =>
+                    {
+                        if (!string.IsNullOrEmpty(o))
+                        {
+                            LoadAvatar(o);
+                        }
+                    }, knownHash, p => ReportDownloadProgress(avatarMeta.Id, p));
+                }
+                else if (string.IsNullOrEmpty(token))
+                {
+                    APITools.APIObject.GetFile(stream =>
+                    {
+                        LoadAvatar(DownloadTools.CopyToFile($"{avatarMeta.Id}.hna", stream));
+                    }, avatarMeta.OwnerId, fileId);
+                }
+                else
+                {
+                    APITools.APIObject.GetFile(stream =>
+                    {
+                        LoadAvatar(DownloadTools.CopyToFile($"{avatarMeta.Id}.hna", stream));
+                    }, avatarMeta.OwnerId, fileId, token);
+                }
+            }, avatarMeta.OwnerId, fileId);
+        }
+
+        public void ChangeAvatar(string id)
+        {
+            AvatarId = id;
+            APITools.APIObject.GetAvatarMeta(result =>
+            {
+                AvatarMeta avatarMeta = result.result.Meta;
+                if (avatarMeta.Publicity != AvatarPublicity.Anyone)
+                {
+                    if (avatarMeta.OwnerId != APITools.CurrentUser.Id)
+                    {
+                        return;
+                    }
+                    GetAvatarToken(avatarMeta.Id, token =>
+                    {
+                        assetTokens.Add(avatarMeta.Id, token);
+                        DownloadAvatar(avatarMeta, token);
+                    });
+                }
+                else
+                {
+                    DownloadAvatar(avatarMeta, null);
+                }
+            }, id);
         }
 
         public void VoiceUpdate(PlayerVoice playerVoice)
