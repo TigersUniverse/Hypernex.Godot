@@ -66,6 +66,10 @@ chat_text={
 ]
 }
 
+[physics]
+
+3d/physics_engine="JoltPhysics3D"
+
 [rendering]
 
 occlusion_culling/use_occlusion_culling=true
