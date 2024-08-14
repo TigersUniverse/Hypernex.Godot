@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Godot;
 using Hypernex.Networking.Messages;
 using Hypernex.Networking.Messages.Data;
@@ -78,13 +79,7 @@ namespace Hypernex.Game
         {
             // Position = Vector3.Zero;
             UpdateLoop();
-            if (IsInstanceValid(Avatar))
-                Avatar.QueueFree();
-            targetPos.Clear();
-            targetRot.Clear();
-            Avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
-            AddChild(Avatar);
-            Avatar.AttachTo(Controller);
+            LoadAvatar("user://skeleton.hna");
         }
 
         private async void UpdateLoop()
@@ -207,6 +202,27 @@ namespace Hypernex.Game
             targetRot[id] = rotation;
         }
 
+        public void LoadAvatar(string path)
+        {
+            targetPos.Clear();
+            targetRot.Clear();
+            new Thread(() =>
+            {
+                var avi = AvatarRoot.LoadFromFile(path);
+                QuickInvoke.InvokeActionOnMainThread(() =>
+                {
+                    if (IsInstanceValid(Avatar))
+                        Avatar.QueueFree();
+                    Avatar = avi;
+                    if (IsInstanceValid(Avatar))
+                    {
+                        AddChild(Avatar);
+                        Avatar.AttachTo(Controller);
+                    }
+                });
+            }).Start();
+        }
+
         public void NetworkUpdate(PlayerUpdate playerUpdate)
         {
             if (playerUpdate.AvatarId != AvatarId)
@@ -228,13 +244,7 @@ namespace Hypernex.Game
                             {
                                 if (!string.IsNullOrEmpty(o))
                                 {
-                                    if (IsInstanceValid(Avatar))
-                                        Avatar.QueueFree();
-                                    targetPos.Clear();
-                                    targetRot.Clear();
-                                    Avatar = AvatarRoot.LoadFromFile(o);
-                                    AddChild(Avatar);
-                                    Avatar.AttachTo(Controller);
+                                    LoadAvatar(o);
                                 }
                             }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
                         }, avatarMeta.OwnerId, fileId);
