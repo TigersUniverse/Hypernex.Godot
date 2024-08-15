@@ -222,7 +222,7 @@ public partial class Init : Node
             overlay.root.Show();
             overlay.ShowHome();
             APITools.CreateUserSocket(SocketManager.InitSocket);
-            // APITools.UploadWorld(System.IO.Path.Combine(OS.GetUserDataDir(), "my_world.hnw"), new HypernexSharp.APIObjects.WorldMeta(string.Empty, APITools.CurrentUser.Id, HypernexSharp.APIObjects.WorldPublicity.OwnerOnly, $"My World {DateTime.Now}", $"The best {DateTime.Now}", string.Empty));
+            GetWindow().Title = $"Hypernex ({user.GetUsersName()} - {APITools.APIObject.Settings.TargetDomain})";
         };
         APITools.OnLogout += () =>
         {
@@ -230,6 +230,7 @@ public partial class Init : Node
             ui.Show();
             overlay.root.Hide();
             login.root.Show();
+            GetWindow().Title = "Hypernex";
         };
 
         InitXR();
@@ -242,5 +243,6 @@ public partial class Init : Node
         ui.Show();
         overlay.root.Hide();
         login.root.Show();
+        GetWindow().Title = "Hypernex";
     }
 }
