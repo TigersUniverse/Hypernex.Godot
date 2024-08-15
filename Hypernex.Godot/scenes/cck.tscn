@@ -50,7 +50,7 @@ size = Vector2i(335, 159)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
-filters = PackedStringArray("*.hna;Hypernex World")
+filters = PackedStringArray("*.hnw;Hypernex World")
 use_native_dialog = true
 
 [node name="Label" type="Label" parent="ScrollContainer/TabContainer/World"]
