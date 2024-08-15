@@ -1,10 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=10 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
-[ext_resource type="AudioStream" uid="uid://cfg6lwextysdv" path="res://temp/Unity.mp3" id="5_2rack"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -84,7 +83,6 @@ Runtime.OnFixedUpdate(SandboxFunc().SetAction(settime));"
 metadata/typename = "WorldScript"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Test"]
-stream = ExtResource("5_2rack")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

@@ -231,7 +231,7 @@ namespace Hypernex.CCK.GodotVersion
                         Script scr = null;
                         if (kvp.Key.Equals("metadata/typename", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (!scripts.TryGetValue(kvp.Value.Trim('"'), out scr))
+                            if (!scripts.TryGetValue(Marshalls.Base64ToVariant(kvp.Value).AsString().Trim('"'), out scr))
                                 continue;
                         }
                         else
@@ -419,7 +419,7 @@ namespace Hypernex.CCK.GodotVersion
                 if (reader.FileExists("world.txt"))
                 {
                     string worldPath = Encoding.UTF8.GetString(reader.ReadFile("world.txt"));
-                    world = ParseTscn(path, Encoding.UTF8.GetString(reader.ReadFile(worldPath)));
+                    world = ParseBin(path, reader.ReadFile(worldPath));
                     foreach (var resKvp in world.ExtResources)
                     {
                         // GD.PrintS(resKvp.Key, resKvp.Value);
@@ -446,11 +446,18 @@ namespace Hypernex.CCK.GodotVersion
             cachedResources.Add(path, null);
             string resPath = path.ReplaceN("res://", "");
             Resource res = null;
-            if (resPath.GetExtension().Equals("tscn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tscn")))
+            if (resPath.GetExtension().Equals("scn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "scn")))
             {
-                // Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn")));
-                // return null;
-                // GD.Print(resPath);
+                ParsedTscn tscn = ParseBin(path.ReplaceN(path.GetExtension(), "scn"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "scn")));
+                foreach (var resKvp in tscn.ExtResources)
+                {
+                    Resource res2 = LoadFile(resKvp.Value);
+                    tscn.LoadedExtResources.Add(resKvp.Key, res2);
+                }
+                res = tscn.ToPackedScene(validScripts);
+            }
+            else if (resPath.GetExtension().Equals("tscn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tscn")))
+            {
                 ParsedTscn tscn = ParseTscn(path.ReplaceN(path.GetExtension(), "tscn"), Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn"))));
                 foreach (var resKvp in tscn.ExtResources)
                 {
@@ -461,13 +468,52 @@ namespace Hypernex.CCK.GodotVersion
             }
             else if (reader.FileExists(resPath))
                 res = ReadData(path, reader.ReadFile(resPath));
-            else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
-                res = ReadData(path.ReplaceN(path.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
-            else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
-                res = ReadData(path.ReplaceN(path.GetExtension(), "asset"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "asset")));
+            // else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tres")))
+            //     res = ReadData(path.ReplaceN(path.GetExtension(), "tres"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tres")));
+            // else if (reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "asset")))
+            //     res = ReadData(path.ReplaceN(path.GetExtension(), "asset"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "asset")));
             else
                 res = LoadScript(path);
             cachedResources[path] = res;
+            return res;
+        }
+
+        public Resource ReadRes(string path, byte[] data)
+        {
+            DirAccess.MakeDirAbsolute("user://temp/");
+            string tempPath = $"user://temp/{path.GetFile()}.asset";
+            FileAccess file2 = FileAccess.Open(tempPath, FileAccess.ModeFlags.Write);
+            if (file2 == null)
+                GD.PrintErr($"{FileAccess.GetOpenError()} ({tempPath})");
+            file2.StoreBuffer(data);
+            file2.Close();
+            FileAccess file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Read);
+            string type = file.GetPascalString();
+            if (ClassDB.IsParentClass(type, nameof(Script)))
+                return null;
+                // type = nameof(Resource);
+            Resource res = ClassDB.Instantiate(type).As<Resource>();
+            while (file.GetPosition() < file.GetLength())
+            {
+                string key = file.GetPascalString();
+                byte isRes = file.Get8();
+                if (isRes == 0)
+                {
+                    Variant val = file.GetVar(false);
+                    if (key == Resource.PropertyName.ResourcePath)
+                        continue;
+                    res.Set(key, val);
+                }
+                else if (isRes == 1)
+                {
+                    string resPath = file.GetPascalString();
+                    if (key == Resource.PropertyName.ResourcePath)
+                        continue;
+                    Resource subRes = LoadFile(resPath);
+                    res.Set(key, subRes);
+                }
+            }
+            file.Close();
             return res;
         }
 
@@ -486,7 +532,9 @@ namespace Hypernex.CCK.GodotVersion
                 }
                 return tres.ToResource();
             }
-            else*/ if (path.ToLower().EndsWith(".asset"))
+            else*/
+            /*
+            if (path.ToLower().EndsWith(".asset"))
             {
                 DirAccess.MakeDirAbsolute("user://temp/");
                 string tempPath = $"user://temp/{path.GetFile()}.asset";
@@ -525,6 +573,7 @@ namespace Hypernex.CCK.GodotVersion
                 return res;
             }
             else
+            */
             {
                 Image img = new Image();
                 switch (path.GetExtension().ToLower())
@@ -551,13 +600,8 @@ namespace Hypernex.CCK.GodotVersion
                     case "ktx":
                         img.LoadKtxFromBuffer(data);
                         break;
-                    case "mp3":
-                        return new AudioStreamMP3()
-                        {
-                            Data = data,
-                        };
                     default:
-                        return null;
+                        return ReadRes(path, data);
                 }
                 img.GenerateMipmaps();
                 // img.Compress(Image.CompressMode.S3Tc, Image.CompressSource.Generic);
@@ -574,7 +618,7 @@ namespace Hypernex.CCK.GodotVersion
             // prevent long parsing times
             // if (prop.Length >= 4096 * 2)
             //     return new Variant();
-            Variant va = GD.StrToVar(prop);
+            Variant va = Marshalls.Base64ToVariant(prop);
             return va;
             foreach (var key in Enum.GetNames<Variant.Type>())
             {
@@ -624,6 +668,49 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
             return new Variant();
+        }
+
+        public static ParsedTscn ParseBin(string path, byte[] data)
+        {
+            Stopwatch sw = new Stopwatch();
+            GD.Print("Begin parse");
+            sw.Start();
+            ParsedTscn tscn = new ParsedTscn();
+
+            var dict = GD.BytesToVar(data).AsGodotDictionary();
+            if (dict.ContainsKey("ext_resources"))
+                foreach (var tresDict in dict["ext_resources"].AsGodotArray<Godot.Collections.Dictionary>())
+                {
+                    tscn.ExtResources.TryAdd(tresDict["id"].AsString(), tresDict["path"].AsString());
+                }
+            if (dict.ContainsKey("sub_resources"))
+                foreach (var tresDict in dict["sub_resources"].AsGodotArray<Godot.Collections.Dictionary>())
+                {
+                    ParsedSubTres tres = new ParsedSubTres();
+                    foreach (var kvp in tresDict["props"].AsGodotDictionary())
+                        tres.Properties.Add(kvp.Key.AsString(), kvp.Value.AsString());
+                    tres.Type = tresDict["type"].AsString();
+                    tscn.SubResources.TryAdd(tresDict["id"].AsString(), tres);
+                }
+            if (dict.ContainsKey("nodes"))
+                foreach (var nodeDict in dict["nodes"].AsGodotArray<Godot.Collections.Dictionary>())
+                {
+                    ParsedNode node = new ParsedNode();
+                    foreach (var kvp in nodeDict["props"].AsGodotDictionary())
+                        node.Properties.Add(kvp.Key.AsString(), kvp.Value.AsString());
+                    node.Name = nodeDict["name"].AsString();
+                    if (nodeDict.ContainsKey("type"))
+                        node.Type = nodeDict["type"].AsString();
+                    if (nodeDict.ContainsKey("parent"))
+                        node.Parent = nodeDict["parent"].AsString();
+                    if (nodeDict.ContainsKey("instance"))
+                        node.Instance = nodeDict["instance"].AsString();
+                    tscn.Nodes.Add(node);
+                }
+
+            sw.Stop();
+            GD.Print($"End parse {sw.ElapsedMilliseconds}ms");
+            return tscn;
         }
 
         public static ParsedTscn ParseTscn(string path, string data)
@@ -682,7 +769,6 @@ namespace Hypernex.CCK.GodotVersion
             }
             sw.Stop();
             GD.Print($"End parse {sw.ElapsedMilliseconds}ms");
-            // GD.Print("Parsed tscn");
             return tscn;
         }
 
