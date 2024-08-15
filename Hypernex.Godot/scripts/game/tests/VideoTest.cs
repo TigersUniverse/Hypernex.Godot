@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Godot;
 using Hypernex.CCK;
@@ -6,23 +7,25 @@ using Hypernex.Tools;
 
 namespace Hypernex.Game.Tests
 {
-    public partial class VideoTest : VideoStreamPlayer
+    public partial class VideoTest : TextureRect
     {
         [Export]
         public string url;
+        [Export]
+        public AudioStreamPlayer3D audio;
 
         public override async void _Ready()
         {
+            Init.resolverSet = false;
             byte[] res = await HttpUtils.HttpGetAsync(this, url);
             if (IsInstanceValid(this))
             {
-                Stream = ImageTools.LoadFFmpeg(res);
-                Finished += () =>
+                var ff = ImageTools.LoadFFmpeg(res, this, audio);
+                ff.Finished += () =>
                 {
-                    StreamPosition = 0;
-                    Play();
+                    ff.Seek(0);
                 };
-                Play();
+                ff.Seek(0);
             }
         }
     }

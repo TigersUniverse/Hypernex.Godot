@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using FFmpeg.Godot;
 using Godot;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
@@ -37,9 +38,9 @@ namespace Hypernex.UI
         [Export]
         public RichTextLabel label;
         [Export]
-        public VideoStreamPlayer videoIcon;
+        public FFGodot videoIcon;
         [Export]
-        public VideoStreamPlayer videoBackground;
+        public FFGodot videoBackground;
         [Export]
         public Button button;
         [Export]
@@ -66,8 +67,8 @@ namespace Hypernex.UI
 
         public override void _ExitTree()
         {
-            videoIcon.Stream = null;
-            videoBackground.Stream = null;
+            videoIcon.Pause();
+            videoBackground.Pause();
             videoIcon.Finished -= IconVidDone;
             videoBackground.Finished -= VidDone;
             if (button != null)
@@ -204,14 +205,12 @@ namespace Hypernex.UI
 
         private void IconVidDone()
         {
-            videoIcon.StreamPosition = 0;
-            videoIcon.Play();
+            videoIcon.Seek(0);
         }
 
         private void VidDone()
         {
-            videoBackground.StreamPosition = 0;
-            videoBackground.Play();
+            videoBackground.Seek(0);
         }
 
         public static string GetColor(Status status)
@@ -242,11 +241,9 @@ namespace Hypernex.UI
             worldMeta = null;
             safeInstance = null;
             icon.Show();
-            videoIcon.Stream = null;
-            videoIcon.Stop();
+            videoIcon.Pause();
             background.Show();
-            videoBackground.Stream = null;
-            videoBackground.Stop();
+            videoBackground.Pause();
             if (menu != null)
                 menu.GetPopup().Clear();
             Hide();
@@ -277,8 +274,7 @@ namespace Hypernex.UI
                                 background.Texture = ImageTexture.CreateFromImage(img);
                             else
                             {
-                                videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                                videoBackground.Play();
+                                ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });
@@ -312,8 +308,7 @@ namespace Hypernex.UI
                                 background.Texture = ImageTexture.CreateFromImage(img);
                             else
                             {
-                                videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                                videoBackground.Play();
+                                ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });
@@ -348,8 +343,7 @@ namespace Hypernex.UI
                                 icon.Texture = ImageTexture.CreateFromImage(img);
                             else
                             {
-                                videoIcon.Stream = ImageTools.LoadFFmpeg(b);
-                                videoIcon.Play();
+                                ImageTools.LoadFFmpeg(videoIcon, b);
                                 icon.Hide();
                             }
                         });
@@ -362,8 +356,7 @@ namespace Hypernex.UI
                                 background.Texture = ImageTexture.CreateFromImage(img);
                             else
                             {
-                                videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                                videoBackground.Play();
+                                ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });

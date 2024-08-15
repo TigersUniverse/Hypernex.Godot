@@ -9,6 +9,7 @@
     <Compile Include="addons\ccksharp\**\*.cs" />
     <Compile Include="addons\FastIK\**\*.cs" />
     <Compile Include="addons\IKSystem\**\*.cs" />
+    <Compile Include="addons\FFplay\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- <ProjectReference Include="addons\cck\CCK.Godot.csproj" /> -->

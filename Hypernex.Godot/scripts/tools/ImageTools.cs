@@ -1,4 +1,5 @@
 using System.IO;
+using FFmpeg.Godot;
 using Godot;
 
 namespace Hypernex.Tools
@@ -24,18 +25,25 @@ namespace Hypernex.Tools
             return null;
         }
 
-        public static VideoStream LoadFFmpeg(byte[] buffer)
+        public static FFGodot LoadFFmpeg(byte[] buffer, TextureRect texture, AudioStreamPlayer3D sound)
         {
             string path = Path.GetTempFileName();
             File.WriteAllBytes(path, buffer);
-            var asset = ClassDB.Instantiate("FFmpegVideoStream").AsGodotObject();
-            if (asset is VideoStream vid)
-            {
-                vid.File = path;
-                return vid;
-            }
-            // This should never happen.
-            return null;
+            FFGodot ff = new FFGodot();
+            ff.renderMesh = texture;
+            ff.source = sound;
+            texture.AddChild(ff);
+            ff.Play(path, path);
+            ff.Pause();
+            return ff;
+        }
+
+        public static void LoadFFmpeg(FFGodot ff, byte[] buffer)
+        {
+            string path = Path.GetTempFileName();
+            File.WriteAllBytes(path, buffer);
+            ff.Log = _ => { };
+            ff.Play(path, path);
         }
 
         public static bool IsPng(byte[] buffer)

@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://bc42bxyk4uvjk"]
+[gd_scene load_steps=6 format=3 uid="uid://bc42bxyk4uvjk"]
 
 [ext_resource type="Script" path="res://scripts/ui/BigCardTemplate.cs" id="1_3gxw0"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="2_2xvhd"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="3_p0uxf"]
+[ext_resource type="Script" path="res://addons/FFplay/FFGodot.cs" id="3_uxu61"]
 
 [sub_resource type="Theme" id="Theme_cbfv0"]
 RichTextLabel/colors/default_color = Color(1, 1, 1, 1)
@@ -30,10 +31,10 @@ controlsContainer = NodePath("VBoxContainer/Controls/HBoxContainer")
 usersContainer = NodePath("VBoxContainer/Users/HBoxContainer")
 foregroundContainer = NodePath("VBoxContainer/HBoxContainer/Image")
 foreground = NodePath("VBoxContainer/HBoxContainer/Image/Image/TextureRect")
-videoForeground = NodePath("VBoxContainer/HBoxContainer/Image/Image/VideoStreamPlayer")
+videoForeground = NodePath("VBoxContainer/HBoxContainer/Image/Image/Video/FFplay")
 backgroundContainer = NodePath("Background")
 background = NodePath("Background/Image/TextureRect")
-videoBackground = NodePath("Background/Image/VideoStreamPlayer")
+videoBackground = NodePath("Background/Image/Video/FFplay")
 cardUI = ExtResource("2_2xvhd")
 metadata/_edit_lock_ = true
 
@@ -62,15 +63,18 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 
-[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Background/Image"]
+[node name="Video" type="TextureRect" parent="Background/Image"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-volume_db = -80.0
-expand = true
+expand_mode = 1
+
+[node name="FFplay" type="Node" parent="Background/Image/Video" node_paths=PackedStringArray("renderMesh")]
+script = ExtResource("3_uxu61")
+renderMesh = NodePath("..")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -104,15 +108,18 @@ grow_vertical = 2
 texture = ExtResource("3_p0uxf")
 expand_mode = 1
 
-[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VBoxContainer/HBoxContainer/Image/Image"]
+[node name="Video" type="TextureRect" parent="VBoxContainer/HBoxContainer/Image/Image"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-volume_db = -80.0
-expand = true
+expand_mode = 1
+
+[node name="FFplay" type="Node" parent="VBoxContainer/HBoxContainer/Image/Image/Video" node_paths=PackedStringArray("renderMesh")]
+script = ExtResource("3_uxu61")
+renderMesh = NodePath("..")
 
 [node name="Label" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2

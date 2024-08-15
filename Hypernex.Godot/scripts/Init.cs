@@ -39,6 +39,16 @@ public partial class Init : Node
     public static XRInterface xrInterface;
     public static bool IsVRLoaded => xrInterface != null && xrInterface.IsInitialized();
 
+    public static bool resolverSet = false;
+
+    static Init()
+    {
+        if (resolverSet)
+            return;
+        resolverSet = true;
+        NativeLibrary.SetDllImportResolver(typeof(Init).Assembly, Resolver);
+    }
+
     public override void _Ready()
     {
         Instance = this;
@@ -139,6 +149,32 @@ public partial class Init : Node
                 return IntPtr.Zero;
         }
         return fliteLibHandle;
+    }
+
+    public static IntPtr Resolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    {
+        string dir = OS.GetExecutablePath().GetBaseDir();
+        if (OS.HasFeature("editor"))
+        {
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+        }
+        IntPtr libHandle = IntPtr.Zero;
+        switch (OS.GetName().ToLower())
+        {
+            case "windows":
+                if (libraryName.Contains(".dll"))
+                    libHandle = NativeLibrary.Load(Path.Combine(dir, libraryName));
+                else
+                    libHandle = NativeLibrary.Load(Path.Combine(dir, $"{libraryName}.dll"));
+                break;
+            case "linux":
+                if (libraryName.Contains(".so"))
+                    libHandle = NativeLibrary.Load(Path.Combine(dir, libraryName));
+                else
+                    libHandle = NativeLibrary.Load(Path.Combine(dir, $"lib{libraryName}.so"));
+                break;
+        }
+        return libHandle;
     }
 
     private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)

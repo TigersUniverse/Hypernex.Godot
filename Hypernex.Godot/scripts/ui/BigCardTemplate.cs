@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FFmpeg.Godot;
 using Godot;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
@@ -35,13 +36,13 @@ namespace Hypernex.UI
         [Export]
         public TextureRect foreground;
         [Export]
-        public VideoStreamPlayer videoForeground;
+        public FFGodot videoForeground;
         [Export]
         public AspectRatioContainer backgroundContainer;
         [Export]
         public TextureRect background;
         [Export]
-        public VideoStreamPlayer videoBackground;
+        public FFGodot videoBackground;
         [Export]
         public PackedScene cardUI;
 
@@ -68,14 +69,12 @@ namespace Hypernex.UI
 
         private void FGLoop()
         {
-            videoForeground.StreamPosition = 0;
-            videoForeground.Play();
+            videoForeground.Seek(0);
         }
 
         private void BGLoop()
         {
-            videoBackground.StreamPosition = 0;
-            videoBackground.Play();
+            videoBackground.Seek(0);
         }
 
         private void OnClick(Variant meta)
@@ -125,12 +124,10 @@ namespace Hypernex.UI
             gameInstance = null;
             safeInstance = null;
             foreground.Show();
-            videoForeground.Stream = null;
-            videoForeground.Stop();
+            videoForeground.Pause();
             foregroundContainer.Ratio = 2.5f;
             background.Show();
-            videoBackground.Stream = null;
-            videoBackground.Stop();
+            videoBackground.Pause();
             backgroundContainer.Ratio = 2.5f;
             foreach (var child in usersContainer.GetChildren())
                 child.QueueFree();
@@ -181,8 +178,7 @@ namespace Hypernex.UI
                     foreground.Texture = ImageTexture.CreateFromImage(img);
                 else
                 {
-                    videoForeground.Stream = ImageTools.LoadFFmpeg(b);
-                    videoForeground.Play();
+                    ImageTools.LoadFFmpeg(videoForeground, b);
                     foreground.Hide();
                 }
             });
@@ -215,8 +211,7 @@ namespace Hypernex.UI
                                 foreground.Texture = ImageTexture.CreateFromImage(img);
                             else
                             {
-                                videoForeground.Stream = ImageTools.LoadFFmpeg(b);
-                                videoForeground.Play();
+                                ImageTools.LoadFFmpeg(videoForeground, b);
                                 foreground.Hide();
                             }
                         });
@@ -273,8 +268,7 @@ namespace Hypernex.UI
                     foreground.Texture = ImageTexture.CreateFromImage(img);
                 else
                 {
-                    videoForeground.Stream = ImageTools.LoadFFmpeg(b);
-                    videoForeground.Play();
+                    ImageTools.LoadFFmpeg(videoForeground, b);
                     foreground.Hide();
                 }
             });
@@ -287,8 +281,7 @@ namespace Hypernex.UI
                     background.Texture = ImageTexture.CreateFromImage(img);
                 else
                 {
-                    videoBackground.Stream = ImageTools.LoadFFmpeg(b);
-                    videoBackground.Play();
+                    ImageTools.LoadFFmpeg(videoBackground, b);
                     background.Hide();
                 }
             });
@@ -319,8 +312,7 @@ namespace Hypernex.UI
                     foreground.Texture = ImageTexture.CreateFromImage(img);
                 else
                 {
-                    videoForeground.Stream = ImageTools.LoadFFmpeg(b);
-                    videoForeground.Play();
+                    ImageTools.LoadFFmpeg(videoForeground, b);
                     foreground.Hide();
                 }
             });
