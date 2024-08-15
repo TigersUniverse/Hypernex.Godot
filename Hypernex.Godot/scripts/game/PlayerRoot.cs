@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Godot;
+using Hypernex.CCK;
 using Hypernex.Configuration;
 using Hypernex.Networking.Messages;
 using Hypernex.Networking.Messages.Data;
@@ -60,7 +61,9 @@ namespace Hypernex.Game
             if (UserId == APITools.CurrentUser.Id)
             {
                 Local = this;
+                Instance.OnUserLoaded += OtherUserLoaded;
             }
+            SocketManager.OnAvatarToken += OnAssetToken;
             APITools.APIObject.GetUser(r =>
             {
                 if (r.success)
@@ -168,33 +171,38 @@ namespace Hypernex.Game
                 Rotation = Rot.ToFloat4(),
                 Size = Vector3.One.ToFloat3(),
             });
-            if (IsInstanceValid(Avatar))
+            try
             {
-                dict.Add(HeadId, new NetworkedObject()
+                if (IsInstanceValid(Avatar) && IsInstanceValid(Avatar.ikSystem))
                 {
-                    ObjectLocation = "head",
-                    IgnoreObjectLocation = true,
-                    Position = Avatar.HeadTransform.Position.ToFloat3(),
-                    Rotation = Avatar.HeadTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
-                    Size = Vector3.One.ToFloat3(),
-                });
-                dict.Add(LeftHandId, new NetworkedObject()
-                {
-                    ObjectLocation = "left_hand",
-                    IgnoreObjectLocation = true,
-                    Position = Avatar.LeftHandTransform.Position.ToFloat3(),
-                    Rotation = Avatar.LeftHandTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
-                    Size = Vector3.One.ToFloat3(),
-                });
-                dict.Add(RightHandId, new NetworkedObject()
-                {
-                    ObjectLocation = "right_hand",
-                    IgnoreObjectLocation = true,
-                    Position = Avatar.RightHandTransform.Position.ToFloat3(),
-                    Rotation = Avatar.RightHandTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
-                    Size = Vector3.One.ToFloat3(),
-                });
+                    dict.Add(HeadId, new NetworkedObject()
+                    {
+                        ObjectLocation = "head",
+                        IgnoreObjectLocation = true,
+                        Position = Avatar.HeadTransform.Position.ToFloat3(),
+                        Rotation = Avatar.HeadTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
+                        Size = Vector3.One.ToFloat3(),
+                    });
+                    dict.Add(LeftHandId, new NetworkedObject()
+                    {
+                        ObjectLocation = "left_hand",
+                        IgnoreObjectLocation = true,
+                        Position = Avatar.LeftHandTransform.Position.ToFloat3(),
+                        Rotation = Avatar.LeftHandTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
+                        Size = Vector3.One.ToFloat3(),
+                    });
+                    dict.Add(RightHandId, new NetworkedObject()
+                    {
+                        ObjectLocation = "right_hand",
+                        IgnoreObjectLocation = true,
+                        Position = Avatar.RightHandTransform.Position.ToFloat3(),
+                        Rotation = Avatar.RightHandTransform.Basis.GetRotationQuaternion().Normalized().ToFloat4(),
+                        Size = Vector3.One.ToFloat3(),
+                    });
+                }
             }
+            catch
+            { }
             return dict;
         }
 
@@ -242,6 +250,17 @@ namespace Hypernex.Game
             }).Start();
         }
 
+        private void OnAssetToken(SharedAvatarToken shToken)
+        {
+            if (!IsLocal)
+                ChangeAvatar(AvatarId);
+        }
+
+        private void OtherUserLoaded(User user)
+        {
+            ShareAvatarToken(user, AvatarId);
+        }
+
         public void NetworkUpdate(PlayerUpdate playerUpdate)
         {
             if (playerUpdate.AvatarId != AvatarId)
@@ -259,13 +278,30 @@ namespace Hypernex.Game
             }
         }
 
+        private void ShareAvatarToken(User user, string id)
+        {
+            if (APITools.CurrentUser.BlockedUsers.Contains(user.Id))
+                return;
+            GetAvatarToken(id, token =>
+            {
+                APITools.UserSocket.ShareAvatarToken(user, id, token);
+            });
+        }
+
         private void GetAvatarToken(string id, Action<string> callback)
         {
+            SharedAvatarToken shToken = SocketManager.SharedAvatarTokens.FirstOrDefault(x => x.avatarId == id && x.fromUserId != APITools.CurrentUser.Id);
+            if (shToken != null)
+            {
+                callback?.Invoke(shToken.avatarToken);
+                return;
+            }
             APITools.APIObject.AddAssetToken(result =>
             {
                 if (result.success)
                 {
-                    QuickInvoke.InvokeActionOnMainThread(callback, result.result.token.content);
+                    if (IsInstanceValid(this))
+                        QuickInvoke.InvokeActionOnMainThread(callback, result.result.token.content);
                 }
             }, APITools.CurrentUser, APITools.CurrentToken, id);
         }
@@ -309,7 +345,12 @@ namespace Hypernex.Game
 
         public void ChangeAvatar(string id)
         {
+            if (AvatarId == id && IsInstanceValid(Avatar))
+                return;
             AvatarId = id;
+            if (IsInstanceValid(Avatar))
+                Avatar.QueueFree();
+            Avatar = null;
             APITools.APIObject.GetAvatarMeta(result =>
             {
                 AvatarMeta avatarMeta = result.result.Meta;
@@ -317,13 +358,21 @@ namespace Hypernex.Game
                 {
                     if (avatarMeta.OwnerId != APITools.CurrentUser.Id)
                     {
+                        GetAvatarToken(avatarMeta.Id, token =>
+                        {
+                            DownloadAvatar(avatarMeta, token);
+                        });
                         return;
                     }
                     GetAvatarToken(avatarMeta.Id, token =>
                     {
-                        assetTokens.Add(avatarMeta.Id, token);
+                        assetTokens.TryAdd(avatarMeta.Id, token);
                         DownloadAvatar(avatarMeta, token);
                     });
+                    foreach (var user in Instance.ConnectedUsers)
+                    {
+                        ShareAvatarToken(user, avatarMeta.Id);
+                    }
                 }
                 else
                 {
