@@ -18,7 +18,7 @@ namespace Hypernex.Game.Tests
         [Export]
         public Node3D target2;
         [Export]
-        public Node3D target3;
+        public ShapeCast3D target3;
         [Export]
         public bool save = false;
         [Export]
@@ -39,7 +39,7 @@ namespace Hypernex.Game.Tests
                 CallDeferred(Node.MethodName.AddChild, root);
             }).Start();
             */
-            avatar = AvatarRoot.LoadFromFile("user://gman.hna");
+            avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
             AddChild(avatar);
             avatar.AttachTo(target);
             // RunTest();
@@ -49,7 +49,7 @@ namespace Hypernex.Game.Tests
         {
             float s = Time.GetTicksMsec() / 1000f;
             target.Position = new Vector3(Mathf.Cos(s), 0f, Mathf.Sin(s));
-            avatar.ProcessIk(true, true, target3.GlobalTransform, target2.GlobalTransform, target2.GlobalTransform);
+            avatar.ProcessIk(true, true, target3.GlobalTransform, target3.GlobalTransform.TranslatedLocal(target3.TargetPosition * target3.GetClosestCollisionUnsafeFraction()), target2.GlobalTransform, target2.GlobalTransform);
         }
 
         public void RunTest()

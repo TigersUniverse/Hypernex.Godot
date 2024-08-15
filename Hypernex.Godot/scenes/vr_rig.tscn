@@ -2,12 +2,14 @@
 
 [ext_resource type="Script" path="res://scripts/VRRig.cs" id="1_1xyfp"]
 
-[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "openMenuWarning")]
+[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "openMenuWarning")]
 script = ExtResource("1_1xyfp")
 origin = NodePath("SubViewport/Origin")
 head = NodePath("SubViewport/Origin/Head")
 leftHand = NodePath("SubViewport/Origin/Left")
 rightHand = NodePath("SubViewport/Origin/Right")
+leftHandSkel = NodePath("SubViewport/Origin/LeftSkel")
+rightHandSkel = NodePath("SubViewport/Origin/RightSkel")
 openMenuWarning = NodePath("SubViewport/Origin/Head/Label3D")
 
 [node name="SubViewport" type="SubViewport" parent="."]
@@ -30,11 +32,16 @@ modulate = Color(1, 0, 0, 1)
 text = "Menu is open!
 Use desktop."
 
-[node name="AudioListener3D" type="AudioListener3D" parent="SubViewport/Origin/Head"]
-current = true
-
 [node name="Left" type="XRController3D" parent="SubViewport/Origin"]
 tracker = &"left_hand"
 
 [node name="Right" type="XRController3D" parent="SubViewport/Origin"]
 tracker = &"right_hand"
+
+[node name="LeftSkel" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"left_hand"
+pose = &"skeleton"
+
+[node name="RightSkel" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"right_hand"
+pose = &"skeleton"
