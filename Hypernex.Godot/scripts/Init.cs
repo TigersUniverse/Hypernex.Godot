@@ -114,7 +114,7 @@ public partial class Init : Node
             var plr = NewPlayer(true);
             plr.SetUser(APITools.CurrentUser.Id, instance);
             instance.World.AddPlayer(plr);
-            Instance.ui.Hide();
+            // Instance.ui.Hide();
         }
     }
 

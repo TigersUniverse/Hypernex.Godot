@@ -18,7 +18,7 @@ namespace Hypernex.Player
         public override void _Ready()
         {
             lastMousePosition = GetViewport().GetMousePosition();
-            Input.MouseMode = Input.MouseModeEnum.Captured;
+            // Input.MouseMode = Input.MouseModeEnum.Captured;
         }
 
         public override void _ExitTree()
@@ -40,7 +40,7 @@ namespace Hypernex.Player
 
         public override void _Process(double delta)
         {
-            if (Input.IsActionJustPressed("ui_cancel"))
+            if (Input.IsActionJustPressed("ui_cancel") && GetWindow().HasFocus())
             {
                 textChatOpen = false;
                 Input.MouseMode = (Input.MouseMode == Input.MouseModeEnum.Visible) ? Input.MouseModeEnum.Captured : Input.MouseModeEnum.Visible;
@@ -62,7 +62,7 @@ namespace Hypernex.Player
         {
             if (Init.IsVRLoaded)
                 return;
-            if (Input.IsActionJustReleased("chat_text"))
+            if (Input.IsActionJustReleased("chat_text") && GetWindow().HasFocus())
             {
                 textChatOpen = true;
                 Input.MouseMode = Input.MouseModeEnum.Visible;
