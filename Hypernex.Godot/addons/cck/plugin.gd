@@ -97,7 +97,6 @@ static func export_res(id: String, res: Resource, scn_state: TscnState) -> Dicti
 	}
 
 static func export_scn(writer: ZIPPacker, path: String) -> void:
-	print(path)
 	var dep_path := path
 	var scn := ResourceLoader.load(path) as PackedScene
 	var state := scn.get_state()
