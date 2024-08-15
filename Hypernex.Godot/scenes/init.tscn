@@ -76,7 +76,7 @@ useHttp = true
 
 [node name="ServerAddress" type="LineEdit" parent="UI/Login"]
 layout_mode = 2
-placeholder_text = "Server Address"
+placeholder_text = "Server Address (play.hypernex.dev)"
 alignment = 1
 
 [node name="Username" type="LineEdit" parent="UI/Login"]

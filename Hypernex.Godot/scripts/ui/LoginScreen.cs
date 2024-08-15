@@ -108,7 +108,7 @@ namespace Hypernex.UI
             }
             else
             {
-                string addr = string.IsNullOrWhiteSpace(serverAddressEdit.Text) ? "127.0.0.1" : serverAddressEdit.Text;
+                string addr = string.IsNullOrWhiteSpace(serverAddressEdit.Text) ? "play.hypernex.dev" : serverAddressEdit.Text;
                 HypernexSettings settings = new HypernexSettings(usernameEdit.Text, passwordEdit.Text, twoFactorEdit.Text)
                 {
                     TargetDomain = addr,
