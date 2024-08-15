@@ -67,6 +67,8 @@ mesh = SubResource("CapsuleMesh_i7wyo")
 
 [node name="Voice" type="AudioStreamPlayer3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+max_distance = 25.0
+bus = &"Voice"
 
 [node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root", "audioSource")]
 script = ExtResource("3_hirej")

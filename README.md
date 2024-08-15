@@ -11,7 +11,7 @@ This client is very Work-in-Progress.
 - Login, Home, Worlds and Instance UI
 - Networking
 - PC/Flatscreen Movement
-- Proximity Voice Chat (broken as of current)
+- Proximity Voice Chat
 - Proximity Text To Speech
 - GIF/Video playback in UI
 

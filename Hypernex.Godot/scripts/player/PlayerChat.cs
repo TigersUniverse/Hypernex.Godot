@@ -91,6 +91,8 @@ namespace Hypernex.Player
             voice.BufferLength = 0.5f;
             voice.ProcessMode = ProcessModeEnum.Always;
             AddChild(voice);
+            voice.CallDeferred(VoiceChat.MethodName.SetVoice, audioSource);
+            // voice.SetVoice(audioSource);
         }
 
         public void HandleVoice(PlayerVoice data)
