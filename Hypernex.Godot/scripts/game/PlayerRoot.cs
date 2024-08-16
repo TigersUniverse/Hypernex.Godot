@@ -284,7 +284,7 @@ namespace Hypernex.Game
 
         private void ReportDownloadProgress(string id, float amount)
         {
-            if (IsInstanceValid(loadingBar) && IsInstanceValid(loadingSprite) && AvatarId == id)
+            if (IsInstanceValid(loadingBar) && IsInstanceValid(loadingSprite) && TargetAvatarId == id)
             {
                 loadingBar.Value = amount;
                 loadingSprite.Visible = amount < 1f;
