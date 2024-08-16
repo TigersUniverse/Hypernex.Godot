@@ -26,6 +26,7 @@ namespace Hypernex.Tools
             {
                 if (Cache.ContainsKey(url) && !skipCache)
                 {
+                    QuickInvoke.InvokeActionOnMainThread(DownloadProgress, 1f);
                     QuickInvoke.InvokeActionOnMainThread(OnDownload, Cache[url]);
                     return;
                 }
@@ -81,7 +82,11 @@ namespace Hypernex.Tools
             if (fileExists && !string.IsNullOrEmpty(knownFileHash))
                 isHashSame = GetFileHash(fileOutput) == knownFileHash;
             if (fileExists && isHashSame)
+            {
+                if (DownloadProgress != null)
+                    QuickInvoke.InvokeActionOnMainThread(DownloadProgress, 1f);
                 QuickInvoke.InvokeActionOnMainThread(OnDownload, fileOutput);
+            }
             else
             {
                 DownloadMeta meta = new DownloadMeta
