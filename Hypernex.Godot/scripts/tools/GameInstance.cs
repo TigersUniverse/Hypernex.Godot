@@ -435,7 +435,7 @@ namespace Hypernex.Tools
                             LoadScene(open, o);
                         else
                             Dispose();
-                    }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
+                    }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p), Init.Instance.loadingOverlay.Add(fileURL, worldMeta.Name));
                 }, worldMeta.OwnerId, fileId);
             }
         }

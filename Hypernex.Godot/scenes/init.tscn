@@ -261,9 +261,10 @@ offset_top = -50.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="Controller" type="Node" parent="UI/LoadingIcon" node_paths=PackedStringArray("bar", "label")]
+[node name="Controller" type="Node" parent="UI/LoadingIcon" node_paths=PackedStringArray("bar", "barContainer", "label")]
 script = ExtResource("14_j4y3h")
-bar = NodePath("../CenterContainer/VBoxContainer/ProgressBar")
+bar = NodePath("../CenterContainer/VBoxContainer/Bar/ProgressBar")
+barContainer = NodePath("../CenterContainer/VBoxContainer/Bar")
 label = NodePath("../CenterContainer/VBoxContainer/Label")
 
 [node name="CenterContainer" type="CenterContainer" parent="UI/LoadingIcon"]
@@ -278,11 +279,18 @@ text = "Loading..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ProgressBar" type="ProgressBar" parent="UI/LoadingIcon/CenterContainer/VBoxContainer"]
+[node name="Bar" type="HBoxContainer" parent="UI/LoadingIcon/CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="UI/LoadingIcon/CenterContainer/VBoxContainer/Bar"]
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 max_value = 1.0
 step = 0.0
+
+[node name="Button" type="Button" parent="UI/LoadingIcon/CenterContainer/VBoxContainer/Bar"]
+layout_mode = 2
+text = "Cancel"
 
 [node name="Window" type="Window" parent="UI"]
 title = "CCK"
@@ -293,4 +301,5 @@ transient = true
 
 [node name="CCKController" parent="UI/Window" instance=ExtResource("14_tnrj2")]
 
+[connection signal="pressed" from="UI/LoadingIcon/CenterContainer/VBoxContainer/Bar/Button" to="UI/LoadingIcon/Controller" method="StopAllDownloads"]
 [connection signal="close_requested" from="UI/Window" to="UI/Window" method="hide"]

@@ -138,7 +138,7 @@ namespace Hypernex.Tools
                     DownloadedWorlds.Add(worldMeta.Id, o);
                     if (APITools.IsFullReady)
                         APITools.UserSocket.RequestNewInstance(worldMeta, instancePublicity, instanceProtocol, gameServer);
-                }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
+                }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p), Init.Instance.loadingOverlay.Add(fileURL, worldMeta.Name));
             }, worldMeta.OwnerId, targetBuild.FileId);
         }
 
@@ -204,7 +204,7 @@ namespace Hypernex.Tools
                     DownloadedWorlds.Add(worldMeta.Id, o);
                     if (APITools.IsFullReady)
                         APITools.UserSocket.JoinInstance(instance.GameServerId, instance.InstanceId);
-                }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p));
+                }, knownHash, p => Init.Instance.loadingOverlay.Report(fileURL, p), Init.Instance.loadingOverlay.Add(fileURL, worldMeta.Name));
             }, worldMeta.OwnerId, targetBuild.FileId);
         }
 

@@ -35,7 +35,7 @@ namespace Hypernex.Tools
         {
             if (mutex.WaitOne(0))
             {
-                if (queue.Count > 0)
+                while (queue.Count > 0)
                 {
                     try
                     {

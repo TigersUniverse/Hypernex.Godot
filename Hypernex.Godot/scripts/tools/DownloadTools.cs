@@ -18,7 +18,7 @@ namespace Hypernex.Tools
         private static readonly Queue<DownloadMeta> Queue = new();
         private static readonly Dictionary<DownloadMeta, Thread> RunningThreads = new();
 
-        public static void DownloadBytes(string url, Action<byte[]> OnDownload, Action<float> DownloadProgress = null, bool skipCache = false)
+        public static void DownloadBytes(string url, Action<byte[]> OnDownload, Action<float> DownloadProgress = null, bool skipCache = false, CancellationToken cancellation = default)
         {
             if (string.IsNullOrWhiteSpace(url))
                 return;
@@ -35,7 +35,8 @@ namespace Hypernex.Tools
             {
                 url = url,
                 done = OnDownload,
-                skipCache = skipCache
+                skipCache = skipCache,
+                cancellationToken = cancellation,
             };
             if (DownloadProgress != null)
                 meta.progress = DownloadProgress;
@@ -70,7 +71,7 @@ namespace Hypernex.Tools
         }
 
         public static void DownloadFile(string url, string output, Action<string> OnDownload,
-            string knownFileHash = null, Action<float> DownloadProgress = null)
+            string knownFileHash = null, Action<float> DownloadProgress = null, CancellationToken cancellation = default)
         {
             if (!Directory.Exists(DownloadsPath))
                 Directory.CreateDirectory(DownloadsPath);
@@ -97,7 +98,8 @@ namespace Hypernex.Tools
                         if (DownloadProgress != null)
                             QuickInvoke.InvokeActionOnMainThread(DownloadProgress, p);
                     },
-                    skipCache = true
+                    skipCache = true,
+                    cancellationToken = cancellation,
                 };
                 Queue.Enqueue(meta);
                 Logger.CurrentLogger.Debug("Added " + url + " to download queue!");
@@ -132,28 +134,30 @@ namespace Hypernex.Tools
                         if (downloadMeta.progress != null)
                             QuickInvoke.InvokeActionOnMainThread(downloadMeta.progress, (float)total / leng);
                     });
-                    await CopyAsync(httpStream, ms, 81920, prog);
+                    await CopyAsync(httpStream, ms, 81920, prog, downloadMeta.cancellationToken);
                 }
                 else
                 {
-                    await httpStream.CopyToAsync(ms);
+                    await httpStream.CopyToAsync(ms, downloadMeta.cancellationToken);
                 }
                 Logger.CurrentLogger.Debug("Finished download for " + downloadMeta.url);
                 if (!downloadMeta.skipCache)
                     AttemptAddToCache(downloadMeta.url, ms.ToArray());
                 QuickInvoke.InvokeActionOnMainThread(downloadMeta.done, ms.ToArray());
                 RunningThreads.Remove(downloadMeta);
-            });
+            }, downloadMeta.cancellationToken);
         }
 
-        private static async Task CopyAsync(Stream source, Stream dest, int bufferSize, IProgress<long> progress)
+        private static async Task CopyAsync(Stream source, Stream dest, int bufferSize, IProgress<long> progress, CancellationToken token)
         {
             var buffer = new byte[bufferSize];
             long total = 0;
             int read;
-            while ((read = await source.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) != 0)
+            while ((read = await source.ReadAsync(buffer, 0, buffer.Length, token)/*.ConfigureAwait(false)*/) != 0)
             {
-                await dest.WriteAsync(buffer, 0, read).ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();
+                await dest.WriteAsync(buffer, 0, read, token);//.ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();
                 total += read;
                 progress.Report(total);
             }
@@ -190,5 +194,6 @@ namespace Hypernex.Tools
         public Action<float> progress;
         public Action<byte[]> done;
         public bool skipCache;
+        public CancellationToken cancellationToken;
     }
 }
