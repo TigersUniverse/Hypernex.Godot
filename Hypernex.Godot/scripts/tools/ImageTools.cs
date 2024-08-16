@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Security.Cryptography;
 using FFmpeg.Godot;
 using Godot;
 
@@ -27,8 +29,10 @@ namespace Hypernex.Tools
 
         public static FFGodot LoadFFmpeg(byte[] buffer, TextureRect texture, AudioStreamPlayer3D sound)
         {
-            string path = Path.GetTempFileName();
-            File.WriteAllBytes(path, buffer);
+            string hash = Convert.ToBase64String(MD5.HashData(buffer));
+            string path = DownloadTools.GetFilePath($"media_{hash}.cache");
+            if (!File.Exists(path))
+                File.WriteAllBytes(path, buffer);
             FFGodot ff = new FFGodot();
             ff.renderMesh = texture;
             ff.source = sound;
@@ -40,8 +44,10 @@ namespace Hypernex.Tools
 
         public static void LoadFFmpeg(FFGodot ff, byte[] buffer)
         {
-            string path = Path.GetTempFileName();
-            File.WriteAllBytes(path, buffer);
+            string hash = Convert.ToBase64String(MD5.HashData(buffer));
+            string path = DownloadTools.GetFilePath($"media_{hash.Replace("=", null).Replace("/", null)}.cache");
+            if (!File.Exists(path))
+                File.WriteAllBytes(path, buffer);
             ff.Log = _ => { };
             ff.Play(path, path);
         }

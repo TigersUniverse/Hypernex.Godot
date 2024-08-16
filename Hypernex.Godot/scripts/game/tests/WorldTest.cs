@@ -31,14 +31,12 @@ namespace Hypernex.Game.Tests
             GDLogger logger = new GDLogger();
             logger.SetLogger();
             await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
-            /*
             new Thread(() =>
             {
-                var root = WorldRoot.LoadFromFile("user://slender.hnw");
+                var root = WorldRoot.LoadFromFile("user://my_world.hnw");
                 // Thread.Sleep(1000);
                 CallDeferred(Node.MethodName.AddChild, root);
             }).Start();
-            */
             avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
             AddChild(avatar);
             avatar.AttachTo(target);

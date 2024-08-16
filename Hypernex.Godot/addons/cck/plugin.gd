@@ -2,16 +2,21 @@
 class_name CCKPlugin
 extends EditorPlugin
 
+const ZoneGizmo := preload("res://addons/cck/classes/zone_gizmo.gd")
+
 var cck_dock: Node = null
+var zone_gizmo_plugin := ZoneGizmo.new()
 
 func _enter_tree():
 	add_tool_menu_item("Export World", export_world_quick)
 	cck_dock = load("res://addons/cck/cck_dock.tscn").instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_UR, cck_dock)
+	# add_node_3d_gizmo_plugin(zone_gizmo_plugin)
 
 func _exit_tree():
 	remove_tool_menu_item("Export World")
 	remove_control_from_docks(cck_dock)
+	# remove_node_3d_gizmo_plugin(zone_gizmo_plugin)
 
 static func export_asset(res: Resource, path: String) -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)

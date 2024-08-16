@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=13 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
+[ext_resource type="Script" path="res://addons/cck/classes/reverb_zone.gd" id="5_a4oh0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -29,6 +30,11 @@ static func _static_init():
 	print(\"hacked smh\")
 "
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_1slmv"]
+radius = 0.1
+
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_6mgta"]
+
 [node name="WorldTest" type="Node"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -38,8 +44,11 @@ environment = SubResource("Environment_4365i")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Test" type="Node" parent="."]
+[node name="Test" type="Node" parent="." node_paths=PackedStringArray("target", "target2", "target3")]
 script = ExtResource("1_hscsn")
+target = NodePath("World/Marker3D")
+target2 = NodePath("World/Marker3D2")
+target3 = NodePath("World/Marker3D3")
 save = true
 load = true
 
@@ -81,6 +90,26 @@ end
 
 Runtime.OnFixedUpdate(SandboxFunc().SetAction(settime));"
 metadata/typename = "WorldScript"
+
+[node name="Marker3D" type="Marker3D" parent="Test/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.20059, 0)
+
+[node name="Marker3D2" type="Marker3D" parent="Test/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.58851, 0)
+
+[node name="Marker3D3" type="ShapeCast3D" parent="Test/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.37821, -1.50097)
+shape = SubResource("SphereShape3D_1slmv")
+target_position = Vector3(0, -2, 0)
+
+[node name="ReverbZone" type="CSGBox3D" parent="Test/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.226929, 1.25464, -1.18481)
+visible = false
+gi_mode = 0
+size = Vector3(11.7791, 3.50928, 3.36963)
+script = ExtResource("5_a4oh0")
+effect = SubResource("AudioEffectReverb_6mgta")
+metadata/typename = "ReverbZone"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Test"]
 
