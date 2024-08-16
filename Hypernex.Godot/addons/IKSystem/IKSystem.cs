@@ -259,12 +259,12 @@ public partial class IKSystem : Node
             direction = humanoid.GetBoneTransform(HumanBodyBones.Head).position - humanoid.GetBoneTransform(HumanBodyBones.Hips).position;
             */
             direction = head.GlobalPosition - hips.GlobalPosition;
-            float scl = /*direction.Length()*/ 1f / GetScale();
+            float scl = direction.Length() / GetScale();
             footDistance = leftFoot.GlobalPosition.DistanceTo(rightFoot.GlobalPosition);
             hipsDistance = hips.GlobalPosition.DistanceTo(head.GlobalPosition);
             floorDistance = hips.GlobalPosition.DistanceTo(humanoid.GlobalPosition);
             float scale = 1f / GetScale();
-            float handPoleDist = -0.5f;
+            float handPoleDist = -1f;
 
             Vector3 right = -humanoid.GlobalBasis.X.Normalized();
             Vector3 forward = humanoid.GlobalBasis.Z.Normalized();
@@ -326,7 +326,7 @@ public partial class IKSystem : Node
                 leftFootData.target.GlobalTransform = leftFoot.GlobalTransform;
                 leftFootData.pole = new Node3D() { Name = "LeftFoot_Pole" };
                 leftUpperLeg.AddChild(leftFootData.pole);
-                leftFootData.pole.GlobalPosition = leftUpperLeg.GlobalPosition - right * 0.25f * scl + forward * 1.5f * scl + up * 0.9f * scl;
+                leftFootData.pole.GlobalPosition = leftUpperLeg.GlobalPosition - right * 1f * scl + forward * 2f * scl + up * 0.9f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
                 // leftFoot.AddChild(ik);
@@ -347,7 +347,7 @@ public partial class IKSystem : Node
                 rightFootData.target.GlobalTransform = rightFoot.GlobalTransform;
                 rightFootData.pole = new Node3D() { Name = "RightFoot_Pole" };
                 rightUpperLeg.AddChild(rightFootData.pole);
-                rightFootData.pole.GlobalPosition = rightUpperLeg.GlobalPosition + right * 0.25f * scl + forward * 1.5f * scl + up * 0.9f * scl;
+                rightFootData.pole.GlobalPosition = rightUpperLeg.GlobalPosition + right * 1f * scl + forward * 2f * scl + up * 0.9f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
                 // rightFoot.AddChild(ik);

@@ -240,6 +240,7 @@ namespace Hypernex.UI
                         break;
                     }
                     ConfigManager.SelectedConfigUser.CurrentAvatar = selectedAvatarMeta.Id;
+                    ConfigManager.SaveConfigToFile();
                     if (IsInstanceValid(PlayerRoot.Local))
                     {
                         PlayerRoot.Local.AvatarId = selectedAvatarMeta.Id;
