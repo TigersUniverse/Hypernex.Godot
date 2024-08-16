@@ -387,6 +387,7 @@ namespace Hypernex.Tools
                         }
                         if (open)
                             Open();
+                        FocusedInstance?.Dispose();
                         FocusedInstance = this;
                         OnGameInstanceLoaded?.Invoke(this, worldMeta);
                     });
