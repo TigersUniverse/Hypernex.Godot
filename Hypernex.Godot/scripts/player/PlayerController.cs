@@ -30,7 +30,7 @@ namespace Hypernex.Player
             if (inputs == null)
                 return;
             Rotation += new Vector3(0f, inputs.lastMouseDelta.X, 0f);
-            root.view.Rotation = new Vector3(Mathf.Clamp(root.view.Rotation.X + inputs.lastMouseDelta.Y, -Mathf.Pi * 0.5f, Mathf.Pi * 0.5f), 0f, 0f);
+            root.view.Rotation = new Vector3(Mathf.Clamp(root.view.Rotation.X + inputs.lastMouseDelta.Y, Mathf.DegToRad(-89f), Mathf.DegToRad(89f)), 0f, 0f);
             inputs.lastMouseDelta = Vector2.Zero;
         }
 
@@ -45,7 +45,10 @@ namespace Hypernex.Player
             else
                 vel.Y = 0f;
 
-            Vector3 dir = root.Transform.Basis * Transform.Basis * (new Vector3(inputs.move.X, 0f, inputs.move.Y).Normalized() * speed);
+            Basis viewB = root.view.GlobalBasis;
+            viewB.Y = Vector3.Up;
+
+            Vector3 dir = viewB.Orthonormalized() * (new Vector3(inputs.move.X, 0f, inputs.move.Y).Normalized() * speed);
             dir.Y = vel.Y;
             vel = vel.MoveToward(dir, (float)delta * accel);
 
