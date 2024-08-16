@@ -690,7 +690,7 @@ namespace FFmpeg.Godot
 
         public static Image SaveFrame(AVFrame frame, int width, int height, AVPixelFormat format)
         {
-            Image texture = Image.Create(width, height, false, Image.Format.Rgb8);
+            Image texture = Image.CreateEmpty(width, height, false, Image.Format.Rgb8);
             SaveFrame(frame, width, height, texture, format);
             return texture;
         }

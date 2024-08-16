@@ -24,7 +24,7 @@ namespace FFmpeg.Godot.Helpers
             {
                 pool.Add(new TexturePoolState()
                 {
-                    texture = Image.Create(16, 16, false, Image.Format.Rgb8),
+                    texture = Image.CreateEmpty(16, 16, false, Image.Format.Rgb8),
                 });
             }
         }
@@ -38,7 +38,7 @@ namespace FFmpeg.Godot.Helpers
                 GD.Print($"Adding to texture pool {pool.Count}");
                 var n = new TexturePoolState()
                 {
-                    texture = Image.Create(16, 16, false, Image.Format.Rgb8),
+                    texture = Image.CreateEmpty(16, 16, false, Image.Format.Rgb8),
                 };
                 pool.Add(n);
                 index = pool.Count - 1;
