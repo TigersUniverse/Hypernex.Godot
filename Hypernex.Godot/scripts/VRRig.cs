@@ -43,7 +43,9 @@ public partial class VRRig : Node3D
                 Transform3D floor = head.GlobalTransform;
                 floor.Origin += Vector3.Down * head.Position.Y;
                 // TODO: eye offsets
-                PlayerRoot.Local.Avatar.ProcessIk(true, true, head.GlobalTransform.Translated(head.GlobalBasis.Z * 0.2f), floor, leftHandSkel.GlobalTransform, rightHandSkel.GlobalTransform);
+                Vector3 backFloor = head.GlobalBasis.Z;
+                backFloor.Y = 0f;
+                PlayerRoot.Local.Avatar.ProcessIk(true, true, head.GlobalTransform.Translated(backFloor * 0.2f), floor, leftHandSkel.GlobalTransform, rightHandSkel.GlobalTransform);
                 // PlayerRoot.Local.Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
             }
         }
