@@ -63,7 +63,7 @@ public partial class Init : Node
         Telepathy.Log.Error = s => logger.Error(s);
 
         NativeLibrary.SetDllImportResolver(typeof(Flite.FliteNativeApi).Assembly, FliteResolver);
-        NativeLibrary.SetDllImportResolver(typeof(Discord.Discord).Assembly, DiscordResolver);
+        // NativeLibrary.SetDllImportResolver(typeof(Discord.Discord).Assembly, DiscordResolver);
 
         AddChild(new QuickInvoke() { Name = "QuickInvoke" });
         AddChild(new ConfigManager() { Name = "ConfigManager" });

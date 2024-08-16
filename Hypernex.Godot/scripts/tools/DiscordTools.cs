@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using Discord;
+using DiscordRPC;
+using DiscordRPC.Logging;
 using Godot;
 using Hypernex.CCK;
 using Hypernex.Player;
@@ -38,13 +40,37 @@ namespace Hypernex.Tools
     internal static class DiscordTools
     {
         private const long DiscordApplicationId = 1101618498062516254;
-        private static Discord.Discord discord = null;
+        private static DiscordRpcClient discord = null;
         private static readonly long startTime = new DateTimeOffset(DateTime.Now).ToUnixTimeMilliseconds();
 
         private static bool ignoreUserRefresh;
         private static readonly Dictionary<string, long> InstanceDateTimes = new();
 
-        private static ActivityManager.UpdateActivityHandler updateActivity = result => { };
+        public class DiscordLogger : ILogger
+        {
+            public LogLevel Level { get; set; }
+
+            public void Error(string message, params object[] args)
+            {
+                Logger.CurrentLogger.Error($"DiscordGameSDK: {string.Format(message, args)}");
+            }
+
+            public void Info(string message, params object[] args)
+            {
+                Logger.CurrentLogger.Log($"DiscordGameSDK: {string.Format(message, args)}");
+            }
+
+            public void Trace(string message, params object[] args)
+            {
+                Logger.CurrentLogger.Debug($"DiscordGameSDK: {string.Format(message, args)}");
+            }
+
+            public void Warning(string message, params object[] args)
+            {
+                Logger.CurrentLogger.Warn($"DiscordGameSDK: {string.Format(message, args)}");
+            }
+
+        }
 
         private static bool IsInitialized => discord != null;
 
@@ -69,23 +95,21 @@ namespace Hypernex.Tools
         {
             try
             {
-                var userManager = discord.GetUserManager();
                 string status = user.Bio.Status.ToString();
                 string statusSpaced = GetSpacedStatus(user.Bio.Status);
-                discord.GetActivityManager().UpdateActivity(new Activity
+                discord.SetPresence(new RichPresence()
                 {
-                    Name = "Hypernex",
                     Details = $"Playing as {user.Username}",
-                    Timestamps = new ActivityTimestamps {Start = startTime},
-                    Assets = new ActivityAssets
+                    Timestamps = new Timestamps() {StartUnixMilliseconds = (ulong)startTime},
+                    Assets = new Assets()
                     {
-                        LargeImage = "logo",
-                        SmallImage = status.ToLower(),
-                        SmallText = string.IsNullOrEmpty(APITools.CurrentUser.Bio.StatusText)
+                        LargeImageKey = "logo",
+                        SmallImageKey = status.ToLower(),
+                        SmallImageText = string.IsNullOrEmpty(APITools.CurrentUser.Bio.StatusText)
                             ? statusSpaced
                             : APITools.CurrentUser.Bio.StatusText
-                    }
-                }, updateActivity);
+                    },
+                });
             } catch(Exception){}
         }
 
@@ -95,33 +119,15 @@ namespace Hypernex.Tools
             {
                 if (IsInitialized)
                     return;
-                discord = new(DiscordApplicationId, (ulong)CreateFlags.NoRequireDiscord);
-                discord.SetLogHook(LogLevel.Debug, (level, msg) =>
+                discord = new DiscordRpcClient(DiscordApplicationId.ToString(), autoEvents: false);
+                discord.Logger = new DiscordLogger();
+                discord.Initialize();
+                discord.SetPresence(new RichPresence()
                 {
-                    switch (level)
-                    {
-                        default:
-                        case LogLevel.Debug:
-                            Logger.CurrentLogger.Debug($"DiscordGameSDK: {msg}");
-                            break;
-                        case LogLevel.Info:
-                            Logger.CurrentLogger.Log($"DiscordGameSDK: {msg}");
-                            break;
-                        case LogLevel.Warn:
-                            Logger.CurrentLogger.Warn($"DiscordGameSDK: {msg}");
-                            break;
-                        case LogLevel.Error:
-                            Logger.CurrentLogger.Error($"DiscordGameSDK: {msg}");
-                            break;
-                    }
-                });
-                discord.GetActivityManager().UpdateActivity(new Activity
-                {
-                    Name = "Hypernex",
                     Details = "Logging In",
-                    Timestamps = new ActivityTimestamps {Start = startTime},
-                    Assets = new ActivityAssets {LargeImage = "logo"}
-                }, updateActivity);
+                    Timestamps = new Timestamps() {StartUnixMilliseconds = (ulong)startTime},
+                    Assets = new Assets() {LargeImageKey = "logo"},
+                });
                 APITools.OnUserLogin += user =>
                 {
                     // if (ignoreUserRefresh)
@@ -132,13 +138,12 @@ namespace Hypernex.Tools
                 {
                     ignoreUserRefresh = false;
                     InstanceDateTimes.Clear();
-                    discord.GetActivityManager().UpdateActivity(new Activity
+                    discord.SetPresence(new RichPresence()
                     {
-                        Name = "Hypernex",
                         Details = "Logging In",
-                        Timestamps = new ActivityTimestamps {Start = startTime},
-                        Assets = new ActivityAssets {LargeImage = "logo"}
-                    }, updateActivity);
+                        Timestamps = new Timestamps() {StartUnixMilliseconds = (ulong)startTime},
+                        Assets = new Assets() {LargeImageKey = "logo"},
+                    });
                 };
             }
             catch (Exception e)
@@ -164,22 +169,21 @@ namespace Hypernex.Tools
                 }
                 string status = APITools.CurrentUser.Bio.Status.ToString();
                 string statusSpaced = GetSpacedStatus(APITools.CurrentUser.Bio.Status);
-                discord.GetActivityManager().UpdateActivity(new Activity
+                discord.SetPresence(new RichPresence()
                 {
-                    Name = "Hypernex",
                     Details = $"Playing as {APITools.CurrentUser.Username}",
-                    Timestamps = new ActivityTimestamps {Start = time},
+                    Timestamps = new Timestamps {StartUnixMilliseconds = (ulong)time},
                     State = "Visiting " + worldMeta.Name,
-                    Assets = new ActivityAssets
+                    Assets = new Assets()
                     {
-                        LargeImage = string.IsNullOrEmpty(worldMeta.ThumbnailURL) ? "logo" : worldMeta.ThumbnailURL,
-                        LargeText = $"Hosted By {host.Username}",
-                        SmallImage = status.ToLower(),
-                        SmallText = string.IsNullOrEmpty(APITools.CurrentUser.Bio.StatusText)
+                        LargeImageKey = string.IsNullOrEmpty(worldMeta.ThumbnailURL) ? "logo" : worldMeta.ThumbnailURL,
+                        LargeImageText = $"Hosted By {host.Username}",
+                        SmallImageKey = status.ToLower(),
+                        SmallImageText = string.IsNullOrEmpty(APITools.CurrentUser.Bio.StatusText)
                             ? statusSpaced
                             : APITools.CurrentUser.Bio.StatusText
                     }
-                }, updateActivity);
+                });
             } catch(Exception){}
         }
 
@@ -196,7 +200,7 @@ namespace Hypernex.Tools
             try
             {
                 if (IsInitialized)
-                    discord.RunCallbacks();
+                    discord.Invoke();
             } catch(Exception){}
         }
 
