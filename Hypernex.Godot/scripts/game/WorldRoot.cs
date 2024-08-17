@@ -17,7 +17,7 @@ namespace Hypernex.Game
         public WorldDescriptor descriptor;
         public List<Node> Objects = new List<Node>();
         public List<ScriptRunner> Runners = new List<ScriptRunner>();
-        public List<Resource> Assets = new List<Resource>();
+        public List<WorldAsset> Assets = new List<WorldAsset>();
 
         public void AddPlayer(PlayerRoot player)
         {
@@ -27,7 +27,7 @@ namespace Hypernex.Game
 
         public void RespawnPlayer(PlayerRoot player)
         {
-            player.Pos = descriptor.StartPosition;
+            player.Pos = descriptor.GetRandomSpawn().GlobalPosition;
         }
 
         public void AddObject(Node worldObject)
@@ -35,7 +35,14 @@ namespace Hypernex.Game
             if (Objects.Contains(worldObject))
                 return;
             if (worldObject is WorldDescriptor desc)
+            {
                 descriptor = desc;
+                if (descriptor.Assets != null)
+                    foreach (var asset in descriptor.Assets)
+                    {
+                        AddAsset(asset);
+                    }
+            }
             if (worldObject is WorldScript script)
             {
                 ScriptRunner runner = new ScriptRunner();
@@ -65,9 +72,19 @@ namespace Hypernex.Game
             }
         }
 
-        public void AddAsset(Resource worldObject)
+        public void AddAsset(WorldAsset worldObject)
         {
             Assets.Add(worldObject);
+        }
+
+        public T GetAsset<T>(string asset) where T : Resource
+        {
+            return GetAsset(asset, typeof(T)) as T;
+        }
+
+        public Resource GetAsset(string asset, Type t)
+        {
+            return Assets.FirstOrDefault(x => x.name == asset && t.IsAssignableFrom(x.asset.GetType())).asset;
         }
 
         public void Load()
@@ -84,6 +101,7 @@ namespace Hypernex.Game
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
             loader.validScripts.Add(UICanvas.TypeName, SafeLoader.LoadScript<UICanvas>());
             loader.validScripts.Add(VideoPlayer.TypeName, SafeLoader.LoadScript<VideoPlayer>());
+            loader.validScripts.Add(WorldAsset.TypeName, SafeLoader.LoadScript<WorldAsset>());
             if (IsInstanceValid(Init.Instance))
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>

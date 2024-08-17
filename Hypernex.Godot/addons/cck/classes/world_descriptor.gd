@@ -2,7 +2,8 @@
 class_name WorldDescriptor
 extends Node3D
 
-@export var StartPosition: Vector3 = Vector3.ZERO
+@export var StartPositions: Array[Node3D] = []
+@export var Assets: Array[WorldAsset] = []
 
 func _notification(what) -> void:
 	if what == NOTIFICATION_EDITOR_PRE_SAVE:

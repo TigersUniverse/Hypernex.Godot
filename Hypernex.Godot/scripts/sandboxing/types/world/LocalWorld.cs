@@ -20,6 +20,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
         public static void SetSkyboxMaterial(string asset)
         {
             throw new NotImplementedException();
+            // GameInstance.FocusedInstance.World.GetAsset();
         }
 
         public static void UpdateEnvironment() => throw new NotImplementedException();

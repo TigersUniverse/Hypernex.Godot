@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using Godot;
+using Hypernex.Game;
 using Hypernex.Tools;
 using Nexbox;
 
@@ -30,7 +31,10 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public static void SetAudioClip(Item item, string asset)
         {
-            throw new NotImplementedException();
+            if (item.world is WorldRoot world)
+            {
+                GetAudio3D(item).Stream = world.GetAsset<AudioStream>(asset);
+            }
         }
 
         public static void SetMute(Item item, bool value)

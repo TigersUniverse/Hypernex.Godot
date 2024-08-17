@@ -18,23 +18,6 @@ func _exit_tree():
 	remove_control_from_docks(cck_dock)
 	# remove_node_3d_gizmo_plugin(zone_gizmo_plugin)
 
-static func export_asset(res: Resource, path: String) -> void:
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	file.store_pascal_string(res.get_class())
-	for prop in res.get_property_list():
-		var prop_name : String = prop["name"]
-		var prop_val : Variant = res.get(prop_name)
-		file.store_pascal_string(prop_name)
-		if prop_val is Resource:
-			file.store_8(1)
-			if prop_val.resource_path.is_empty():
-				printerr("Not able to export ", prop_val)
-			file.store_pascal_string(prop_val.resource_path)
-		else:
-			file.store_8(0)
-			file.store_var(prop_val)
-	file.close()
-
 static func export_deps(writer: ZIPPacker, path: String) -> void:
 	for dep in ResourceLoader.get_dependencies(path):
 		var dep_path := dep.get_slice("::", 2)
@@ -53,29 +36,37 @@ static func export_deps(writer: ZIPPacker, path: String) -> void:
 			writer.start_file(dep_path.replacen("res://", ""))
 			writer.write_file(dep_file)
 			writer.close_file()
-		elif dep_res.is_class("AudioStream") or true:
-			# write binary file
-			export_asset(dep_res, temp_path)
-			var dep_file := FileAccess.get_file_as_bytes(temp_path)
-			writer.start_file(dep_path.replacen("res://", ""))
-			writer.write_file(dep_file)
-			writer.close_file()
 		else:
-			# write text-version of file
-			ResourceSaver.save(dep_res, temp_path)
-			var dep_file := FileAccess.get_file_as_bytes(temp_path)
+			# write tres
+			var state := TscnState.new()
+			state.path = dep_path
+			var res_dict := export_res(dep_res.resource_path, dep_res, state)
+			var dict := {"resource": res_dict, "sub_resources": state.sub_tres, "ext_resources": state.ext_tres}
 			writer.start_file(dep_path.replacen("res://", ""))
-			writer.write_file(dep_file)
+			writer.write_file(var_to_bytes(dict))
 			writer.close_file()
+			export_deps(writer, dep_res.resource_path)
 		export_deps(writer, dep_path)
 
 class TscnState extends RefCounted:
 	var path := ""
-	var nodes := []
+	# var nodes := []
 	var sub_tres := []
 	var ext_tres := []
 	
 static func export_prop(val: Variant, scn_state: TscnState) -> Variant:
+	if val is Array:
+		var arr = []
+		for i in val:
+			arr.push_back(export_prop(i, scn_state))
+		return arr
+	if val is Dictionary:
+		var dict = {}
+		for i in val:
+			dict[i] = export_prop(val[i], scn_state)
+		return dict
+	if val is EncodedObjectAsID:
+		return export_prop(instance_from_id(val.object_id), scn_state)
 	var s := Marshalls.variant_to_base64(val)
 	if val is Resource:
 		if val.resource_path.begins_with(scn_state.path):
@@ -107,6 +98,7 @@ static func export_scn(writer: ZIPPacker, path: String) -> void:
 	var state := scn.get_state()
 	var scn_state := TscnState.new()
 	scn_state.path = path
+	var nodes := []
 	for i in range(state.get_node_count()):
 		var props := {}
 		for j in range(state.get_node_property_count(i)):
@@ -115,14 +107,22 @@ static func export_scn(writer: ZIPPacker, path: String) -> void:
 		var inst := ""
 		if state.get_node_instance(i):
 			inst = export_prop(state.get_node_instance(i), scn_state)
-		scn_state.nodes.append({
+		nodes.append({
 			"name": str(state.get_node_name(i)),
 			"type": str(state.get_node_type(i)),
 			"parent": str(state.get_node_path(i, true)),
 			"instance": str(inst),
 			"props": props,
 		})
-	var dict := {"nodes": scn_state.nodes, "sub_resources": scn_state.sub_tres, "ext_resources": scn_state.ext_tres, "connections": []}
+	var dict := {"nodes": nodes, "sub_resources": scn_state.sub_tres, "ext_resources": scn_state.ext_tres, "connections": []}
+
+	"""
+	DirAccess.make_dir_recursive_absolute(dep_path.replacen("res://", "user://").replacen("." + dep_path.get_extension(), ".scn").get_base_dir())
+	var file := FileAccess.open(dep_path.replacen("res://", "user://").replacen("." + dep_path.get_extension(), ".scn"), FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(dict, "\t"))
+		file.close()
+	"""
 
 	writer.start_file(dep_path.replacen("res://", "").replacen("." + dep_path.get_extension(), ".scn"))
 	writer.write_file(var_to_bytes(dict))
