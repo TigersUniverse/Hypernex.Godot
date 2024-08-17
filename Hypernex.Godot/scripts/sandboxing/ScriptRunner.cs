@@ -2,6 +2,7 @@ using System;
 using Godot;
 using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion.Classes;
+using Hypernex.Game;
 using Hypernex.Networking.Messages.Data;
 using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Sandboxing.SandboxedTypes.World;
@@ -13,6 +14,7 @@ namespace Hypernex.Sandboxing
     public partial class ScriptRunner : Node
     {
         public WorldScript scriptRef;
+        public WorldRoot world;
         public IInterpreter interpreter;
         public NexboxScript script;
         public Runtime runtime;
@@ -58,7 +60,7 @@ namespace Hypernex.Sandboxing
                 interpreter.StartSandbox(o => OnLog(o));
                 ForwardWorldTypes();
                 runtime = new Runtime(this);
-                interpreter.CreateGlobal("item", new Item(GetParent()));
+                interpreter.CreateGlobal("item", new Item(GetParent(), world));
                 interpreter.CreateGlobal("Runtime", runtime);
                 interpreter.RunScript(script.Script, e => OnError(e));
             }
@@ -94,6 +96,7 @@ namespace Hypernex.Sandboxing
             interpreter.ForwardType("Time", typeof(SandboxedTypes.Time));
             interpreter.ForwardType("UtcTime", typeof(UtcTime));
             interpreter.ForwardType("LocalAvatar", typeof(LocalAvatar));
+            interpreter.ForwardType("Audio", typeof(Audio));
         }
     }
 }

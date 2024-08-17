@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Game;
 
 namespace Hypernex.Player
@@ -9,11 +10,15 @@ namespace Hypernex.Player
     {
         [Export]
         public PlayerRoot root;
+        [Export]
+        public RayCast3D cast;
 
         public Vector2 move;
         public bool textChatOpen;
         public Vector2 lastMousePosition;
         public Vector2 lastMouseDelta;
+
+        private bool lastPrimaryTriggerState = false;
 
         public override void _Ready()
         {
@@ -51,11 +56,61 @@ namespace Hypernex.Player
             var position = GetViewport().GetMousePosition();
             lastMousePosition = position;
             ReadInput();
+            HandleMouseRayCast();
         }
 
         public override void _PhysicsProcess(double delta)
         {
             ReadInput();
+            HandleMouseRayCast();
+        }
+
+        public void HandleMouseRayCast()
+        {
+            if (Init.IsVRLoaded)
+            {
+                cast.Visible = false;
+                return;
+            }
+            if (cast.IsColliding())
+            {
+                bool triggerState = Input.IsMouseButtonPressed(MouseButton.Left);
+                InputEventMouse ev;
+                if (triggerState != lastPrimaryTriggerState)
+                {
+                    ev = new InputEventMouseButton()
+                    {
+                        ButtonIndex = MouseButton.Left,
+                        Pressed = triggerState,
+                    };
+                }
+                else
+                {
+                    ev = new InputEventMouseMotion()
+                    {
+                        ButtonMask = triggerState ? MouseButtonMask.Left : 0,
+                    };
+                }
+                lastPrimaryTriggerState = triggerState;
+                GodotObject collider = cast.GetCollider();
+                if (collider.HasMeta(UICanvas.TypeName))
+                {
+                    // prevent people from fooling with the cck
+                    try
+                    {
+                        cast.Visible = true;
+                        UICanvas canvas = collider.GetMeta(UICanvas.TypeName).As<UICanvas>();
+                        canvas.HandleInput(root.view, ev, cast.GetCollisionPoint(), cast.GetCollisionNormal(), cast.GetColliderShape());
+                    }
+                    catch
+                    { }
+                }
+            }
+            else
+            {
+                cast.Visible = false;
+                lastPrimaryTriggerState = false;
+            }
         }
 
         public virtual void ReadInput()

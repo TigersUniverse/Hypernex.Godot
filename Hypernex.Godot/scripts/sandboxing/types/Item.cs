@@ -12,13 +12,23 @@ namespace Hypernex.Sandboxing.SandboxedTypes
     public class Item
     {
         internal Node t;
+        internal WorldRoot world;
 
         public Item()
         {
             throw new Exception("Item cannot be created by a Script!");
         }
 
-        internal Item(Node t) => this.t = t;
+        internal Item(Node t, WorldRoot root)
+        {
+            if (!GodotObject.IsInstanceValid(t))
+                this.t = null;
+            else if (root.IsAncestorOf(t))
+                this.t = t;
+            else
+                this.t = root;
+            this.world = root;
+        }
 
         public string Name => t.Name;
 
@@ -27,6 +37,14 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             get => t.CanProcess();
             set
             {
+                if (t is Node3D n3d)
+                {
+                    n3d.Visible = value;
+                }
+                else if (t is CanvasItem n2d)
+                {
+                    n2d.Visible = value;
+                }
                 t.ProcessMode = value ? Node.ProcessModeEnum.Inherit : Node.ProcessModeEnum.Disabled;
                 // t.SetProcess(value);
                 // t.SetPhysicsProcess(value);
@@ -37,7 +55,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public Item Parent
         {
-            get => new (t.GetParent());
+            get => new Item(t.GetParent(), world);
             set
             {
                 throw new NotImplementedException();
@@ -100,7 +118,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             }
         }
 
-        public int ChildCount => throw new NotImplementedException();
+        public int ChildCount => t.GetChildCount();
 
         public Item[] Children
         {
@@ -127,34 +145,14 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public Item GetChildByIndex(int i)
         {
-            throw new NotImplementedException();
-            /*
             Node tr = t.GetChild(i);
-            if (tr != null)
-            {
-                Item item = new Item(tr);
-                if (LocalLocalAvatar.IsAvatarItem(item) || LocalNetAvatar.IsAvatarItem(item))
-                    return null;
-                return item;
-            }
-            return null;
-            */
+            return new Item(tr, world);
         }
 
         public Item GetChildByName(string name)
         {
-            throw new NotImplementedException();
-            /*
-            Transform tr = t.Find(name);
-            if (tr != null)
-            {
-                Item item = new Item(tr);
-                if (LocalLocalAvatar.IsAvatarItem(item) || LocalNetAvatar.IsAvatarItem(item))
-                    return null;
-                return item;
-            }
-            return null;
-            */
+            Node tr = t.FindChild(name, false);
+            return new Item(tr, world);
         }
         
         public static bool operator ==(Item x, Item y) => x?.Equals(y) ?? false;

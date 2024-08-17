@@ -46,7 +46,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
         {
             if (!GodotObject.IsInstanceValid(PlayerRoot.Local))
                 return null;
-            return new Item(PlayerRoot.Local.Controller);
+            return new Item(PlayerRoot.Local.Controller, GameInstance.FocusedInstance.World);
         }
 
         /*

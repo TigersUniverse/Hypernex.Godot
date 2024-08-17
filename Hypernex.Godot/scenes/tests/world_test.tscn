@@ -1,10 +1,12 @@
-[gd_scene load_steps=13 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=15 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
 [ext_resource type="Script" path="res://addons/cck/classes/reverb_zone.gd" id="5_a4oh0"]
+[ext_resource type="Script" path="res://addons/ccksharp/classes/UICanvas.cs" id="6_yh4eb"]
+[ext_resource type="Script" path="res://addons/cck/classes/ui_canvas.gd" id="7_dqm2x"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -111,7 +113,26 @@ script = ExtResource("5_a4oh0")
 effect = SubResource("AudioEffectReverb_6mgta")
 metadata/typename = "ReverbZone"
 
+[node name="UI" type="Node3D" parent="Test/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1.00448)
+script = ExtResource("6_yh4eb")
+
+[node name="SubViewport" type="SubViewport" parent="Test/World/UI"]
+disable_3d = true
+transparent_bg = true
+gui_embed_subwindows = true
+size = Vector2i(128, 128)
+
+[node name="Button" type="Button" parent="Test/World/UI/SubViewport"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "TEST"
+
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Test"]
+
+[node name="UICanvas" type="Node3D" parent="Test"]
+script = ExtResource("7_dqm2x")
+metadata/typename = "UICanvas"
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)

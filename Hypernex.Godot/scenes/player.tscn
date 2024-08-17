@@ -1,9 +1,21 @@
-[gd_scene load_steps=8 format=3 uid="uid://b4nrx2xxp1xio"]
+[gd_scene load_steps=10 format=3 uid="uid://b4nrx2xxp1xio"]
 
 [ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_e3jbc"]
 [ext_resource type="Script" path="res://scripts/player/PlayerInputs.cs" id="2_777if"]
 [ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_4k47x"]
 [ext_resource type="Script" path="res://scripts/player/PlayerChat.cs" id="4_r7ubo"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_td8dh"]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 4.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4uruo"]
+transparency = 4
+blend_mode = 1
+depth_draw_mode = 1
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 0.176471)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
 
@@ -19,9 +31,10 @@ loadingBar = NodePath("CharacterBody3D/Sprite3D/SubViewport/ProgressBar")
 loadingSprite = NodePath("CharacterBody3D/Sprite3D")
 parts = [NodePath("Inputs"), NodePath("CharacterBody3D"), NodePath("Chat")]
 
-[node name="Inputs" type="Node" parent="." node_paths=PackedStringArray("root")]
+[node name="Inputs" type="Node" parent="." node_paths=PackedStringArray("root", "cast")]
 script = ExtResource("2_777if")
 root = NodePath("..")
+cast = NodePath("../CharacterBody3D/View/RayCast3D")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("root", "cam")]
 script = ExtResource("3_4k47x")
@@ -34,6 +47,20 @@ cam = NodePath("View/Camera3D")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
 
 [node name="Camera3D" type="Camera3D" parent="CharacterBody3D/View"]
+
+[node name="RayCast3D" type="RayCast3D" parent="CharacterBody3D/View"]
+target_position = Vector3(0, 0, -5)
+hit_back_faces = false
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D/View/RayCast3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -2.5)
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("CylinderMesh_td8dh")
+surface_material_override/0 = SubResource("StandardMaterial3D_4uruo")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

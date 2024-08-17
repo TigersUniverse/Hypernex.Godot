@@ -1,4 +1,6 @@
+using System;
 using Godot;
+using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Game;
 using Hypernex.Player;
 using Hypernex.Tools;
@@ -17,9 +19,18 @@ public partial class VRRig : Node3D
     public XRController3D leftHandSkel;
     [Export]
     public XRController3D rightHandSkel;
+    [Export]
+    public RayCast3D[] raycasts = Array.Empty<RayCast3D>();
+
+    private bool lastLeftTriggerState = false;
+    private bool lastRightTriggerState = false;
+    private bool lastPrimaryTriggerState = false;
+    private string primaryTracker;
 
     [Export]
     public Node3D openMenuWarning;
+    [Export]
+    public float triggerClickThreshold = 0.75f;
 
     public override void _Ready()
     {
@@ -29,6 +40,70 @@ public partial class VRRig : Node3D
     public override void _Process(double delta)
     {
         openMenuWarning.Visible = Init.Instance.ui.Visible && GameInstance.FocusedInstance == null;
+
+        foreach (var cast in raycasts)
+        {
+            XRController3D ctrl = cast.GetParentOrNull<XRController3D>();
+            if (!IsInstanceValid(ctrl))
+                continue;
+            if (cast.IsColliding())
+            {
+                if (ctrl.Tracker != primaryTracker)
+                {
+                    cast.Visible = false;
+                    continue;
+                }
+                bool triggerState = ctrl.GetFloat("trigger") > triggerClickThreshold;
+                InputEventMouse ev;
+                if (triggerState != lastPrimaryTriggerState)
+                {
+                    ev = new InputEventMouseButton()
+                    {
+                        ButtonIndex = MouseButton.Left,
+                        Pressed = triggerState,
+                    };
+                }
+                else
+                {
+                    ev = new InputEventMouseMotion()
+                    {
+                        ButtonMask = triggerState ? MouseButtonMask.Left : 0,
+                    };
+                }
+                lastPrimaryTriggerState = ctrl.GetFloat("trigger") > triggerClickThreshold;
+                GodotObject collider = cast.GetCollider();
+                if (collider.HasMeta(UICanvas.TypeName))
+                {
+                    // prevent people from fooling with the cck
+                    try
+                    {
+                        cast.Visible = true;
+                        UICanvas canvas = collider.GetMeta(UICanvas.TypeName).As<UICanvas>();
+                        canvas.HandleInput(head, ev, cast.GetCollisionPoint(), cast.GetCollisionNormal(), cast.GetColliderShape());
+                    }
+                    catch
+                    { }
+                }
+            }
+            else
+            {
+                cast.Visible = false;
+                if (ctrl.Tracker == primaryTracker)
+                    lastPrimaryTriggerState = false;
+            }
+        }
+
+        bool leftTriggerState = leftHand.GetFloat("trigger") > triggerClickThreshold;
+        bool rightTriggerState = rightHand.GetFloat("trigger") > triggerClickThreshold;
+
+        if (lastLeftTriggerState != leftTriggerState)
+            primaryTracker = leftHand.Tracker;
+        else if (lastRightTriggerState != rightTriggerState)
+            primaryTracker = rightHand.Tracker;
+
+        lastLeftTriggerState = leftTriggerState;
+        lastRightTriggerState = rightTriggerState;
+
         if (IsInstanceValid(PlayerRoot.Local))
         {
             origin.GlobalPosition = PlayerRoot.Local.Controller.GlobalPosition;
@@ -37,6 +112,8 @@ public partial class VRRig : Node3D
             PlayerInputs inputs = PlayerRoot.Local.GetPart<PlayerInputs>();
             inputs.move = leftHand.GetVector2("primary") * new Vector2(1f, -1f);
             inputs.lastMouseDelta.X = -rightHand.GetVector2("primary").X * (float)delta * Mathf.Pi;
+            if (IsInstanceValid(PlayerRoot.Local.GetPart<PlayerChat>().voice))
+                PlayerRoot.Local.GetPart<PlayerChat>().voice.Recording = rightHand.GetFloat("ax_button") > 0.5f;
             if (IsInstanceValid(PlayerRoot.Local.Avatar))
             {
                 XRServer.WorldScale = PlayerRoot.Local.Avatar.ikSystem.floorDistance;

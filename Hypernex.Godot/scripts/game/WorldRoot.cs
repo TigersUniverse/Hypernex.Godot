@@ -40,6 +40,7 @@ namespace Hypernex.Game
             {
                 ScriptRunner runner = new ScriptRunner();
                 runner.Name = script.Name + "_Runner";
+                runner.world = this;
                 runner.scriptRef = script;
                 script.AddSibling(runner);
                 Runners.Add(runner);
@@ -94,6 +95,7 @@ namespace Hypernex.Game
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
+            loader.validScripts.Add(UICanvas.TypeName, SafeLoader.LoadScript<UICanvas>());
             if (IsInstanceValid(Init.Instance))
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>

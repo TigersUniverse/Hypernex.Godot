@@ -1,0 +1,278 @@
+[gd_scene load_steps=12 format=3 uid="uid://eg74khus5nk5"]
+
+[ext_resource type="Theme" uid="uid://1cua8ppjbi8u" path="res://themes/main_theme.tres" id="1_agp67"]
+[ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_stlhk"]
+[ext_resource type="Script" path="res://scripts/ui/MainOverlay.cs" id="3_rkes6"]
+[ext_resource type="PackedScene" uid="uid://bc42bxyk4uvjk" path="res://scenes/big_card.tscn" id="4_nrys0"]
+[ext_resource type="Script" path="res://scripts/ui/FriendsController.cs" id="5_jkkk8"]
+[ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="6_tmr5u"]
+[ext_resource type="Script" path="res://scripts/ui/RequestsController.cs" id="7_7jup7"]
+[ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_fd74d"]
+[ext_resource type="Script" path="res://scripts/ui/WorldsController.cs" id="9_e3twq"]
+[ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="10_638y1"]
+[ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck.tscn" id="11_raxun"]
+
+[node name="UI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_agp67")
+
+[node name="AcceptDialog" type="AcceptDialog" parent="."]
+auto_translate_mode = 1
+initial_position = 2
+
+[node name="Login" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoginScreen" type="Node" parent="Login" node_paths=PackedStringArray("root", "serverAddressEdit", "usernameEdit", "passwordEdit", "twoFactorEdit", "loginButton", "loginOptions", "messagePopup")]
+script = ExtResource("2_stlhk")
+root = NodePath("..")
+serverAddressEdit = NodePath("../ServerAddress")
+usernameEdit = NodePath("../Username")
+passwordEdit = NodePath("../Password")
+twoFactorEdit = NodePath("../2FA")
+loginButton = NodePath("../LoginBtn")
+loginOptions = NodePath("../LoginOptions")
+messagePopup = NodePath("../../AcceptDialog")
+useHttp = true
+
+[node name="ServerAddress" type="LineEdit" parent="Login"]
+layout_mode = 2
+placeholder_text = "Server Address (play.hypernex.dev)"
+alignment = 1
+
+[node name="Username" type="LineEdit" parent="Login"]
+layout_mode = 2
+placeholder_text = "Username"
+alignment = 1
+
+[node name="Password" type="LineEdit" parent="Login"]
+layout_mode = 2
+placeholder_text = "Password"
+alignment = 1
+secret = true
+
+[node name="2FA" type="LineEdit" parent="Login"]
+layout_mode = 2
+placeholder_text = "2FA Code (optional)"
+alignment = 1
+
+[node name="LoginBtn" type="Button" parent="Login"]
+layout_mode = 2
+text = "Login"
+
+[node name="LoginOptions" type="OptionButton" parent="Login"]
+layout_mode = 2
+allow_reselect = true
+
+[node name="MainOverlay" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="Node" parent="MainOverlay" node_paths=PackedStringArray("root", "tabs", "cckButton", "cckWindow", "logoutButton", "exitButton")]
+script = ExtResource("3_rkes6")
+root = NodePath("..")
+tabs = NodePath("../TabContainer")
+cckButton = NodePath("../TabContainer/Settings/CCKBtn")
+cckWindow = NodePath("../../Window")
+logoutButton = NodePath("../TabContainer/Settings/LogoutBtn")
+exitButton = NodePath("../TabContainer/Settings/ExitBtn")
+currentInstanceIdx = 3
+bigCardUI = ExtResource("4_nrys0")
+
+[node name="TabContainer" type="TabContainer" parent="MainOverlay"]
+layout_mode = 2
+current_tab = 3
+
+[node name="Home" type="VBoxContainer" parent="MainOverlay/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Friends" type="RichTextLabel" parent="MainOverlay/TabContainer/Home"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Friends"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Controller" type="Node" parent="MainOverlay/TabContainer/Home/Friends" node_paths=PackedStringArray("label", "container")]
+script = ExtResource("5_jkkk8")
+label = NodePath("..")
+container = NodePath("../../ScrollContainer/HBoxContainer")
+friendUI = ExtResource("6_tmr5u")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainOverlay/TabContainer/Home"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainOverlay/TabContainer/Home/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Requests" type="RichTextLabel" parent="MainOverlay/TabContainer/Home"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Friend Requests"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Controller" type="Node" parent="MainOverlay/TabContainer/Home/Requests" node_paths=PackedStringArray("label", "container")]
+script = ExtResource("7_7jup7")
+label = NodePath("..")
+container = NodePath("../../ScrollContainer2/HBoxContainer")
+friendUI = ExtResource("6_tmr5u")
+
+[node name="ScrollContainer2" type="ScrollContainer" parent="MainOverlay/TabContainer/Home"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainOverlay/TabContainer/Home/ScrollContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Worlds" type="VBoxContainer" parent="MainOverlay/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="Instances" type="RichTextLabel" parent="MainOverlay/TabContainer/Worlds"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Active Instances"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Controller" type="Node" parent="MainOverlay/TabContainer/Worlds/Instances" node_paths=PackedStringArray("label", "container")]
+script = ExtResource("8_fd74d")
+label = NodePath("..")
+container = NodePath("../../ScrollContainer2")
+worldUI = ExtResource("6_tmr5u")
+
+[node name="ScrollContainer2" type="ScrollContainer" parent="MainOverlay/TabContainer/Worlds"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainOverlay/TabContainer/Worlds/ScrollContainer2"]
+layout_mode = 2
+
+[node name="MyWorlds" type="RichTextLabel" parent="MainOverlay/TabContainer/Worlds"]
+layout_mode = 2
+bbcode_enabled = true
+text = "My Worlds"
+fit_content = true
+scroll_active = false
+shortcut_keys_enabled = false
+
+[node name="Controller" type="Node" parent="MainOverlay/TabContainer/Worlds/MyWorlds" node_paths=PackedStringArray("label", "container")]
+script = ExtResource("9_e3twq")
+labelFormat = "[center]My Worlds ({0})[/center][right][url]Refresh[/url][/right]"
+label = NodePath("..")
+container = NodePath("../../ScrollContainer/HBoxContainer")
+worldUI = ExtResource("6_tmr5u")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainOverlay/TabContainer/Worlds"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainOverlay/TabContainer/Worlds/ScrollContainer"]
+layout_mode = 2
+
+[node name="Settings" type="VBoxContainer" parent="MainOverlay/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="CCKBtn" type="Button" parent="MainOverlay/TabContainer/Settings"]
+layout_mode = 2
+text = "Launch CCK"
+
+[node name="LogoutBtn" type="Button" parent="MainOverlay/TabContainer/Settings"]
+layout_mode = 2
+text = "Logout"
+
+[node name="ExitBtn" type="Button" parent="MainOverlay/TabContainer/Settings"]
+layout_mode = 2
+text = "Exit :("
+
+[node name="Current Instance" parent="MainOverlay/TabContainer" instance=ExtResource("4_nrys0")]
+layout_mode = 2
+usersLabelFormat = "[center]Users ({0})[/center][right][url]Refresh[/url][/right][right][url=leave]Leave[/url][/right]"
+metadata/_tab_index = 3
+
+[node name="LoadingIcon" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -50.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Controller" type="Node" parent="LoadingIcon" node_paths=PackedStringArray("bar", "barContainer", "label")]
+script = ExtResource("10_638y1")
+bar = NodePath("../CenterContainer/VBoxContainer/Bar/ProgressBar")
+barContainer = NodePath("../CenterContainer/VBoxContainer/Bar")
+label = NodePath("../CenterContainer/VBoxContainer/Label")
+
+[node name="CenterContainer" type="CenterContainer" parent="LoadingIcon"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LoadingIcon/CenterContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="LoadingIcon/CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Loading..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Bar" type="HBoxContainer" parent="LoadingIcon/CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="LoadingIcon/CenterContainer/VBoxContainer/Bar"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+max_value = 1.0
+step = 0.0
+
+[node name="Button" type="Button" parent="LoadingIcon/CenterContainer/VBoxContainer/Bar"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="Window" type="Window" parent="."]
+auto_translate_mode = 1
+title = "CCK"
+initial_position = 2
+size = Vector2i(640, 480)
+visible = false
+transient = true
+
+[node name="CCKController" parent="Window" instance=ExtResource("11_raxun")]
+
+[connection signal="pressed" from="LoadingIcon/CenterContainer/VBoxContainer/Bar/Button" to="LoadingIcon/Controller" method="StopAllDownloads"]
+[connection signal="close_requested" from="Window" to="Window" method="hide"]

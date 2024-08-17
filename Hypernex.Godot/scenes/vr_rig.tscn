@@ -1,8 +1,33 @@
-[gd_scene load_steps=2 format=3 uid="uid://d3kcsxyx7aa6i"]
+[gd_scene load_steps=6 format=3 uid="uid://d3kcsxyx7aa6i"]
 
 [ext_resource type="Script" path="res://scripts/VRRig.cs" id="1_1xyfp"]
 
-[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "openMenuWarning")]
+[sub_resource type="CylinderMesh" id="CylinderMesh_45s0p"]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 5.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w6u4v"]
+transparency = 4
+blend_mode = 1
+depth_draw_mode = 1
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 0.176471)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_jn5d5"]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 5.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fjr5q"]
+render_priority = 127
+transparency = 4
+blend_mode = 1
+depth_draw_mode = 1
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 0.176471)
+
+[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "raycasts", "openMenuWarning")]
 script = ExtResource("1_1xyfp")
 origin = NodePath("SubViewport/Origin")
 head = NodePath("SubViewport/Origin/Head")
@@ -10,6 +35,7 @@ leftHand = NodePath("SubViewport/Origin/Left")
 rightHand = NodePath("SubViewport/Origin/Right")
 leftHandSkel = NodePath("SubViewport/Origin/LeftSkel")
 rightHandSkel = NodePath("SubViewport/Origin/RightSkel")
+raycasts = [NodePath("SubViewport/Origin/LeftAim/Raycast"), NodePath("SubViewport/Origin/RightAim/Raycast")]
 openMenuWarning = NodePath("SubViewport/Origin/Head/Label3D")
 
 [node name="SubViewport" type="SubViewport" parent="."]
@@ -45,3 +71,41 @@ pose = &"skeleton"
 [node name="RightSkel" type="XRController3D" parent="SubViewport/Origin"]
 tracker = &"right_hand"
 pose = &"skeleton"
+
+[node name="LeftAim" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"left_hand"
+pose = &"aim"
+
+[node name="Raycast" type="RayCast3D" parent="SubViewport/Origin/LeftAim"]
+exclude_parent = false
+target_position = Vector3(0, 0, -5)
+hit_back_faces = false
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/Origin/LeftAim/Raycast"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -2.5)
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("CylinderMesh_45s0p")
+surface_material_override/0 = SubResource("StandardMaterial3D_w6u4v")
+
+[node name="RightAim" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"right_hand"
+pose = &"aim"
+
+[node name="Raycast" type="RayCast3D" parent="SubViewport/Origin/RightAim"]
+exclude_parent = false
+target_position = Vector3(0, 0, -5)
+hit_back_faces = false
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/Origin/RightAim/Raycast"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -2.5)
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("CylinderMesh_jn5d5")
+surface_material_override/0 = SubResource("StandardMaterial3D_fjr5q")

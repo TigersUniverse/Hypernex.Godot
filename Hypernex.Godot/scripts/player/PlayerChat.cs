@@ -54,7 +54,7 @@ namespace Hypernex.Player
                     textChat.Hide();
                 }
             }
-            if (voice != null)
+            if (voice != null && !Init.IsVRLoaded)
             {
                 voice.Recording = Input.IsActionPressed("chat_voice");
             }
