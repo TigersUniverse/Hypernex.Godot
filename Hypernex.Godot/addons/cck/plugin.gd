@@ -154,4 +154,4 @@ static func export_world(name: String) -> String:
 
 	export_deps(writer, root.scene_file_path)
 	writer.close()
-	return "Exported World"
+	return "Exported Scene"

@@ -10,12 +10,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Controller" type="Node" parent="." node_paths=PackedStringArray("export_world_ui", "world_name_edit")]
+[node name="Controller" type="Node" parent="." node_paths=PackedStringArray("export_avatar_ui", "avatar_name_edit", "export_world_ui", "world_name_edit")]
 script = ExtResource("1_i1s5v")
+export_avatar_ui = NodePath("../AvatarExportUI")
+avatar_name_edit = NodePath("../AvatarExportUI/LineEdit")
 export_world_ui = NodePath("../WorldExportUI")
 world_name_edit = NodePath("../WorldExportUI/LineEdit")
 
 [node name="WorldExportUI" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,4 +34,22 @@ placeholder_text = "World File Name"
 layout_mode = 2
 text = "Export World to File"
 
+[node name="AvatarExportUI" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="AvatarExportUI"]
+layout_mode = 2
+placeholder_text = "Avatar File Name"
+
+[node name="ExportAvatar" type="Button" parent="AvatarExportUI"]
+layout_mode = 2
+text = "Export Avatar to File"
+
 [connection signal="pressed" from="WorldExportUI/ExportWorld" to="Controller" method="export_world"]
+[connection signal="pressed" from="AvatarExportUI/ExportAvatar" to="Controller" method="export_avatar"]
