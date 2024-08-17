@@ -15,7 +15,8 @@ namespace FFmpeg.Godot
     public partial class FFGodot : Node
     {
         public bool IsPaused => _paused;
-        public bool IsFinished => _streamVideoCtx == null || _streamAudioCtx == null || _videoTextures == null || _audioStream == null || (_streamVideoCtx.EndReached && _streamAudioCtx.EndReached && _videoTextures.Count == 0 && _audioStream.Count == 0);
+        public double Length => _streamVideoCtx?.GetLength() ?? 0d;
+        public bool IsFinished => _streamVideoCtx == null || _streamAudioCtx == null || _videoTextures == null || _audioStream == null || _offset >= _streamVideoCtx.GetLength() || (_streamVideoCtx.EndReached && _streamAudioCtx.EndReached && _videoTextures.Count == 0 && _audioStream.Count == 0);
 
         [Signal]
         public delegate void FinishedEventHandler();
@@ -296,7 +297,7 @@ namespace FFmpeg.Godot
             if (_videoWatch == null)
                 return;
             
-            if (_streamVideoCtx.EndReached && (_audioDecoder == null || _streamAudioCtx.EndReached) && _videoTextures.Count == 0 && (_audioDecoder == null || _audioStream.Count == 0) && !_paused)
+            if ((_offset >= _streamVideoCtx.GetLength() || (_streamVideoCtx.EndReached && (_audioDecoder == null || _streamAudioCtx.EndReached) && _videoTextures.Count == 0 && (_audioDecoder == null || _audioStream.Count == 0))) && !_paused)
             {
                 Pause();
                 EmitSignal(SignalName.Finished);

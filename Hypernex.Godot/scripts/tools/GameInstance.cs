@@ -10,6 +10,7 @@ using Hypernex.Networking;
 using Hypernex.Networking.Messages;
 using Hypernex.Player;
 using Hypernex.Sandboxing;
+using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
 using HypernexSharp.Socketing.SocketResponses;
@@ -122,7 +123,7 @@ namespace Hypernex.Tools
         private List<User> usersBeforeMe = new ();
         private bool isDisposed;
         public bool IsDisposed => isDisposed;
-        // internal ScriptEvents ScriptEvents;
+        internal ScriptEvents ScriptEvents;
 
         private GameInstance(JoinedInstance joinInstance, WorldMeta worldMeta)
         {
@@ -168,6 +169,7 @@ namespace Hypernex.Tools
             userIdToken = "";
             instanceCreatorId = APITools.CurrentUser.Id;
             worldMeta = new WorldMeta("0", APITools.CurrentUser.Id, WorldPublicity.OwnerOnly, "Local World", "", "");
+            ScriptEvents = new ScriptEvents(this);
         }
 
         public static GameInstance FromLocalFile(string file)
@@ -179,7 +181,7 @@ namespace Hypernex.Tools
 
         private void SetupClient(string ip, int port, InstanceProtocol instanceProtocol)
         {
-            // ScriptEvents = new ScriptEvents(this);
+            ScriptEvents = new ScriptEvents(this);
             ClientSettings clientSettings = new ClientSettings(ip, port, instanceProtocol == InstanceProtocol.UDP, 1);
             client = new HypernexInstanceClient(APITools.APIObject, APITools.CurrentUser, instanceProtocol,
                 clientSettings);
@@ -200,7 +202,6 @@ namespace Hypernex.Tools
                 QuickInvoke.InvokeActionOnMainThread(OnDisconnect);
             };
             OnClientConnect += user => PlayerManagement.GetOrCreateNetPlayer(this, user.Id);
-            // OnClientConnect += user => ScriptEvents?.OnUserJoin.Invoke(user.Id);
             OnMessage += (meta, channel) => MessageHandler.HandleMessage(this, meta, channel);
             OnClientDisconnect += user => PlayerManagement.PlayerLeave(this, user);
             OnDisconnect += Dispose;

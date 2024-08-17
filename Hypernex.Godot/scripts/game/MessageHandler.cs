@@ -80,7 +80,6 @@ namespace Hypernex.Game
                 }
                 case "Hypernex.Networking.Messages.PlayerMessage":
                 {
-                    // TODO: Implement chatbox system (this will go in NetPlayer)
                     PlayerMessage playerMessage = (PlayerMessage) Convert.ChangeType(msgMeta.Data, typeof(PlayerMessage));
                     try
                     {
@@ -92,7 +91,7 @@ namespace Hypernex.Game
                 {
                     NetworkedEvent networkedEvent =
                         (NetworkedEvent) Convert.ChangeType(msgMeta.Data, typeof(NetworkedEvent));
-                    // gameInstance.ScriptEvents.OnServerNetworkEvent.Invoke(networkedEvent.EventName, networkedEvent.Data.ToArray());
+                    gameInstance.ScriptEvents.OnServerNetworkEvent.Invoke(networkedEvent.EventName, networkedEvent.Data.ToArray());
                     break;
                 }
                 case "Hypernex.Networking.Messages.ServerConsoleLog":

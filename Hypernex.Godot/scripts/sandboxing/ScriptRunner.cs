@@ -29,7 +29,7 @@ namespace Hypernex.Sandboxing
             Logger.CurrentLogger.Error($"[WORLD] [{script.Name}{script.GetExtensionFromLanguage()}] {e}");
         }
 
-        public override void _EnterTree()
+        public override void _Ready()
         {
             Start();
         }
@@ -91,12 +91,23 @@ namespace Hypernex.Sandboxing
             interpreter.ForwardType("float3", typeof(float3));
             interpreter.ForwardType("float4", typeof(float4));
             interpreter.ForwardType("Item", typeof(Item));
+            interpreter.ForwardType("ReadonlyItem", typeof(ReadonlyItem));
             interpreter.ForwardType("Runtime", typeof(Runtime));
             interpreter.ForwardType("UI", typeof(SandboxedTypes.UI));
             interpreter.ForwardType("Time", typeof(SandboxedTypes.Time));
             interpreter.ForwardType("UtcTime", typeof(UtcTime));
+            interpreter.ForwardType("Mathf", typeof(ClientMathf));
+            interpreter.ForwardType("MidpointRounding", typeof(MidpointRounding));
+
+            interpreter.CreateGlobal("ScriptEvents", world?.gameInstance?.ScriptEvents);
+            interpreter.ForwardType("ScriptEvent", typeof(ScriptEvent));
+
+            interpreter.ForwardType("Colliders", typeof(Colliders));
+            interpreter.ForwardType("HumanBodyBones", typeof(HumanBodyBones));
             interpreter.ForwardType("LocalAvatar", typeof(LocalAvatar));
+            interpreter.ForwardType("LocalWorld", typeof(LocalWorld));
             interpreter.ForwardType("Audio", typeof(Audio));
+            interpreter.ForwardType("Video", typeof(Video));
         }
     }
 }

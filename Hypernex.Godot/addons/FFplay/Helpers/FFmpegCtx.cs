@@ -65,6 +65,12 @@ namespace FFmpeg.Godot.Helpers
             return $"{av.num}/{av.den}";
         }
 
+        public double GetLength()
+        {
+            double time_base = (double)_pFormatContext->streams[_videoIndex]->time_base.num / _pFormatContext->streams[_videoIndex]->time_base.den;
+            return _pFormatContext->streams[_videoIndex]->duration * time_base;
+        }
+
         public bool TryGetFps(out double fps)
         {
             fps = default;

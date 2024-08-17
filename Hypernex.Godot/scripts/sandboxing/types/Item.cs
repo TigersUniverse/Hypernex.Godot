@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Godot;
-using Hypernex.Game;
 using Hypernex.Networking.Messages.Data;
-using Hypernex.Tools;
 using Hypernex.Tools.Godot;
 
 namespace Hypernex.Sandboxing.SandboxedTypes
@@ -12,14 +8,14 @@ namespace Hypernex.Sandboxing.SandboxedTypes
     public class Item
     {
         internal Node t;
-        internal WorldRoot world;
+        internal Node world;
 
         public Item()
         {
             throw new Exception("Item cannot be created by a Script!");
         }
 
-        internal Item(Node t, WorldRoot root)
+        internal Item(Node t, Node root)
         {
             if (!GodotObject.IsInstanceValid(t))
                 this.t = null;
@@ -27,7 +23,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 this.t = t;
             else
                 this.t = root;
-            this.world = root;
+            world = root;
         }
 
         public string Name => t.Name;
@@ -51,20 +47,17 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             }
         }
 
-        public string Path => t.GetPath();
+        public string Path => world.GetPathTo(t);
 
         public Item Parent
         {
             get => new Item(t.GetParent(), world);
             set
             {
-                throw new NotImplementedException();
-                /*
-                Transform root = AnimationUtility.GetRootOfChild(t);
-                if (root.GetComponent<LocalPlayer>() != null || root.GetComponent<NetPlayer>() != null)
-                    return;
-                t.parent = value.t;
-                */
+                if (world == value.world && GodotObject.IsInstanceValid(value.t))
+                {
+                    t.Reparent(value.t);
+                }
             }
         }
         

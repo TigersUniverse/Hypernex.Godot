@@ -1,0 +1,31 @@
+// https://docs.unity3d.com/ScriptReference/HumanBodyBones.html
+public enum HumanBodyBones : int
+{
+    Hips,
+    LeftUpperLeg,
+    RightUpperLeg,
+    LeftLowerLeg,
+    RightLowerLeg,
+    LeftFoot,
+    RightFoot,
+    Spine,
+    Chest,
+    UpperChest,
+    Neck,
+    Head,
+    LeftShoulder,
+    RightShoulder,
+    LeftUpperArm,
+    RightUpperArm,
+    LeftLowerArm,
+    RightLowerArm,
+    LeftHand,
+    RightHand,
+    LeftToes,
+    RightToes,
+    LeftEye,
+    RightEye,
+    Jaw,
+    // TODO: fingers
+    LastBone,
+}

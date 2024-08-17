@@ -78,24 +78,12 @@ namespace Hypernex.Game
         public static WorldRoot LoadFromFile(string path)
         {
             WorldRoot root = new WorldRoot();
-            /*
-            SafeScene safeScn = new SafeScene();
-            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-            safeScn.FromString(file.GetAsText(true));
-            ConvertDB db = new ConvertDB();
-            db.Register<CSharpScriptConverter>();
-            db.Register<MeshConverter>();
-            db.Register<ConcaveConverter>();
-            db.Register<MaterialConverter>();
-            db.Register<Texture2DConverter>();
-            db.Register<AudioStreamConverter>();
-            PackedScene scn = safeScn.SetupToPackedScene(db);
-            */
             SafeLoader loader = new SafeLoader();
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
             loader.validScripts.Add(UICanvas.TypeName, SafeLoader.LoadScript<UICanvas>());
+            loader.validScripts.Add(VideoPlayer.TypeName, SafeLoader.LoadScript<VideoPlayer>());
             if (IsInstanceValid(Init.Instance))
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>
@@ -136,27 +124,6 @@ namespace Hypernex.Game
         public static void SaveToFile(string path, Node root)
         {
             throw new NotImplementedException();
-            /*
-            foreach (var child in root.FindChildren("*", owned: true))
-            {
-                child.Owner = root;
-            }
-            PackedScene scn = new PackedScene();
-            scn.Pack(root);
-            */
-            /*
-            SafeScene safeScene = new SafeScene();
-            ConvertDB db = new ConvertDB();
-            db.Register<CSharpScriptConverter>();
-            db.Register<ConcaveConverter>();
-            db.Register<MeshConverter>();
-            db.Register<MaterialConverter>();
-            db.Register<Texture2DConverter>();
-            db.Register<AudioStreamConverter>();
-            safeScene.SetupFromState(scn.GetState(), db);
-            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
-            file.StoreString(safeScene.ToString());
-            */
         }
     }
 }

@@ -30,11 +30,15 @@ namespace Hypernex.Game
                 return null;
             PlayerRoot netPlayer = GetNetPlayer(instance, userid);
             if (netPlayer != null)
+            {
+                instance.ScriptEvents.OnUserJoin.Invoke(userid);
                 return netPlayer;
+            }
             netPlayer = Init.NewPlayer(false);
             netPlayer.SetUser(userid, instance);
             instance.World.AddPlayer(netPlayer);
             players[instance].Add(netPlayer);
+            instance.ScriptEvents.OnUserJoin.Invoke(userid);
             return netPlayer;
         }
 
@@ -106,6 +110,7 @@ namespace Hypernex.Game
             PlayerRoot netPlayer = GetNetPlayer(gameInstance, user.Id);
             if (netPlayer != null)
             {
+                gameInstance.ScriptEvents.OnUserLeave.Invoke(user.Id);
                 players[gameInstance].Remove(netPlayer);
                 netPlayer.QueueFree();
             }

@@ -9,7 +9,11 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         [Export]
         public NodePath Skeleton { get; set; }
+        [Export]
+        public NodePath Eyes { get; set; }
 
         public Skeleton3D GetSkeleton() => GetNode<Skeleton3D>(Skeleton);
+
+        public Marker3D GetEyes() => GetNode<Marker3D>(Eyes);
     }
 }

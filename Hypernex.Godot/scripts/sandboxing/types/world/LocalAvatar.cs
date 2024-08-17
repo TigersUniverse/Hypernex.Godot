@@ -18,29 +18,25 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
         public static bool IsLocalPlayerId(string userid) => APITools.CurrentUser.Id == userid;
         public static bool IsHost() => GameInstance.FocusedInstance?.isHost ?? false;
 
-        /*
         public static ReadonlyItem GetAvatarObject(HumanBodyBones humanBodyBones)
         {
-            if (LocalPlayer.Instance == null || LocalPlayer.Instance.avatar == null)
+            if (!GodotObject.IsInstanceValid(PlayerRoot.Local))
                 return null;
-            Transform bone = LocalPlayer.Instance.avatar.GetBoneFromHumanoid(humanBodyBones);
-            if (bone == null)
+            Node ch = PlayerRoot.Local.Avatar.FindBone(humanBodyBones.ToString());
+            if (!GodotObject.IsInstanceValid(ch))
                 return null;
-            return new ReadonlyItem(bone);
+            return new ReadonlyItem(ch, GameInstance.FocusedInstance.World);
         }
-        */
 
-        /*
         public static ReadonlyItem GetAvatarObjectByPath(string path)
         {
-            if (LocalPlayer.Instance == null || LocalPlayer.Instance.avatar == null)
+            if (!GodotObject.IsInstanceValid(PlayerRoot.Local))
                 return null;
-            Transform bone = LocalPlayer.Instance.avatar.Avatar.transform.Find(path);
-            if (bone == null)
+            Node ch = PlayerRoot.Local.Avatar.FindChild(path);
+            if (!GodotObject.IsInstanceValid(ch))
                 return null;
-            return new ReadonlyItem(bone);
+            return new ReadonlyItem(ch, GameInstance.FocusedInstance.World);
         }
-        */
 
         public static Item GetPlayerRoot()
         {
@@ -49,13 +45,9 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
             return new Item(PlayerRoot.Local.Controller, GameInstance.FocusedInstance.World);
         }
 
-        /*
-        public static bool IsAvatarItem(Item item) =>
-            AnimationUtility.GetRootOfChild(item.t).gameObject.GetComponent<LocalPlayer>() != null;
+        public static bool IsAvatarItem(Item item) => item.world == PlayerRoot.Local.Avatar;
         
-        public static bool IsAvatarItem(ReadonlyItem item) =>
-            AnimationUtility.GetRootOfChild(item.item.t).gameObject.GetComponent<LocalPlayer>() != null;
-        */
+        public static bool IsAvatarItem(ReadonlyItem item) => item.item.world == PlayerRoot.Local.Avatar;
 
         public static void TeleportTo(float3 position)
         {
@@ -168,16 +160,13 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
             return APITools.CurrentUser.Bio.Pronouns;
         }
 
-        /*
         public static void SetAvatar(string avatarId)
         {
             if (!GodotObject.IsInstanceValid(PlayerRoot.Local) || ConfigManager.SelectedConfigUser == null)
                 return;
             ConfigManager.SelectedConfigUser.CurrentAvatar = avatarId;
-            if(LocalPlayer.Instance != null)
-                LocalPlayer.Instance.LoadAvatar();
+            PlayerRoot.Local.ChangeAvatar(avatarId);
             ConfigManager.SaveConfigToFile();
         }
-        */
     }
 }
