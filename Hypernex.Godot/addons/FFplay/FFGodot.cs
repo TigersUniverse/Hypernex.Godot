@@ -46,7 +46,7 @@ namespace FFmpeg.Godot
         private double _prevTime = 0.0d;
         private double _timeOffset = 0.0d;
         [Export]
-        public double _videoOffset = -0.5d;
+        public double _videoOffset = -0.25d;
         private Stopwatch _videoWatch;
         private double? _lastPts;
         private int? _lastPts2;
@@ -281,7 +281,7 @@ namespace FFmpeg.Godot
                 _audioClip = new AudioStreamGenerator()
                 {
                     MixRate = _audioDecoder.SampleRate,
-                    BufferLength = 0.1f,
+                    BufferLength = (float)-_videoOffset,
                 };
                 source.Stream = _audioClip;
                 source.Play();

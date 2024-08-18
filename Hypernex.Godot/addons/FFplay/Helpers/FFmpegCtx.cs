@@ -20,7 +20,7 @@ namespace FFmpeg.Godot.Helpers
         public bool EndReached { get; private set; } = false;
         public bool IsValid { get; private set; } = false;
 
-        public FFmpegCtx(Stream stream, uint bufferSize = 16000000)
+        public FFmpegCtx(Stream stream, uint bufferSize = 16_000_000)
         {
             _stream = stream;
             bufferPtr = (byte*)ffmpeg.av_malloc(bufferSize);
@@ -47,9 +47,13 @@ namespace FFmpeg.Godot.Helpers
             IsValid = true;
         }
 
-        public FFmpegCtx(string url)
+        public FFmpegCtx(string url/*, uint bufferSize = 4000*/)
         {
+            // bufferPtr = (byte*)ffmpeg.av_malloc(bufferSize);
+            // _pIOContext = ffmpeg.avio_alloc_context(bufferPtr, (int)bufferSize, 0, null, null, null, null);
             _pFormatContext = ffmpeg.avformat_alloc_context();
+            // _pFormatContext->pb = _pIOContext;
+            // _pFormatContext->flags |= ffmpeg.AVFMT_FLAG_NONBLOCK;
             var pFormatContext = _pFormatContext;
             ffmpeg.avformat_open_input(&pFormatContext, url, null, null).ThrowExceptionIfError();
             ffmpeg.avformat_find_stream_info(_pFormatContext, null).ThrowExceptionIfError();
@@ -293,8 +297,8 @@ namespace FFmpeg.Godot.Helpers
                 ffmpeg.avio_context_free(&pIOContext);
             if (streamHandle.IsAllocated)
                 streamHandle.Free();
-            // if (bufferPtr != null)
-            //     ffmpeg.av_free(bufferPtr);
+            if (bufferPtr != null)
+                ffmpeg.av_free(bufferPtr);
         }
     }
 }

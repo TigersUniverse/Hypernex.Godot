@@ -3,6 +3,7 @@ using System.IO;
 using FFmpeg.Godot;
 using Godot;
 using Hypernex.CCK.GodotVersion.Classes;
+using Hypernex.Tools;
 
 namespace Hypernex.Sandboxing.SandboxedTypes
 {
@@ -61,7 +62,14 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public static void LoadUrl(Item item, string url)
         {
-            GetFFGodot(item).Play(url, url);
+            var ff = GetFFGodot(item);
+            DownloadTools.DownloadBytes(url, data =>
+            {
+                if (GodotObject.IsInstanceValid(ff))
+                {
+                    ImageTools.LoadFFmpeg(ff, data);
+                }
+            });
         }
 
         /*
