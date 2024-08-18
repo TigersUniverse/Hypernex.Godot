@@ -697,10 +697,14 @@ namespace FFmpeg.Godot
         }
 
         [ThreadStatic]
-        private static byte[] line = new byte[4096 * 4096 * 6];
+        private static byte[] line;
 
         public unsafe static bool SaveFrame(AVFrame frame, int width, int height, byte[] texture, AVPixelFormat format)
         {
+            if (line == null)
+            {
+                line = new byte[4096 * 4096 * 6];
+            }
             if (frame.data[0] == null || frame.format == -1 || texture == null)
             {
                 return false;
@@ -715,6 +719,10 @@ namespace FFmpeg.Godot
 
         public unsafe static void SaveFrame(AVFrame frame, int width, int height, Image texture, AVPixelFormat format)
         {
+            if (line == null)
+            {
+                line = new byte[4096 * 4096 * 6];
+            }
             // Profiler.BeginSample(nameof(SaveFrame), texture);
             if (frame.data[0] == null || frame.format == -1)
             {
