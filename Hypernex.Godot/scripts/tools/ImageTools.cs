@@ -30,7 +30,7 @@ namespace Hypernex.Tools
         public static FFGodot LoadFFmpeg(byte[] buffer, TextureRect texture, AudioStreamPlayer3D sound)
         {
             string hash = Convert.ToBase64String(MD5.HashData(buffer));
-            string path = DownloadTools.GetFilePath($"media_{hash}.cache");
+            string path = DownloadTools.GetFilePath($"media_{hash.Replace("=", null).Replace("/", null)}.cache");
             if (!File.Exists(path))
                 File.WriteAllBytes(path, buffer);
             FFGodot ff = new FFGodot();
@@ -50,6 +50,28 @@ namespace Hypernex.Tools
                 File.WriteAllBytes(path, buffer);
             ff.Log = _ => { };
             ff.Play(path, path);
+        }
+
+        public static bool IsVideoStream(Uri uri)
+        {
+            switch (uri.Scheme.ToLower())
+            {
+                case "rtmp":
+                case "rtsp":
+                case "srt":
+                case "udp":
+                case "tcp":
+                    return true;
+            }
+            string fileName = Path.GetFileName(uri.LocalPath);
+            string ext = Path.GetExtension(fileName);
+            switch (ext)
+            {
+                case ".m3u8":
+                case ".flv":
+                    return true;
+            }
+            return false;
         }
 
         public static bool IsPng(byte[] buffer)

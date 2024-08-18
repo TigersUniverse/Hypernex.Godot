@@ -3,6 +3,7 @@ using System.IO;
 using FFmpeg.Godot;
 using Godot;
 using Hypernex.CCK.GodotVersion.Classes;
+using Hypernex.Sandboxing.SandboxedTypes.World;
 using Hypernex.Tools;
 
 namespace Hypernex.Sandboxing.SandboxedTypes
@@ -72,34 +73,23 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             });
         }
 
-        /*
         public static void LoadFromCobalt(Item item, CobaltDownload cobaltDownload)
         {
-            VideoPlayerDescriptor videoPlayerDescriptor = GetVideoPlayerDescriptor(item);
-            if(videoPlayerDescriptor == null)
+            VideoPlayer videoPlayer = GetVideoPlayer(item);
+            FFGodot ff = GetFFGodot(item);
+            if (!GodotObject.IsInstanceValid(videoPlayer))
                 return;
             if (cobaltDownload.isStream)
             {
-                IVideoPlayer videoPlayer = videoPlayerDescriptor.Replace(
-                    VideoPlayerManager.GetVideoPlayerType(new Uri(cobaltDownload.PathToFile)) ??
-                    VideoPlayerManager.DefaultVideoPlayerType);
-                if (videoPlayer == null)
-                    return;
-                videoPlayer.Source = cobaltDownload.PathToFile;
+                ff.Play(cobaltDownload.PathToFile, cobaltDownload.PathToFile);
             }
             else
             {
                 if (!File.Exists(cobaltDownload.PathToFile))
                     return;
-                string filePath = "file:///" + cobaltDownload.PathToFile;
-                IVideoPlayer videoPlayer = videoPlayerDescriptor.Replace(
-                    VideoPlayerManager.GetVideoPlayerType(new Uri(filePath)) ??
-                    VideoPlayerManager.DefaultVideoPlayerType);
-                if (videoPlayer == null)
-                    return;
-                videoPlayer.Source = filePath;
+                string filePath = cobaltDownload.PathToFile;
+                ff.Play(filePath, filePath);
             }
         }
-        */
     }
 }

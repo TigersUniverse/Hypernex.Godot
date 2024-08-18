@@ -1,4 +1,5 @@
 using System;
+using CobaltSharp;
 using Godot;
 using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion.Classes;
@@ -100,14 +101,24 @@ namespace Hypernex.Sandboxing
             interpreter.ForwardType("MidpointRounding", typeof(MidpointRounding));
 
             interpreter.CreateGlobal("ScriptEvents", world?.gameInstance?.ScriptEvents);
+            interpreter.CreateGlobal("NetworkEvent", new ClientNetworkEvent(world?.gameInstance));
             interpreter.ForwardType("ScriptEvent", typeof(ScriptEvent));
 
             interpreter.ForwardType("Colliders", typeof(Colliders));
             interpreter.ForwardType("HumanBodyBones", typeof(HumanBodyBones));
             interpreter.ForwardType("LocalAvatar", typeof(LocalAvatar));
             interpreter.ForwardType("LocalWorld", typeof(LocalWorld));
+
             interpreter.ForwardType("Audio", typeof(Audio));
             interpreter.ForwardType("Video", typeof(Video));
+            interpreter.ForwardType("Cobalt", typeof(SandboxedTypes.World.Cobalt));
+            interpreter.ForwardType("GetMedia", typeof(GetMedia));
+            interpreter.ForwardType("VideoCodec", typeof(VideoCodec));
+            interpreter.ForwardType("AudioFormat", typeof(AudioFormat));
+            interpreter.ForwardType("VideoQuality", typeof(VideoQuality));
+            interpreter.ForwardType("CobaltOption", typeof(CobaltOption));
+            interpreter.ForwardType("CobaltOptions", typeof(CobaltOptions));
+            interpreter.ForwardType("CobaltDownload", typeof(CobaltDownload));
         }
     }
 }

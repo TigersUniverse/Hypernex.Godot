@@ -39,6 +39,9 @@
     <Reference Include="MessagePack.Annotations">
       <HintPath>addons\Nexport\MessagePack.Annotations.dll</HintPath>
     </Reference>
+    <Reference Include="CobaltSharp">
+      <HintPath>addons\CobaltSharp\CobaltSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

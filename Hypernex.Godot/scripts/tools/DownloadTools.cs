@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Hypernex.Configuration;
@@ -46,12 +47,19 @@ namespace Hypernex.Tools
             Check();
         }
 
-        private static string GetFileHash(string file)
+        public static string GetFileHash(string file)
         {
             using MD5 md5 = MD5.Create();
             using FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite,
                 FileShare.ReadWrite | FileShare.Delete);
             byte[] hash = md5.ComputeHash(fileStream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+
+        public static string GetStringHash(string s)
+        {
+            using MD5 md5 = MD5.Create();
+            byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
