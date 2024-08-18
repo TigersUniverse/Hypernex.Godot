@@ -23,7 +23,8 @@ namespace Hypernex.CCK.GodotVersion.Classes
         {
             area = new Area3D()
             {
-                InputCaptureOnDrag = true,
+                InputRayPickable = false,
+                // InputCaptureOnDrag = true,
             };
             shape = new CollisionShape3D()
             {

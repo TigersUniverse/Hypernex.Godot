@@ -42,6 +42,15 @@ vrRigScene = ExtResource("4_yte2b")
 script = ExtResource("4_ju6j5")
 buttonBaseBox = SubResource("StyleBoxFlat_k8o0g")
 
+[node name="VROverlay" type="TextureRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+
 [node name="UILayer" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 

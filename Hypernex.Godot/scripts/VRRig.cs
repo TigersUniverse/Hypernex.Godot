@@ -25,14 +25,17 @@ public partial class VRRig : Node3D
     [Export]
     public UICanvas canvas;
 
+    [Export]
+    public SubViewport vp;
+    [Export]
+    public Camera3D cam;
+
     private bool lastLeftTriggerState = false;
     private bool lastRightTriggerState = false;
     private bool lastPrimaryTriggerState = false;
     private string primaryTracker;
     private bool lastMenuToggleState = false;
 
-    [Export]
-    public Node3D openMenuWarning;
     [Export]
     public float triggerClickThreshold = 0.75f;
 
@@ -59,8 +62,9 @@ public partial class VRRig : Node3D
 
     public override void _Process(double delta)
     {
+        cam.GlobalTransform = head.GlobalTransform;
         bool menuToggleState = rightHand.GetFloat("by_button") > 0.5f;
-        if (lastMenuToggleState != menuToggleState)
+        if (menuToggleState && lastMenuToggleState != menuToggleState)
         {
             canvas.Visible = !canvas.Visible;
         }

@@ -33,7 +33,7 @@ public partial class Init : Node
     [Export]
     public PackedScene vrRigScene;
 
-    public Node3D vrRig;
+    public VRRig vrRig;
 
     public static Node worldsRoot;
     private static IntPtr fliteLibHandle = IntPtr.Zero;
@@ -238,7 +238,7 @@ public partial class Init : Node
         InitXR();
         if (IsVRLoaded)
         {
-            vrRig = vrRigScene.Instantiate<Node3D>();
+            vrRig = vrRigScene.Instantiate<VRRig>();
             AddChild(vrRig);
         }
 

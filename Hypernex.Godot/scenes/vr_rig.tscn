@@ -36,7 +36,7 @@ transparency = 1
 shading_mode = 0
 albedo_texture = SubResource("ViewportTexture_utwhu")
 
-[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "raycasts", "canvas", "openMenuWarning")]
+[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "raycasts", "canvas", "vp", "cam")]
 script = ExtResource("1_1xyfp")
 origin = NodePath("SubViewport/Origin")
 head = NodePath("SubViewport/Origin/Head")
@@ -46,7 +46,8 @@ leftHandSkel = NodePath("SubViewport/Origin/LeftSkel")
 rightHandSkel = NodePath("SubViewport/Origin/RightSkel")
 raycasts = [NodePath("SubViewport/Origin/LeftAim/Raycast"), NodePath("SubViewport/Origin/RightAim/Raycast")]
 canvas = NodePath("SubViewport/Origin/UICanvas")
-openMenuWarning = NodePath("SubViewport/Origin/Head/Label3D")
+vp = NodePath("SubViewport")
+cam = NodePath("Camera3D")
 triggerClickThreshold = 0.25
 
 [node name="SubViewport" type="SubViewport" parent="."]
@@ -60,15 +61,6 @@ size = Vector2i(0, 0)
 [node name="Origin" type="XROrigin3D" parent="SubViewport"]
 
 [node name="Head" type="XRCamera3D" parent="SubViewport/Origin"]
-
-[node name="Label3D" type="Label3D" parent="SubViewport/Origin/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
-visible = false
-double_sided = false
-no_depth_test = true
-modulate = Color(1, 0, 0, 1)
-text = "Menu is open!
-Use desktop."
 
 [node name="Left" type="XRController3D" parent="SubViewport/Origin"]
 tracker = &"left_hand"
@@ -133,3 +125,5 @@ disable_3d = true
 transparent_bg = true
 gui_embed_subwindows = true
 size = Vector2i(1280, 720)
+
+[node name="Camera3D" type="Camera3D" parent="."]
