@@ -130,9 +130,9 @@ static func export_scn(writer: ZIPPacker, path: String) -> void:
 
 
 static func export_world_quick() -> void:
-	OS.alert(export_world("my_world"))
+	OS.alert(export_world("my_world", "hnw"))
 
-static func export_world(name: String) -> String:
+static func export_world(name: String, ext: String) -> String:
 	var root := EditorInterface.get_edited_scene_root()
 	if not root:
 		return "No Scene Open"
@@ -141,7 +141,7 @@ static func export_world(name: String) -> String:
 
 	# write zip file
 	var writer := ZIPPacker.new()
-	var path := "user://" + name.replace(".", "") + ".hnw"
+	var path := "user://" + name.replace(".", "") + "." + ext
 	var err := writer.open(path)
 	if err != OK:
 		return error_string(err)

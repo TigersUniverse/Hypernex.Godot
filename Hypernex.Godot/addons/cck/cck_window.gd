@@ -23,7 +23,7 @@ func _process(delta: float) -> void:
 	export_avatar_ui.visible = found_avatar
 
 func export_world() -> void:
-	OS.alert(CCKPlugin.export_world(world_name_edit.text))
+	OS.alert(CCKPlugin.export_world(world_name_edit.text, "hnw"))
 
 func export_avatar() -> void:
-	OS.alert(CCKPlugin.export_world(avatar_name_edit.text))
+	OS.alert(CCKPlugin.export_world(avatar_name_edit.text, "hna"))
