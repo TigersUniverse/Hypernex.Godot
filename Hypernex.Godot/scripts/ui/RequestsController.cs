@@ -15,7 +15,7 @@ namespace Hypernex.UI
         [Export]
         public PackedScene friendUI;
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
             label.VisibilityChanged += OnVisible;
             label.MetaClicked += OnClick;

@@ -18,7 +18,7 @@ namespace Hypernex.UI
         public PackedScene worldUI;
         public List<SafeInstance> instances = new List<SafeInstance>();
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
             label.VisibilityChanged += OnVisible;
             label.MetaClicked += OnClick;

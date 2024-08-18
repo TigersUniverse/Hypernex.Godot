@@ -5,7 +5,7 @@ namespace Hypernex.UI
 {
     public partial class ThemedButton : Button
     {
-        public override void _Ready()
+        public override void _EnterTree()
         {
             // ThemeChanged += UpdateTheme;
             UpdateTheme();

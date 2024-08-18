@@ -26,7 +26,7 @@ namespace Hypernex.UI
         public PackedScene bigCardUI;
         public BigCardTemplate currentBigCard;
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
             APITools.OnUserLogin += Login;
             cckButton.Pressed += LaunchCCK;

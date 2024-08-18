@@ -25,6 +25,8 @@ public partial class Init : Node
     [Export]
     public Control ui;
     [Export]
+    public CanvasLayer uiLayer;
+    [Export]
     public PackedScene localPlayerScene;
     [Export]
     public PackedScene remotePlayerScene;

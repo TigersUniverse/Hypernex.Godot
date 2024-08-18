@@ -53,7 +53,7 @@ namespace Hypernex.UI
         public GameInstance gameInstance = null;
         public SafeInstance safeInstance = null;
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
             videoForeground.Finished += FGLoop;
             videoBackground.Finished += BGLoop;

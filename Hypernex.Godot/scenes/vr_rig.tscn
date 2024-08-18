@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://d3kcsxyx7aa6i"]
+[gd_scene load_steps=9 format=3 uid="uid://d3kcsxyx7aa6i"]
 
 [ext_resource type="Script" path="res://scripts/VRRig.cs" id="1_1xyfp"]
+[ext_resource type="Script" path="res://addons/ccksharp/classes/UICanvas.cs" id="2_lc2vd"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_45s0p"]
-top_radius = 0.01
+top_radius = 0.0
 bottom_radius = 0.01
 height = 5.0
 
@@ -15,19 +16,27 @@ shading_mode = 0
 albedo_color = Color(1, 0, 0, 0.176471)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_jn5d5"]
-top_radius = 0.01
+top_radius = 0.0
 bottom_radius = 0.01
 height = 5.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fjr5q"]
-render_priority = 127
 transparency = 4
 blend_mode = 1
 depth_draw_mode = 1
 shading_mode = 0
 albedo_color = Color(1, 0, 0, 0.176471)
 
-[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "raycasts", "openMenuWarning")]
+[sub_resource type="ViewportTexture" id="ViewportTexture_utwhu"]
+viewport_path = NodePath("SubViewport/Origin/UICanvas/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_to2ad"]
+resource_local_to_scene = true
+transparency = 1
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_utwhu")
+
+[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "raycasts", "canvas", "openMenuWarning")]
 script = ExtResource("1_1xyfp")
 origin = NodePath("SubViewport/Origin")
 head = NodePath("SubViewport/Origin/Head")
@@ -36,7 +45,9 @@ rightHand = NodePath("SubViewport/Origin/Right")
 leftHandSkel = NodePath("SubViewport/Origin/LeftSkel")
 rightHandSkel = NodePath("SubViewport/Origin/RightSkel")
 raycasts = [NodePath("SubViewport/Origin/LeftAim/Raycast"), NodePath("SubViewport/Origin/RightAim/Raycast")]
+canvas = NodePath("SubViewport/Origin/UICanvas")
 openMenuWarning = NodePath("SubViewport/Origin/Head/Label3D")
+triggerClickThreshold = 0.25
 
 [node name="SubViewport" type="SubViewport" parent="."]
 use_xr = true
@@ -52,6 +63,7 @@ size = Vector2i(0, 0)
 
 [node name="Label3D" type="Label3D" parent="SubViewport/Origin/Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+visible = false
 double_sided = false
 no_depth_test = true
 modulate = Color(1, 0, 0, 1)
@@ -79,7 +91,6 @@ pose = &"aim"
 [node name="Raycast" type="RayCast3D" parent="SubViewport/Origin/LeftAim"]
 exclude_parent = false
 target_position = Vector3(0, 0, -5)
-hit_back_faces = false
 collide_with_areas = true
 collide_with_bodies = false
 
@@ -109,3 +120,16 @@ ignore_occlusion_culling = true
 gi_mode = 0
 mesh = SubResource("CylinderMesh_jn5d5")
 surface_material_override/0 = SubResource("StandardMaterial3D_fjr5q")
+
+[node name="UICanvas" type="Node3D" parent="SubViewport/Origin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2)
+script = ExtResource("2_lc2vd")
+size = Vector2(2.667, 1.5)
+subViewport = NodePath("SubViewport")
+material = SubResource("StandardMaterial3D_to2ad")
+
+[node name="SubViewport" type="SubViewport" parent="SubViewport/Origin/UICanvas"]
+disable_3d = true
+transparent_bg = true
+gui_embed_subwindows = true
+size = Vector2i(1280, 720)

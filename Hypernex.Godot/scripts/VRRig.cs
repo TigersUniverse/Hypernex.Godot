@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Game;
@@ -21,6 +22,8 @@ public partial class VRRig : Node3D
     public XRController3D rightHandSkel;
     [Export]
     public RayCast3D[] raycasts = Array.Empty<RayCast3D>();
+    [Export]
+    public UICanvas canvas;
 
     private bool lastLeftTriggerState = false;
     private bool lastRightTriggerState = false;
@@ -34,12 +37,34 @@ public partial class VRRig : Node3D
 
     public override void _Ready()
     {
+        if (IsInstanceValid(Init.Instance))
+        {
+            // Init.Instance.uiLayer.CustomViewport = canvas.VP;
+            // canvas.subViewport = GetTree().Root.GetPath();
+            // Init.Instance.ui.Size = canvas.VP.Size;
+        }
         XRServer.WorldScale = 1d;
+    }
+
+    public override void _EnterTree()
+    {
+        if (IsInstanceValid(Init.Instance))
+        {
+            Init.Instance.uiLayer.Reparent(canvas.VP, false);
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        if (IsInstanceValid(Init.Instance))
+        {
+            Init.Instance.uiLayer.Reparent(Init.Instance, false);
+        }
     }
 
     public override void _Process(double delta)
     {
-        openMenuWarning.Visible = Init.Instance.ui.Visible && GameInstance.FocusedInstance == null;
+        // openMenuWarning.Visible = Init.Instance.ui.Visible && GameInstance.FocusedInstance == null;
 
         foreach (var cast in raycasts)
         {
@@ -54,23 +79,55 @@ public partial class VRRig : Node3D
                     continue;
                 }
                 bool triggerState = ctrl.GetFloat("trigger") > triggerClickThreshold;
-                InputEventMouse ev;
+                Vector2 scroll = ctrl.GetVector2("primary");
+                List<InputEventMouse> ev = new List<InputEventMouse>();
                 if (triggerState != lastPrimaryTriggerState)
                 {
-                    ev = new InputEventMouseButton()
+                    ev.Add(new InputEventMouseButton()
                     {
                         ButtonIndex = MouseButton.Left,
                         Pressed = triggerState,
-                    };
+                    });
                 }
                 else
                 {
-                    ev = new InputEventMouseMotion()
+                    ev.Add(new InputEventMouseMotion()
                     {
                         ButtonMask = triggerState ? MouseButtonMask.Left : 0,
-                    };
+                    });
+                    if (scroll.Y > 0.15f)
+                    {
+                        ev.Add(new InputEventMouseButton()
+                        {
+                            ButtonIndex = MouseButton.WheelUp,
+                            Factor = scroll.Y,
+                            Pressed = true,
+                        });
+                    }
+                    else if (scroll.Y < -0.15f)
+                    {
+                        ev.Add(new InputEventMouseButton()
+                        {
+                            ButtonIndex = MouseButton.WheelDown,
+                            Factor = -scroll.Y,
+                            Pressed = true,
+                        });
+                    }
+                    else
+                    {
+                        ev.Add(new InputEventMouseButton()
+                        {
+                            ButtonIndex = MouseButton.WheelUp,
+                            Pressed = false,
+                        });
+                        ev.Add(new InputEventMouseButton()
+                        {
+                            ButtonIndex = MouseButton.WheelDown,
+                            Pressed = false,
+                        });
+                    }
                 }
-                lastPrimaryTriggerState = ctrl.GetFloat("trigger") > triggerClickThreshold;
+                lastPrimaryTriggerState = triggerState;
                 GodotObject collider = cast.GetCollider();
                 if (collider.HasMeta(UICanvas.TypeName))
                 {
@@ -79,7 +136,10 @@ public partial class VRRig : Node3D
                     {
                         cast.Visible = true;
                         UICanvas canvas = collider.GetMeta(UICanvas.TypeName).As<UICanvas>();
-                        canvas.HandleInput(head, ev, cast.GetCollisionPoint(), cast.GetCollisionNormal(), cast.GetColliderShape());
+                        foreach (var e in ev)
+                        {
+                            canvas.HandleInput(head, e, cast.GetCollisionPoint(), cast.GetCollisionNormal(), cast.GetColliderShape());
+                        }
                     }
                     catch
                     { }

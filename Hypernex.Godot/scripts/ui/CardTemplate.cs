@@ -53,7 +53,7 @@ namespace Hypernex.UI
         public WorldMeta worldMeta = null;
         public SafeInstance safeInstance = null;
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
             videoIcon.Finished += IconVidDone;
             videoBackground.Finished += VidDone;

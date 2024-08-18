@@ -29,7 +29,7 @@ namespace Hypernex.UI
         [Export]
         public bool useHttp = false;
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
             LoadedConfig(ConfigManager.LoadedConfig);
             loginButton.Pressed += TryLogin;
