@@ -16,6 +16,8 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 return rl.Text;
             if (item.t is Button btn)
                 return btn.Text;
+            if (item.t is LineEdit le)
+                return le.Text;
             return string.Empty;
         }
 
@@ -29,6 +31,8 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 rl.Text = text;
             if (item.t is Button btn)
                 btn.Text = text;
+            if (item.t is LineEdit le)
+                le.Text = text;
         }
 
         public static void RegisterButtonClick(Item item, object o)
@@ -47,6 +51,26 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 foreach (var conn in b.GetSignalConnectionList(BaseButton.SignalName.Pressed).ToArray())
                 {
                     b.Disconnect(BaseButton.SignalName.Pressed, conn["callable"].AsCallable());
+                }
+            }
+        }
+
+        public static void RegisterInputFieldTextChanged(Item item, object o)
+        {
+            SandboxFunc s = SandboxFuncTools.TryConvert(o);
+            LineEdit lineEdit = item.t as LineEdit;
+            if (GodotObject.IsInstanceValid(lineEdit))
+                lineEdit.TextChanged += t => SandboxFuncTools.InvokeSandboxFunc(s, t);
+        }
+
+        public static void RemoveAllInputFieldTextChanged(Item item)
+        {
+            LineEdit lineEdit = item.t as LineEdit;
+            if (GodotObject.IsInstanceValid(lineEdit))
+            {
+                foreach (var conn in lineEdit.GetSignalConnectionList(LineEdit.SignalName.TextChanged).ToArray())
+                {
+                    lineEdit.Disconnect(LineEdit.SignalName.TextChanged, conn["callable"].AsCallable());
                 }
             }
         }

@@ -32,7 +32,7 @@ project/assembly_name="Hypernex.Godot"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/cck/plugin.cfg")
+enabled=PackedStringArray("res://addons/cck/plugin.cfg", "res://addons/onscreenkeyboard/plugin.cfg")
 
 [input]
 

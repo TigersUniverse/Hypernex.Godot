@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using CobaltSharp;
 using FFmpeg.Godot;
 using Godot;
+using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Sandboxing.SandboxedTypes.World;
 using Hypernex.Tools;
@@ -63,13 +65,27 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public static void LoadUrl(Item item, string url)
         {
-            var ff = GetFFGodot(item);
-            DownloadTools.DownloadBytes(url, data =>
+            GetMedia getMedia = new GetMedia();
+            getMedia.url = url;
+            getMedia.vQuality = VideoQuality.q720;
+            World.Cobalt.GetOptions(getMedia, (opts) =>
             {
-                if (GodotObject.IsInstanceValid(ff))
+                if (opts == null || opts.Options.Length == 0)
                 {
-                    ImageTools.LoadFFmpeg(ff, data);
+                    Logger.CurrentLogger.Error("Could not find a video for URL!");
+                    return;
                 }
+                Logger.CurrentLogger.Log($"Downloading video {url}...");
+                opts.Options[0].Download((file) =>
+                {
+                    if (file == null)
+                    {
+                        Logger.CurrentLogger.Error("Failed to download video!");
+                        return;
+                    }
+                    Logger.CurrentLogger.Log($"Video downloaded {url}...");
+                    LoadFromCobalt(item, file);
+                });
             });
         }
 

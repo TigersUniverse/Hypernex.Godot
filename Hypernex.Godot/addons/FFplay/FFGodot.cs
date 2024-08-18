@@ -696,7 +696,8 @@ namespace FFmpeg.Godot
             return texture;
         }
 
-        private static byte[] line = new byte[4096 * 4096 * 3];
+        [ThreadStatic]
+        private static byte[] line = new byte[4096 * 4096 * 6];
 
         public unsafe static bool SaveFrame(AVFrame frame, int width, int height, byte[] texture, AVPixelFormat format)
         {
@@ -705,7 +706,7 @@ namespace FFmpeg.Godot
                 return false;
             }
             using var converter = new VideoFrameConverter(new System.Drawing.Size(frame.width, frame.height), (AVPixelFormat)frame.format, new System.Drawing.Size(width, height), AVPixelFormat.AV_PIX_FMT_RGB24);
-            var convFrame = converter.Convert(frame, format == AVPixelFormat.AV_PIX_FMT_NONE ? 32 : 1);
+            var convFrame = converter.Convert(frame);
             // var convFrame = converter.Convert(frame, 32);
             Marshal.Copy((IntPtr)convFrame.data[0], line, 0, width * height * 3);
             Array.Copy(line, 0, texture, 0, width * height * 3);
@@ -725,8 +726,9 @@ namespace FFmpeg.Godot
             var convFrame = converter.Convert(frame);
             // Profiler.EndSample();
             // Profiler.BeginSample(nameof(SaveFrame) + "LoadTexture", texture);
-            if (texture.GetWidth() != width || texture.GetHeight() != height)
-                texture.Resize(width, height, Image.Interpolation.Nearest);
+
+            // if (texture.GetWidth() != width || texture.GetHeight() != height)
+            //     texture.Resize(width, height, Image.Interpolation.Nearest);
             Marshal.Copy((IntPtr)convFrame.data[0], line, 0, width * height * 3);
             texture.SetData(width, height, false, Image.Format.Rgb8, line);
             // Profiler.EndSample();

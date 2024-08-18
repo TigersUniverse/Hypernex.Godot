@@ -18,6 +18,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
         private Area3D area;
         private CollisionShape3D shape;
         private MeshInstance3D quad;
+        private Control keyboard;
 
         public override void _EnterTree()
         {
@@ -40,6 +41,12 @@ namespace Hypernex.CCK.GodotVersion.Classes
                     Size = size,
                 },
             };
+            keyboard = ResourceLoader.Load<GDScript>("res://addons/onscreenkeyboard/onscreen_keyboard.gd").New().As<Control>();
+            keyboard.Set("auto_show", false);
+            keyboard.Set("set_tool_tip", false);
+            keyboard.Set("custom_layout_file", "res://addons/ccksharp/keyboard_layout_en.json");
+            keyboard.Connect("key_pressed", Callable.From<Variant>(KeyPressed));
+            keyboard.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
             if (IsInstanceValid(VP))
             {
                 VP.GuiEmbedSubwindows = true;
@@ -51,6 +58,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
                     AlbedoTexture = VP.GetTexture(),
                     Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
                 };
+                VP.AddChild(keyboard);
             }
             if (IsInstanceValid(material))
             {
@@ -65,9 +73,24 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public override void _ExitTree()
         {
+            keyboard.QueueFree();
             area.QueueFree();
             shape.QueueFree();
             quad.QueueFree();
+        }
+
+        public void KeyPressed(Variant key)
+        {
+            var dict = key.AsGodotDictionary();
+            if (dict.ContainsKey("func"))
+            {
+                switch (dict["func"].AsString())
+                {
+                    case "paste":
+                        VP.PushTextInput(DisplayServer.ClipboardGet());
+                        break;
+                }
+            }
         }
 
         public void HandleInput(Node camera, InputEvent ev, Vector3 eventPosition, Vector3 normal, long shapeIdx)
@@ -84,7 +107,13 @@ namespace Hypernex.CCK.GodotVersion.Classes
                 evMouse.GlobalPosition = pos;
                 evMouse.Position = pos;
             }
+            var prevFocus = VP.GuiGetFocusOwner();
             VP.PushInput(ev);
+            var focus = VP.GuiGetFocusOwner();
+            if (focus is LineEdit && (focus != prevFocus /*|| (ev is InputEventMouseButton btn && !btn.Pressed)*/))
+            {
+                keyboard.Call("show");
+            }
         }
     }
 }

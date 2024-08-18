@@ -17,6 +17,14 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
 
         public static void GetOptions(GetMedia getMedia, object callback)
         {
+            GetOptions(getMedia, (opts) =>
+            {
+                SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(callback), opts);
+            });
+        }
+        
+        internal static void GetOptions(GetMedia getMedia, Action<CobaltOptions> callback)
+        {
             new Thread(() =>
             {
                 getMedia.aFormat = AudioFormat.mp3;
@@ -37,7 +45,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
                         {
                             options.Add(new CobaltOption(new Uri(getMedia.url), getMedia.url));
                         } catch(Exception) {}
-                    SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(callback), new CobaltOptions(options));
+                    callback?.Invoke(new CobaltOptions(options));
                 }));
             }).Start();
         }
@@ -73,6 +81,11 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
 
         public void Download(object onDone)
         {
+            Download(d => SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), d));
+        }
+
+        internal void Download(Action<CobaltDownload> onDone)
+        {
             string pathToCobalt = DownloadTools.GetFilePath("Cobalt");
             if (!Directory.Exists(pathToCobalt))
                 Directory.CreateDirectory(pathToCobalt);
@@ -90,15 +103,12 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
                 }
                 if (!trusted)
                 {
-                    QuickInvoke.InvokeActionOnMainThread(new Action(() =>
-                        SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), null)));
+                    QuickInvoke.InvokeActionOnMainThread(onDone, (object)null);
                     return;
                 }
                 if (ImageTools.IsVideoStream(uri))
                 {
-                    QuickInvoke.InvokeActionOnMainThread(new Action(() =>
-                        SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone),
-                            new CobaltDownload(url, true))));
+                    QuickInvoke.InvokeActionOnMainThread(onDone, new CobaltDownload(url, true));
                 }
                 else
                 {
@@ -106,9 +116,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
                     string fileName = DownloadTools.GetStringHash(url);
                     string filePath = Path.Combine(pathToCobalt, fileName);
                     DownloadTools.DownloadFile(url, filePath,
-                        downloadedFile => QuickInvoke.InvokeActionOnMainThread(new Action(() =>
-                            SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone),
-                                new CobaltDownload(downloadedFile, false)))));
+                        downloadedFile => QuickInvoke.InvokeActionOnMainThread(onDone, new CobaltDownload(downloadedFile, false)));
                 }
                 return;
             }
@@ -121,14 +129,12 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
                     streamResponse = Cobalt.c.GetStream(pickerItem.Value);
                 else
                 {
-                    QuickInvoke.InvokeActionOnMainThread(new Action(() =>
-                        SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), null)));
+                    QuickInvoke.InvokeActionOnMainThread(onDone, (object)null);
                     return;
                 }
                 if (streamResponse.status != Status.Success)
                 {
-                    QuickInvoke.InvokeActionOnMainThread(new Action(() =>
-                        SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), null)));
+                    QuickInvoke.InvokeActionOnMainThread(onDone, (object)null);
                     return;
                 }
 
@@ -142,8 +148,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
                 fs.Dispose();
                 streamResponse.Dispose();
                 CobaltDownload cobaltDownload = new CobaltDownload(np, false);
-                QuickInvoke.InvokeActionOnMainThread(new Action(() =>
-                    SandboxFuncTools.InvokeSandboxFunc(SandboxFuncTools.TryConvert(onDone), cobaltDownload)));
+                QuickInvoke.InvokeActionOnMainThread(onDone, cobaltDownload);
             }).Start();
         }
     }

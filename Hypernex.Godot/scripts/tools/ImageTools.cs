@@ -38,7 +38,7 @@ namespace Hypernex.Tools
             ff.source = sound;
             texture.AddChild(ff);
             ff.Play(path, path);
-            ff.Pause();
+            // ff.Pause();
             return ff;
         }
 

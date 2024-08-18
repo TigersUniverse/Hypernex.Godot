@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using FFmpeg.Godot;
 using Godot;
 using Hypernex.CCK;
+using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Tools;
 
 namespace Hypernex.Game.Tests
@@ -14,13 +16,19 @@ namespace Hypernex.Game.Tests
         [Export]
         public AudioStreamPlayer3D audio;
 
-        public override async void _Ready()
+        public override void _Ready()
         {
             Init.resolverSet = false;
-            byte[] res = await HttpUtils.HttpGetAsync(this, url);
+            // byte[] res = await HttpUtils.HttpGetAsync(this, url);
             if (IsInstanceValid(this))
             {
-                var ff = ImageTools.LoadFFmpeg(res, this, audio);
+                // byte[] res = FileAccess.GetFileAsBytes(url);
+                FFGodot ff = new FFGodot();
+                ff.renderMesh = this;
+                ff.source = audio;
+                AddChild(ff);
+                ff.Play(url, url);
+                // var ff = ImageTools.LoadFFmpeg(res, this, audio);
                 ff.Finished += () =>
                 {
                     ff.Seek(0);

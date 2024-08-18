@@ -171,8 +171,8 @@ namespace Hypernex.UI
 
         public void UploadSelectedWorld()
         {
-            selectedWorldMeta.Publicity = WorldPublicity.Anyone;
-            selectedAvatarMeta.Publicity = AvatarPublicity.Anyone;
+            // selectedWorldMeta.Publicity = WorldPublicity.Anyone;
+            // selectedAvatarMeta.Publicity = AvatarPublicity.Anyone;
             if (!string.IsNullOrWhiteSpace(worldNameEdit.Text))
                 selectedWorldMeta.Name = worldNameEdit.Text;
             if (!string.IsNullOrWhiteSpace(worldDescriptionEdit.Text))
