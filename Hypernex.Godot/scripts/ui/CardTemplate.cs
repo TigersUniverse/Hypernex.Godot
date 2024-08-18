@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using FFmpeg.Godot;
 using Godot;
+using Hypernex.Configuration;
+using Hypernex.Game;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
 using HypernexSharp.SocketObjects;
@@ -16,6 +18,7 @@ namespace Hypernex.UI
             User,
             World,
             Instance,
+            Avatar,
         }
 
         public enum CardUserType
@@ -51,6 +54,7 @@ namespace Hypernex.UI
         public CardUserType userType = CardUserType.Other;
         public User userData = null;
         public WorldMeta worldMeta = null;
+        public AvatarMeta avatarMeta = null;
         public SafeInstance safeInstance = null;
 
         public override void _EnterTree()
@@ -145,6 +149,17 @@ namespace Hypernex.UI
                             break;
                     }
                     break;
+                case CardType.Avatar:
+                    switch (id)
+                    {
+                        case 1:
+                            ConfigManager.SelectedConfigUser.CurrentAvatar = avatarMeta.Id;
+                            ConfigManager.SaveConfigToFile();
+                            if (IsInstanceValid(PlayerRoot.Local))
+                                PlayerRoot.Local.ChangeAvatar(avatarMeta.Id);
+                            break;
+                    }
+                    break;
             }
         }
 
@@ -185,6 +200,9 @@ namespace Hypernex.UI
                     popup.AddItem("View Instance", 1);
                     popup.AddItem("Join Instance", 2);
                     break;
+                case CardType.Avatar:
+                    popup.AddItem("Equip Avatar", 1);
+                    break;
             }
         }
 
@@ -199,6 +217,12 @@ namespace Hypernex.UI
                     break;
                 case CardType.Instance:
                     SocketManager.JoinInstance(safeInstance);
+                    break;
+                case CardType.Avatar:
+                    ConfigManager.SelectedConfigUser.CurrentAvatar = avatarMeta.Id;
+                    ConfigManager.SaveConfigToFile();
+                    if (IsInstanceValid(PlayerRoot.Local))
+                        PlayerRoot.Local.ChangeAvatar(avatarMeta.Id);
                     break;
             }
         }
@@ -239,6 +263,7 @@ namespace Hypernex.UI
             userType = CardUserType.Other;
             userData = null;
             worldMeta = null;
+            avatarMeta = null;
             safeInstance = null;
             icon.Show();
             videoIcon.Pause();
@@ -316,6 +341,40 @@ namespace Hypernex.UI
                     });
                 }
             }, worldId);
+        }
+
+        public void SetAvatarId(string avatarId)
+        {
+            Reset();
+            APITools.APIObject.GetAvatarMeta(r =>
+            {
+                if (r.success)
+                {
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        if (!IsInstanceValid(label))
+                            return;
+                        type = CardType.Avatar;
+                        cardInfoId = avatarId;
+                        avatarMeta = r.result.Meta;
+                        label.Text = r.result.Meta.Name.Replace("[", "[lb]");
+                        DownloadTools.DownloadBytes(r.result.Meta.ImageURL, b =>
+                        {
+                            if (!IsInstanceValid(background))
+                                return;
+                            Image img = ImageTools.LoadImage(b);
+                            if (img != null)
+                                background.Texture = ImageTexture.CreateFromImage(img);
+                            else
+                            {
+                                ImageTools.LoadFFmpeg(videoBackground, b);
+                                background.Hide();
+                            }
+                        });
+                        Show();
+                    });
+                }
+            }, avatarId);
         }
 
         public void SetUserId(string userId, CardUserType utype)

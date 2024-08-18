@@ -46,13 +46,13 @@ namespace Hypernex.UI
         private void OnVisible()
         {
             var friends = APITools.CurrentUser.Friends;
+            if (!label.Visible)
+                return;
             label.Text = string.Format(labelFormat, friends.Count);
             foreach (var node in container.GetChildren())
             {
                 node.QueueFree();
             }
-            if (!label.Visible)
-                return;
             foreach (var friend in friends)
             {
                 CardTemplate node = friendUI.Instantiate<CardTemplate>();

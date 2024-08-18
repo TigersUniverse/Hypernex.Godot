@@ -5,18 +5,18 @@ using Hypernex.Tools;
 
 namespace Hypernex.UI
 {
-    public partial class WorldsController : Node
+    public partial class AvatarsController : Node
     {
         [Export(PropertyHint.MultilineText)]
-        public string labelFormat = "[center]Worlds ({0})[/center][right][url]Refresh[/url][/right]";
+        public string labelFormat = "[center]Avatars ({0})[/center][right][url]Refresh[/url][/right]";
         [Export]
-        public bool myWorlds = true;
+        public bool myAvatars = true;
         [Export]
         public RichTextLabel label;
         [Export]
         public Container container;
         [Export]
-        public PackedScene worldUI;
+        public PackedScene avatarUI;
 
         public override void _EnterTree()
         {
@@ -46,18 +46,18 @@ namespace Hypernex.UI
             });
         }
 
-        public void UpdateWith(string[] worlds)
+        public void UpdateWith(string[] avatars)
         {
-            label.Text = string.Format(labelFormat, worlds.Length);
+            label.Text = string.Format(labelFormat, avatars.Length);
             foreach (var node in container.GetChildren())
             {
                 node.QueueFree();
             }
-            foreach (var world in worlds)
+            foreach (var avatar in avatars)
             {
-                CardTemplate node = worldUI.Instantiate<CardTemplate>();
+                CardTemplate node = avatarUI.Instantiate<CardTemplate>();
                 container.AddChild(node);
-                node.SetWorldId(world);
+                node.SetAvatarId(avatar);
             }
         }
 
@@ -65,14 +65,14 @@ namespace Hypernex.UI
         {
             if (!label.IsVisibleInTree())
                 return;
-            if (myWorlds)
+            if (myAvatars)
             {
-                var worlds = APITools.CurrentUser.Worlds;
-                UpdateWith(worlds.ToArray());
+                var avatars = APITools.CurrentUser.Avatars;
+                UpdateWith(avatars.ToArray());
             }
             else
             {
-                APITools.APIObject.GetWorldPopularity(result =>
+                APITools.APIObject.GetAvatarPopularity(result =>
                 {
                     if (result.success)
                     {

@@ -9,6 +9,7 @@ using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Sandboxing.SandboxedTypes.World;
 using Nexbox;
 using Nexbox.Interpreters;
+using Nexport;
 
 namespace Hypernex.Sandboxing
 {
@@ -102,6 +103,7 @@ namespace Hypernex.Sandboxing
 
             interpreter.CreateGlobal("ScriptEvents", world?.gameInstance?.ScriptEvents);
             interpreter.CreateGlobal("NetworkEvent", new ClientNetworkEvent(world?.gameInstance));
+            interpreter.ForwardType("MessageChannel", typeof(MessageChannel));
             interpreter.ForwardType("ScriptEvent", typeof(ScriptEvent));
 
             interpreter.ForwardType("Colliders", typeof(Colliders));

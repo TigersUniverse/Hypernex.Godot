@@ -171,6 +171,8 @@ namespace Hypernex.UI
 
         public void UploadSelectedWorld()
         {
+            selectedWorldMeta.Publicity = WorldPublicity.Anyone;
+            selectedAvatarMeta.Publicity = AvatarPublicity.Anyone;
             if (!string.IsNullOrWhiteSpace(worldNameEdit.Text))
                 selectedWorldMeta.Name = worldNameEdit.Text;
             if (!string.IsNullOrWhiteSpace(worldDescriptionEdit.Text))
@@ -243,7 +245,7 @@ namespace Hypernex.UI
                     ConfigManager.SaveConfigToFile();
                     if (IsInstanceValid(PlayerRoot.Local))
                     {
-                        PlayerRoot.Local.AvatarId = selectedAvatarMeta.Id;
+                        PlayerRoot.Local.ChangeAvatar(selectedAvatarMeta.Id);
                     }
                     break;
                 }
