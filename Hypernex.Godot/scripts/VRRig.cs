@@ -29,6 +29,7 @@ public partial class VRRig : Node3D
     private bool lastRightTriggerState = false;
     private bool lastPrimaryTriggerState = false;
     private string primaryTracker;
+    private bool lastMenuToggleState = false;
 
     [Export]
     public Node3D openMenuWarning;
@@ -37,12 +38,6 @@ public partial class VRRig : Node3D
 
     public override void _Ready()
     {
-        if (IsInstanceValid(Init.Instance))
-        {
-            // Init.Instance.uiLayer.CustomViewport = canvas.VP;
-            // canvas.subViewport = GetTree().Root.GetPath();
-            // Init.Instance.ui.Size = canvas.VP.Size;
-        }
         XRServer.WorldScale = 1d;
     }
 
@@ -64,7 +59,12 @@ public partial class VRRig : Node3D
 
     public override void _Process(double delta)
     {
-        // openMenuWarning.Visible = Init.Instance.ui.Visible && GameInstance.FocusedInstance == null;
+        bool menuToggleState = rightHand.GetFloat("by_button") > 0.5f;
+        if (lastMenuToggleState != menuToggleState)
+        {
+            canvas.Visible = !canvas.Visible;
+        }
+        lastMenuToggleState = menuToggleState;
 
         foreach (var cast in raycasts)
         {
@@ -134,8 +134,13 @@ public partial class VRRig : Node3D
                     // prevent people from fooling with the cck
                     try
                     {
-                        cast.Visible = true;
                         UICanvas canvas = collider.GetMeta(UICanvas.TypeName).As<UICanvas>();
+                        if (!canvas.IsVisibleInTree())
+                        {
+                            cast.Visible = false;
+                            continue;
+                        }
+                        cast.Visible = true;
                         foreach (var e in ev)
                         {
                             canvas.HandleInput(head, e, cast.GetCollisionPoint(), cast.GetCollisionNormal(), cast.GetColliderShape());
