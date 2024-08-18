@@ -7,6 +7,8 @@ extends Node3D
 
 func _notification(what) -> void:
 	if what == NOTIFICATION_EDITOR_PRE_SAVE:
+		for i in range(Assets.size()):
+			Assets[i].set_meta(&"typename", "WorldAsset")
 		set_meta(&"typename", "WorldDescriptor")
 
 func _exit_tree() -> void:
