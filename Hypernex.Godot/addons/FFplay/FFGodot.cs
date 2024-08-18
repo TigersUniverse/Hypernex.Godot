@@ -46,7 +46,7 @@ namespace FFmpeg.Godot
         private double _prevTime = 0.0d;
         private double _timeOffset = 0.0d;
         [Export]
-        public double _videoOffset = -0.25d;
+        public double _videoOffset = -0.5d;
         private Stopwatch _videoWatch;
         private double? _lastPts;
         private int? _lastPts2;
@@ -281,7 +281,7 @@ namespace FFmpeg.Godot
                 _audioClip = new AudioStreamGenerator()
                 {
                     MixRate = _audioDecoder.SampleRate,
-                    BufferLength = (float)-_videoOffset,
+                    BufferLength = 0.1f,
                 };
                 source.Stream = _audioClip;
                 source.Play();
@@ -331,7 +331,7 @@ namespace FFmpeg.Godot
                 AudioCallback();
 
                 int idx = _videoDisplayIndex;
-                if (_videoMutex.WaitOne(1))
+                if (_videoMutex.WaitOne(0))
                 {
                     UpdateVideoFromClones(idx);
                     _videoMutex.ReleaseMutex();
@@ -345,7 +345,7 @@ namespace FFmpeg.Godot
                         // AudioCallback();
                     }
                     int k = 0;
-                    if (CanSeek && _elapsedOffsetVideo > PlaybackTime + _videoSkipBuffer && k < fps)
+                    if (CanSeek && _elapsedOffset > PlaybackTime + _videoSkipBuffer && k < fps)
                     {
                         k++;
                         Present(idx);
