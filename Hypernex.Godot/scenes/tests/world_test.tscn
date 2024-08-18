@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=14 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
 [ext_resource type="Script" path="res://addons/cck/classes/reverb_zone.gd" id="5_a4oh0"]
 [ext_resource type="Script" path="res://addons/ccksharp/classes/UICanvas.cs" id="6_yh4eb"]
-[ext_resource type="Script" path="res://addons/cck/classes/ui_canvas.gd" id="7_dqm2x"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -67,7 +66,6 @@ shape = SubResource("ConcavePolygonShape3D_1l7cg")
 
 [node name="WorldDescriptor" type="Node3D" parent="Test/World"]
 script = ExtResource("3_xf3ip")
-StartPosition = Vector3(0, 10, 0)
 metadata/typename = "WorldDescriptor"
 
 [node name="Node" type="Node" parent="Test/World/WorldDescriptor"]
@@ -94,13 +92,13 @@ Runtime.OnFixedUpdate(SandboxFunc().SetAction(settime));"
 metadata/typename = "WorldScript"
 
 [node name="Marker3D" type="Marker3D" parent="Test/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.20059, 0)
+transform = Transform3D(-0.585934, 0, 0.810359, 0, 1, 0, -0.810359, 0, -0.585934, -0.00551409, 1.51715, 0.0912246)
 
 [node name="Marker3D2" type="Marker3D" parent="Test/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.58851, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.205333, 1.84187, 0.718246)
 
 [node name="Marker3D3" type="ShapeCast3D" parent="Test/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.37821, -1.50097)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.98023e-08, 1.59229, -0.0326142)
 shape = SubResource("SphereShape3D_1slmv")
 target_position = Vector3(0, -2, 0)
 
@@ -116,6 +114,7 @@ metadata/typename = "ReverbZone"
 [node name="UI" type="Node3D" parent="Test/World"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1.00448)
 script = ExtResource("6_yh4eb")
+subViewport = NodePath("SubViewport")
 
 [node name="SubViewport" type="SubViewport" parent="Test/World/UI"]
 disable_3d = true
@@ -130,9 +129,5 @@ text = "TEST"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Test"]
 
-[node name="UICanvas" type="Node3D" parent="Test"]
-script = ExtResource("7_dqm2x")
-metadata/typename = "UICanvas"
-
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
+transform = Transform3D(-0.68644, 0.193773, -0.700894, 0, 0.963843, 0.26647, 0.727186, 0.182916, -0.661621, -1.01967, 1.50676, -2.55637)

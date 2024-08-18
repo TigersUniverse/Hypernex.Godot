@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 
 namespace DitzelGames.FastIK
@@ -22,7 +22,7 @@ namespace DitzelGames.FastIK
                     // return Node.GlobalTransform * Transform;
                     if (Node is Skeleton3D skeleton)
                     {
-                        return skeleton.GlobalTransform * Transform;
+                        // return skeleton.GlobalTransform * Transform;
                     }
                     return Node.GlobalTransform;
                 }
@@ -32,7 +32,7 @@ namespace DitzelGames.FastIK
                         return;
                     if (Node is Skeleton3D skeleton)
                     {
-                        Transform = skeleton.GlobalTransform.AffineInverse() * value;
+                        // Transform = skeleton.GlobalTransform.AffineInverse() * value;
                     }
                     else
                         Node.GlobalTransform = value;
@@ -46,7 +46,7 @@ namespace DitzelGames.FastIK
                         return default;
                     if (Node is Skeleton3D skeleton)
                     {
-                        return skeleton.GetBoneGlobalPose(BoneIndex);
+                        // return skeleton.GetBoneGlobalPose(BoneIndex);
                     }
                     return Node.Transform;
                 }
@@ -56,7 +56,7 @@ namespace DitzelGames.FastIK
                         return;
                     if (Node is Skeleton3D skeleton)
                     {
-                        skeleton.SetBoneGlobalPoseOverride(BoneIndex, value, 1f, true);
+                        // skeleton.SetBoneGlobalPoseOverride(BoneIndex, value, 1f, true);
                     }
                     else
                         Node.Transform = value;
@@ -206,7 +206,7 @@ namespace DitzelGames.FastIK
         protected Vector3[] StartDirectionSucc;
         protected Quaternion[] StartRotationBone;
         protected Quaternion StartRotationTarget;
-        protected BoneData Root;
+        public BoneData Root { get; protected set; }
 
         public bool IsOutOfReach { get; protected set; } = false;
         public float ReachAmountSqr { get; protected set; } = 0f;
@@ -275,7 +275,7 @@ namespace DitzelGames.FastIK
         {
             if (!Enabled)
                 return;
-            ResolveIK();
+            // ResolveIK();
         }
 
         public void ResolveIK()

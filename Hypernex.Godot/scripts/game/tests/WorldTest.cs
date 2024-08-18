@@ -28,16 +28,17 @@ namespace Hypernex.Game.Tests
 
         public override async void _Ready()
         {
-            return;
             GDLogger logger = new GDLogger();
             logger.SetLogger();
             await ToSignal(GetTree().CreateTimer(0.25f), SceneTreeTimer.SignalName.Timeout);
+            /*
             new Thread(() =>
             {
                 var root = WorldRoot.LoadFromFile("user://my_world.hnw");
                 // Thread.Sleep(1000);
                 CallDeferred(Node.MethodName.AddChild, root);
             }).Start();
+            */
             avatar = AvatarRoot.LoadFromFile("user://skeleton.hna");
             AddChild(avatar);
             avatar.AttachTo(target);
@@ -46,7 +47,6 @@ namespace Hypernex.Game.Tests
 
         public override void _Process(double delta)
         {
-            return;
             float s = Time.GetTicksMsec() / 1000f;
             target.Position = new Vector3(Mathf.Cos(s), 0f, Mathf.Sin(s));
             avatar.ProcessIk(true, true, target3.GlobalTransform, target3.GlobalTransform.TranslatedLocal(target3.TargetPosition * target3.GetClosestCollisionUnsafeFraction()), target2.GlobalTransform, target2.GlobalTransform);

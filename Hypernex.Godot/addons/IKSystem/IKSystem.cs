@@ -64,6 +64,7 @@ public partial class IKSystem : Node
     public Curve velCurve;
 
     // [ExportGroup("Debug area")]
+    public IKData headData;
     public IKData leftHandData;
     public IKData rightHandData;
     public IKData leftFootData;
@@ -157,12 +158,20 @@ public partial class IKSystem : Node
             rightFootData.ik.Enabled = footIk;
         if (IsInstanceValid(hips) && IsInstanceValid(head) && IsInstanceValid(headTarget))
         {
+            headData.ik.Enabled = true;
+            // hips.GlobalPosition = headData.target.GlobalPosition - Vector3.Down * hipsDistance;
             // hips.Position = hips.GetParentNode3D().ToLocal(headTarget.GlobalPosition) - hips.GetParentNode3D().ToLocal(direction);
             // hips.Position = hips.GetParentNode3D().InverseTransformPoint(headTarget.GlobalPosition) - hips.GetParentNode3D().InverseTransformVector(direction);
-            Vector3 scl = head.Scale;
-            head.GlobalPosition = headTarget.GlobalPosition;
-            head.GlobalBasis = headTarget.GlobalBasis;
-            head.Scale = scl;
+            // Vector3 scl = head.Scale;
+            // head.GlobalPosition = headTarget.GlobalPosition;
+            // head.GlobalBasis = headTarget.GlobalBasis;
+            // head.Scale = scl;
+        }
+
+        if (handIk)
+        {
+            leftHandData.pole.GlobalPosition = leftHand.GlobalPosition - leftHand.GlobalBasis.Y * 0.1f * GetScale();
+            rightHandData.pole.GlobalPosition = rightHand.GlobalPosition - rightHand.GlobalBasis.Y * 0.1f * GetScale();
         }
 
         Vector3 vel = hips.GlobalPosition - hipsPos;
@@ -272,10 +281,19 @@ public partial class IKSystem : Node
 
             // hips and head
             {
-                headTarget = new Node3D() { Name = "Head_Target" };
-                humanoid.AddChild(headTarget);
-                headTarget.GlobalTransform = head.GlobalTransform;
+                headData.target = new Node3D() { Name = "Head_Target" };
+                humanoid.AddChild(headData.target);
+                headData.target.GlobalTransform = head.GlobalTransform;
                 hipsPos = hips.GlobalPosition;
+
+                FastIKFabric ik = new FastIKFabric();
+                ik.Enabled = false;
+                ik.Target = headData.target;
+                ik.Pole = headData.pole;
+                ik.ChainLength = hips.GetPathTo(head).GetNameCount();
+                ik.SnapBackStrength = SnapBackStrength;
+                head.AddChild(ik);
+                headData.ik = ik;
             }
 
             // left hand
@@ -318,6 +336,8 @@ public partial class IKSystem : Node
                 rightHand.AddChild(ik);
                 rightHandData.ik = ik;
             }
+            AddDebugSphere(leftHandData.pole);
+            AddDebugSphere(rightHandData.pole);
 
             // left foot
             {
@@ -369,6 +389,20 @@ public partial class IKSystem : Node
             // leftFoot.OverridePose = true;
             // rightFoot.OverridePose = true;
         }
+    }
+
+    public void AddDebugSphere(Node3D node)
+    {
+        var sphere = new MeshInstance3D()
+        {
+            Mesh = new SphereMesh()
+            {
+                Height = 0.2f,
+                Radius = 0.1f,
+            },
+            Scale = Vector3.One / GetScale(),
+        };
+        node.AddChild(sphere);
     }
 
     // https://github.com/MMMaellon/renik/blob/master/RenIK%20Foot%20Placement.png

@@ -57,6 +57,13 @@ namespace Hypernex.Game
         {
             if (IsInstanceValid(ikSystem))
                 ikSystem.QueueFree();
+            CreateBoneTree();
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            IKRunner run = new IKRunner();
+            run.root = descriptor.GetSkeleton();
+            AddChild(run);
+            run.CreateFrom(descriptor.GetSkeleton());
+            return;
             ikSystem = new IKSystem();
             // ikSystem.forwardNode = target;
             ikSystem.humanoid = descriptor.GetSkeleton();
@@ -80,6 +87,8 @@ namespace Hypernex.Game
 
         private void CalcIk()
         {
+            return;
+            ikSystem.headData.ik.ResolveIK();
             ikSystem.leftHandData.ik.ResolveIK();
             ikSystem.rightHandData.ik.ResolveIK();
             ikSystem.leftFootData.ik.ResolveIK();
@@ -94,24 +103,31 @@ namespace Hypernex.Game
 
                 if (useHead)
                 {
+                    /*
                     ikSystem.humanoid.GlobalPosition = floor.Origin;
                     Vector3 hipRotation = floor.Basis.GetEuler();
                     hipRotation.X = 0f;
                     hipRotation.Y += Mathf.Pi;
                     hipRotation.Z = 0f;
                     ikSystem.humanoid.GlobalRotation = hipRotation;
+                    */
+                    /*
                     Vector3 headScl = ikSystem.headTarget.Scale;
                     ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
                     ikSystem.headTarget.Scale = headScl;
-                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    */
+                    // ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    Vector3 headScl = ikSystem.headData.target.Scale;
+                    ikSystem.headData.target.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
+                    ikSystem.headData.target.Scale = headScl;
                 }
-                else
+                // else
                 {
                     Vector3 scale = root.Scale;
                     root.GlobalPosition = target.GlobalPosition;
                     root.GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
                     root.Scale = scale;
-                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    // ikSystem.hips.GlobalPosition = ikSystem.headData.target.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
                 }
 
                 if (!vr)
