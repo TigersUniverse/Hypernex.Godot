@@ -31,7 +31,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
             {
                 Shape = new BoxShape3D()
                 {
-                    Size = new Vector3(size.X, size.Y, 0.1f),
+                    Size = new Vector3(size.X, size.Y, 0.01f),
                 },
             };
             quad = new MeshInstance3D()
