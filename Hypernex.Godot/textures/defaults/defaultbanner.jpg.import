@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cuhcp6abu2ly7"
 path.s3tc="res://.godot/imported/defaultbanner.jpg-3819e41c9b37018687957b089ac22ce6.s3tc.ctex"
+path.etc2="res://.godot/imported/defaultbanner.jpg-3819e41c9b37018687957b089ac22ce6.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://textures/defaults/defaultbanner.jpg"
-dest_files=["res://.godot/imported/defaultbanner.jpg-3819e41c9b37018687957b089ac22ce6.s3tc.ctex"]
+dest_files=["res://.godot/imported/defaultbanner.jpg-3819e41c9b37018687957b089ac22ce6.s3tc.ctex", "res://.godot/imported/defaultbanner.jpg-3819e41c9b37018687957b089ac22ce6.etc2.ctex"]
 
 [params]
 

@@ -133,7 +133,8 @@ namespace Hypernex.Tools
             RunningThreads.Add(downloadMeta, null);
             Task.Run(async () =>
             {
-                using HttpClient wc = new HttpClient();
+                // using HttpClient wc = new HttpClient();
+                var wc = Init.http;
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, downloadMeta.url);
                 using var sendTask = wc.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 using var result = sendTask.Result.EnsureSuccessStatusCode();

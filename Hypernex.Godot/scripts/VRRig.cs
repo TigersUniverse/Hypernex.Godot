@@ -48,7 +48,7 @@ public partial class VRRig : Node3D
     {
         if (IsInstanceValid(Init.Instance))
         {
-            Init.Instance.uiLayer.Reparent(canvas.VP, false);
+            Init.Instance.ui.Reparent(canvas.VP, false);
         }
     }
 
@@ -56,7 +56,7 @@ public partial class VRRig : Node3D
     {
         if (IsInstanceValid(Init.Instance))
         {
-            Init.Instance.uiLayer.Reparent(Init.Instance, false);
+            Init.Instance.ui.Reparent(Init.Instance, false);
         }
     }
 

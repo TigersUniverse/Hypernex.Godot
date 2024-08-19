@@ -10,11 +10,14 @@ using Hypernex.UI;
 using HypernexSharp.APIObjects;
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 public partial class Init : Node
 {
+    public static System.Net.Http.HttpClient http = null;
     public static Init Instance;
     [Export]
     public LoginScreen login;
@@ -63,6 +66,22 @@ public partial class Init : Node
         Telepathy.Log.Info = s => logger.Debug(s);
         Telepathy.Log.Warning = s => logger.Warn(s);
         Telepathy.Log.Error = s => logger.Error(s);
+
+        http = new System.Net.Http.HttpClient();
+
+        // this is only needed on android, and exposes MITM attacks
+        /*
+        {
+            http = new System.Net.Http.HttpClient(new HttpClientHandler()
+            {
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true,
+            });
+            ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+        }
+        */
+
+        typeof(HypernexSharp.HypernexSettings).Assembly.GetType("HypernexSharp.API.HTTPTools").GetField("_client", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, http);
 
         NativeLibrary.SetDllImportResolver(typeof(Flite.FliteNativeApi).Assembly, FliteResolver);
         // NativeLibrary.SetDllImportResolver(typeof(Discord.Discord).Assembly, DiscordResolver);

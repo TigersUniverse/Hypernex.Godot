@@ -90,6 +90,12 @@ public partial class VoiceChat : Node
                 return NativeLibrary.Load(Path.Combine(dir, "opus.dll"));
             case "linux":
                 return NativeLibrary.Load(Path.Combine(dir, "libopus.so"));
+            case "android":
+                var file = FileAccess.Open("res://libopus_android.so", FileAccess.ModeFlags.Read);
+                var data = file.GetBuffer((long)file.GetLength());
+                string path = Path.Combine(OS.GetUserDataDir(), "libopus_android.so");
+                File.WriteAllBytes(path, data);
+                return NativeLibrary.Load(path);
             default:
                 return IntPtr.Zero;
         }

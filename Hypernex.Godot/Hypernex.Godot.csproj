@@ -1,10 +1,12 @@
 <Project Sdk="Godot.NET.Sdk/4.3.0">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="android\**" />
     <Compile Remove="addons\**" />
     <Compile Include="addons\ccksharp\**\*.cs" />
     <Compile Include="addons\FastIK\**\*.cs" />

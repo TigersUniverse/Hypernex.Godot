@@ -120,7 +120,7 @@ namespace Hypernex.UI
 
         public void TryLogin(HypernexSettings settings)
         {
-            loginButton.Disabled = true;
+            // loginButton.Disabled = true;
             loginOptions.Selected = 0;
             APITools.Create(settings);
             APITools.Login((s, m) =>

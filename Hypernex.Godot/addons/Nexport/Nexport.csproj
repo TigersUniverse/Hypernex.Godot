@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>11</LangVersion>
         <TargetFrameworks>net48;net7.0;netstandard2.1</TargetFrameworks>
+        <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net7.0</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
