@@ -297,7 +297,7 @@ namespace FFmpeg.Godot
             if (_videoWatch == null)
                 return;
             
-            if ((_offset >= _streamVideoCtx.GetLength() || (_streamVideoCtx.EndReached && (_audioDecoder == null || _streamAudioCtx.EndReached) && _videoTextures.Count == 0 && (_audioDecoder == null || _audioStream.Count == 0))) && !_paused)
+            if (CanSeek && (_offset >= _streamVideoCtx.GetLength() || (_streamVideoCtx.EndReached && (_audioDecoder == null || _streamAudioCtx.EndReached) && _videoTextures.Count == 0 && (_audioDecoder == null || _audioStream.Count == 0))) && !_paused)
             {
                 Pause();
                 EmitSignal(SignalName.Finished);
@@ -518,6 +518,15 @@ namespace FFmpeg.Godot
                     {
                         _streamVideoCtx.NextFrame(out _);
                         vid = _videoDecoder.Decode(out vFrame);
+                        /*
+                        if (!CanSeek)
+                        {
+                            if (_streamVideoCtx.TryGetTime(_videoDecoder, vFrame, out time))
+                            {
+                                _timeOffset = -time;
+                            }
+                        }
+                        */
                     }
                     if (decodeA)
                     {

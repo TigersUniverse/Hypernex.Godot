@@ -24,6 +24,7 @@ namespace Hypernex.Game.Tests
             {
                 // byte[] res = FileAccess.GetFileAsBytes(url);
                 FFGodot ff = new FFGodot();
+                ff.CanSeek = !ImageTools.IsVideoStream(new System.Uri(url));
                 ff.renderMesh = this;
                 ff.source = audio;
                 AddChild(ff);

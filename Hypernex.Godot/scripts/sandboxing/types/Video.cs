@@ -97,6 +97,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 return;
             if (cobaltDownload.isStream)
             {
+                ff.CanSeek = false;
                 ff.Play(cobaltDownload.PathToFile, cobaltDownload.PathToFile);
             }
             else
@@ -104,6 +105,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 if (!File.Exists(cobaltDownload.PathToFile))
                     return;
                 string filePath = cobaltDownload.PathToFile;
+                ff.CanSeek = true;
                 ff.Play(filePath, filePath);
             }
         }
