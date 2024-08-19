@@ -238,6 +238,7 @@ public partial class Init : Node
         APITools.OnUserLogin += user =>
         {
             ConfigManager.SelectedConfigUser = ConfigManager.LoadedConfig.GetConfigUserFromUserId(user.Id);
+            ConfigManager.SaveConfigToFile();
             ui.Show();
             login.root.Hide();
             overlay.root.Show();
@@ -252,6 +253,7 @@ public partial class Init : Node
             overlay.root.Hide();
             login.root.Show();
             GetWindow().Title = "Hypernex";
+            ConfigManager.SaveConfigToFile();
         };
 
         InitXR();

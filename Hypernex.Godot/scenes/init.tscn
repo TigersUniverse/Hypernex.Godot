@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=20 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="14_j4y3h"]
 [ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck.tscn" id="14_tnrj2"]
 [ext_resource type="Script" path="res://scripts/ui/AvatarsController.cs" id="15_xnq34"]
+[ext_resource type="Script" path="res://scripts/ui/SettingsController.cs" id="16_7yuv7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8o0g"]
 corner_radius_top_left = 3
@@ -139,9 +140,10 @@ bigCardUI = ExtResource("11_6bljf")
 
 [node name="TabContainer" type="TabContainer" parent="UI/MainOverlay"]
 layout_mode = 2
-current_tab = 0
+current_tab = 3
 
 [node name="Home" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -318,9 +320,35 @@ size_flags_vertical = 3
 layout_mode = 2
 
 [node name="Settings" type="VBoxContainer" parent="UI/MainOverlay/TabContainer"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 3
+
+[node name="Controller" type="Node" parent="UI/MainOverlay/TabContainer/Settings" node_paths=PackedStringArray("volumeLabel", "volumeSlider", "externalUrlsToggle")]
+script = ExtResource("16_7yuv7")
+volumeLabel = NodePath("../HBoxContainer/Label")
+volumeSlider = NodePath("../HBoxContainer/HSlider")
+externalUrlsToggle = NodePath("../CheckButton")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MainOverlay/TabContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/MainOverlay/TabContainer/Settings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+text = "Volume"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="UI/MainOverlay/TabContainer/Settings/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+scrollable = false
+
+[node name="CheckButton" type="CheckButton" parent="UI/MainOverlay/TabContainer/Settings"]
+layout_mode = 2
+text = "Use Trusted URLs"
 
 [node name="CCKBtn" type="Button" parent="UI/MainOverlay/TabContainer/Settings"]
 layout_mode = 2

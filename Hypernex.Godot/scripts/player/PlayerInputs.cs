@@ -74,7 +74,7 @@ namespace Hypernex.Player
             }
             if (cast.IsColliding())
             {
-                bool triggerState = Input.IsMouseButtonPressed(MouseButton.Left);
+                bool triggerState = Input.IsMouseButtonPressed(MouseButton.Left) && !Init.Instance.ui.IsVisibleInTree();
                 InputEventMouse ev;
                 if (triggerState != lastPrimaryTriggerState)
                 {
