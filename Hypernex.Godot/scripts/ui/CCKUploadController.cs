@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Hypernex.CCK;
 using Hypernex.Configuration;
 using Hypernex.Game;
 using Hypernex.Tools;
@@ -23,6 +24,8 @@ namespace Hypernex.UI
         [Export]
         public RichTextLabel worldLabel;
         [Export]
+        public RichTextLabel scriptsLabel;
+        [Export]
         public OptionButton worldOptions;
         [Export]
         public RichTextLabel worldMetaLabel;
@@ -32,6 +35,7 @@ namespace Hypernex.UI
         public TextEdit worldDescriptionEdit;
 
         public string selectedWorldPath;
+        public string[] selectedScriptPaths = Array.Empty<string>();
         public WorldMeta selectedWorldMeta;
         public AvatarMeta selectedAvatarMeta;
         public string[] worldIds;
@@ -45,6 +49,7 @@ namespace Hypernex.UI
         public void Reset()
         {
             ClearSelectedWorld();
+            ClearSelectedScripts();
             RefreshWorlds();
         }
 
@@ -169,10 +174,25 @@ namespace Hypernex.UI
             worldLabel.Text = $"Selected {fileType} file:\n[code]{path.Replace("[", "[lb]")}[/code]";
         }
 
+        public void WorldServerScripts(string[] paths)
+        {
+            selectedScriptPaths = paths;
+            if (IsInstanceValid(scriptsLabel))
+                scriptsLabel.Text = $"Selected scripts:\n[code]{string.Join("\n", selectedScriptPaths)}[/code]";
+        }
+
+        public void ClearSelectedScripts()
+        {
+            selectedScriptPaths = Array.Empty<string>();
+            if (IsInstanceValid(scriptsLabel))
+                scriptsLabel.Text = "No server scripts selected";
+        }
+
         public void UploadSelectedWorld()
         {
             // selectedWorldMeta.Publicity = WorldPublicity.Anyone;
             // selectedAvatarMeta.Publicity = AvatarPublicity.Anyone;
+
             if (!string.IsNullOrWhiteSpace(worldNameEdit.Text))
                 selectedWorldMeta.Name = worldNameEdit.Text;
             if (!string.IsNullOrWhiteSpace(worldDescriptionEdit.Text))
@@ -184,18 +204,28 @@ namespace Hypernex.UI
             switch (fileType)
             {
                 case CCKFileType.World:
-                    APITools.UploadWorld(selectedWorldPath, selectedWorldMeta, (success, msg) =>
+                    List<NexboxScript> serverScripts = new List<NexboxScript>();
+                    foreach (var script in selectedScriptPaths)
                     {
-                        string title;
-                        if (success)
+                        serverScripts.Add(new NexboxScript(script.GetExtension() == "js" ? NexboxLanguage.JavaScript : NexboxLanguage.Lua, FileAccess.GetFileAsString(script))
                         {
-                            title = "World Uploaded";
-                        }
-                        else
+                            Name = System.IO.Path.GetFileNameWithoutExtension(script),
+                        });
+                    }
+                    APITools.UploadScripts(serverScripts, scripts => {
+                        APITools.UploadWorld(selectedWorldPath, selectedWorldMeta, scripts, (success, msg) =>
                         {
-                            title = "Upload Failed";
-                        }
-                        cck.Popup(title, msg);
+                            string title;
+                            if (success)
+                            {
+                                title = "World Uploaded";
+                            }
+                            else
+                            {
+                                title = "Upload Failed";
+                            }
+                            cck.Popup(title, msg);
+                        });
                     });
                     break;
                 case CCKFileType.Avatar:

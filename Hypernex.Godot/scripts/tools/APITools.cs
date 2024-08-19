@@ -205,7 +205,55 @@ namespace Hypernex.Tools
             }
         }
 
-        public static void UploadWorld(string fullPath, WorldMeta meta, Action<bool, string> callback = null)
+        public static void UploadScripts(List<NexboxScript> serverScripts, Action<List<string>> callback = null, List<string> a = null, List<NexboxScript> b = null)
+        {
+            List<string> scripts;
+            if (a == null)
+                scripts = new List<string>();
+            else
+                scripts = a;
+            List<NexboxScript> ss;
+            if (b == null)
+                ss = new List<NexboxScript>(serverScripts);
+            else
+                ss = b;
+            if (ss.Count <= 0)
+            {
+                callback?.Invoke(scripts);
+                // QuickInvoke.InvokeActionOnMainThread(callback, scripts);
+                return;
+            }
+            NexboxScript script = ss[0];
+            string tempDir2 = Path.Combine(OS.GetUserDataDir(), "file_parts");
+            Directory.CreateDirectory(tempDir2);
+            string tempDir = Path.Combine(OS.GetUserDataDir(), "file_parts", script.Name + script.GetExtensionFromLanguage());
+            File.WriteAllText(tempDir, script.Script);
+            FileStream fs = new FileStream(tempDir, FileMode.Open, System.IO.FileAccess.ReadWrite, FileShare.Delete | FileShare.ReadWrite);
+            APIObject.UploadFile(result =>
+            {
+                fs.Dispose();
+                if (result.success)
+                {
+                    scripts.Add($"{APIObject.Settings.APIURL}file/{result.result.UploadData.UserId}/{result.result.UploadData.FileId}");
+                    ss.RemoveAt(0);
+                    if (ss.Count <= 0)
+                    {
+                        QuickInvoke.InvokeActionOnMainThread(callback, scripts);
+                    }
+                    else
+                    {
+                        UploadScripts(serverScripts, callback, scripts, ss);
+                    }
+                }
+                else
+                {
+                    Logger.CurrentLogger.Warn("Failed to upload script " + script.Name + script.GetExtensionFromLanguage() + " " + result.message);
+                    UploadScripts(serverScripts, callback, scripts, ss);
+                }
+            }, CurrentUser, CurrentToken, fs);
+        }
+
+        public static void UploadWorld(string fullPath, WorldMeta meta, List<string> serverScripts, Action<bool, string> callback = null)
         {
             WorldMeta metaFinal = new WorldMeta(meta.Id, meta.OwnerId, meta.Publicity, meta.Name, meta.Description, meta.ThumbnailURL);
             try

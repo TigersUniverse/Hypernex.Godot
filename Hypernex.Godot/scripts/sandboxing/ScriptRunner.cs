@@ -101,7 +101,9 @@ namespace Hypernex.Sandboxing
             interpreter.ForwardType("Mathf", typeof(ClientMathf));
             interpreter.ForwardType("MidpointRounding", typeof(MidpointRounding));
 
-            interpreter.CreateGlobal("ScriptEvents", world?.gameInstance?.ScriptEvents);
+            interpreter.ForwardType("ScriptEvents", typeof(ScriptEvents));
+            interpreter.CreateGlobal("Events", world?.gameInstance?.ScriptEvents);
+            interpreter.ForwardType("ClientNetworkEvent", typeof(ClientNetworkEvent));
             interpreter.CreateGlobal("NetworkEvent", new ClientNetworkEvent(world?.gameInstance));
             interpreter.ForwardType("MessageChannel", typeof(MessageChannel));
             interpreter.ForwardType("ScriptEvent", typeof(ScriptEvent));

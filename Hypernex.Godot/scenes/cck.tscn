@@ -30,14 +30,17 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="World" type="VBoxContainer" parent="ScrollContainer/TabContainer"]
 layout_mode = 2
+metadata/_tab_index = 0
 
-[node name="FileUploader" type="Node" parent="ScrollContainer/TabContainer/World" node_paths=PackedStringArray("cck", "worldLabel", "worldOptions", "worldMetaLabel", "worldNameEdit", "worldDescriptionEdit")]
+[node name="FileUploader" type="Node" parent="ScrollContainer/TabContainer/World" node_paths=PackedStringArray("cck", "worldLabel", "scriptsLabel", "worldOptions", "worldMetaLabel", "worldNameEdit", "worldDescriptionEdit")]
 script = ExtResource("2_rjuw4")
 cck = NodePath("../../../../CCK")
 worldLabel = NodePath("../WorldFileLabel")
+scriptsLabel = NodePath("../ScriptsFileLabel")
 worldOptions = NodePath("../SelectWorldMeta")
 worldMetaLabel = NodePath("../WorldMetaLabel")
 worldNameEdit = NodePath("../WorldNameEdit")
@@ -46,11 +49,22 @@ worldDescriptionEdit = NodePath("../WorldDescEdit")
 [node name="FileDialog" type="FileDialog" parent="ScrollContainer/TabContainer/World"]
 title = "Open a File"
 initial_position = 2
-size = Vector2i(335, 159)
+size = Vector2i(335, 175)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.hnw;Hypernex World")
+use_native_dialog = true
+
+[node name="ScriptDialog" type="FileDialog" parent="ScrollContainer/TabContainer/World"]
+auto_translate_mode = 1
+title = "Open File(s)"
+initial_position = 2
+size = Vector2i(335, 175)
+ok_button_text = "Open"
+file_mode = 1
+access = 2
+filters = PackedStringArray("*.js,*.lua;Script")
 use_native_dialog = true
 
 [node name="Label" type="Label" parent="ScrollContainer/TabContainer/World"]
@@ -65,6 +79,16 @@ layout_mode = 2
 text = "Select World File"
 
 [node name="WorldFileLabel" type="RichTextLabel" parent="ScrollContainer/TabContainer/World"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+shortcut_keys_enabled = false
+
+[node name="SelectScripts" type="Button" parent="ScrollContainer/TabContainer/World"]
+layout_mode = 2
+text = "Select Server Scripts"
+
+[node name="ScriptsFileLabel" type="RichTextLabel" parent="ScrollContainer/TabContainer/World"]
 layout_mode = 2
 bbcode_enabled = true
 fit_content = true
@@ -120,6 +144,7 @@ text = "Upload World"
 [node name="Avatar" type="VBoxContainer" parent="ScrollContainer/TabContainer"]
 visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="FileUploader" type="Node" parent="ScrollContainer/TabContainer/Avatar" node_paths=PackedStringArray("cck", "worldLabel", "worldOptions", "worldMetaLabel", "worldNameEdit", "worldDescriptionEdit")]
 script = ExtResource("2_rjuw4")
@@ -134,7 +159,7 @@ worldDescriptionEdit = NodePath("../AvatarDescEdit")
 [node name="FileDialog" type="FileDialog" parent="ScrollContainer/TabContainer/Avatar"]
 title = "Open a File"
 initial_position = 2
-size = Vector2i(335, 159)
+size = Vector2i(335, 175)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
@@ -208,7 +233,10 @@ text = "Upload Avatar"
 [connection signal="visibility_changed" from="ScrollContainer/TabContainer/World" to="ScrollContainer/TabContainer/World/FileUploader" method="RefreshWorlds"]
 [connection signal="canceled" from="ScrollContainer/TabContainer/World/FileDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="ClearSelectedWorld"]
 [connection signal="file_selected" from="ScrollContainer/TabContainer/World/FileDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldSelected"]
+[connection signal="canceled" from="ScrollContainer/TabContainer/World/ScriptDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="ClearSelectedScripts"]
+[connection signal="files_selected" from="ScrollContainer/TabContainer/World/ScriptDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldServerScripts"]
 [connection signal="pressed" from="ScrollContainer/TabContainer/World/SelectWorldFile" to="ScrollContainer/TabContainer/World/FileDialog" method="show"]
+[connection signal="pressed" from="ScrollContainer/TabContainer/World/SelectScripts" to="ScrollContainer/TabContainer/World/ScriptDialog" method="show"]
 [connection signal="pressed" from="ScrollContainer/TabContainer/World/LoadWorldFile" to="ScrollContainer/TabContainer/World/FileUploader" method="LoadSelectedWorld"]
 [connection signal="item_selected" from="ScrollContainer/TabContainer/World/SelectWorldMeta" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldMetaSelected"]
 [connection signal="pressed" from="ScrollContainer/TabContainer/World/Upload" to="ScrollContainer/TabContainer/World/FileUploader" method="UploadSelectedWorld"]
