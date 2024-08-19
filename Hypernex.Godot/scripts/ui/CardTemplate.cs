@@ -57,6 +57,9 @@ namespace Hypernex.UI
         public AvatarMeta avatarMeta = null;
         public SafeInstance safeInstance = null;
 
+        public bool isLoaded = false;
+        public bool shouldShow = false;
+
         public override void _EnterTree()
         {
             videoIcon.Finished += IconVidDone;
@@ -272,6 +275,9 @@ namespace Hypernex.UI
             if (menu != null)
                 menu.GetPopup().Clear();
             Hide();
+            isLoaded = false;
+            shouldShow = false;
+            // Show();
         }
 
         public void SetSafeInstance(SafeInstance instance)
@@ -294,18 +300,19 @@ namespace Hypernex.UI
                         {
                             if (!IsInstanceValid(background))
                                 return;
-                            Image img = ImageTools.LoadImage(b);
-                            if (img != null)
-                                background.Texture = ImageTexture.CreateFromImage(img);
-                            else
+                            bool img = ImageTools.LoadImage(background, b);
+                            if (!img)
                             {
                                 ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });
-                        Show();
+                        isLoaded = true;
+                        shouldShow = true;
                     });
                 }
+                else
+                    isLoaded = true;
             }, instance.WorldId);
         }
 
@@ -328,18 +335,20 @@ namespace Hypernex.UI
                         {
                             if (!IsInstanceValid(background))
                                 return;
-                            Image img = ImageTools.LoadImage(b);
-                            if (img != null)
-                                background.Texture = ImageTexture.CreateFromImage(img);
-                            else
+                            bool img = ImageTools.LoadImage(background, b);
+                            if (!img)
                             {
                                 ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });
-                        Show();
+                        icon.Hide();
+                        isLoaded = true;
+                        shouldShow = true;
                     });
                 }
+                else
+                    isLoaded = true;
             }, worldId);
         }
 
@@ -362,18 +371,20 @@ namespace Hypernex.UI
                         {
                             if (!IsInstanceValid(background))
                                 return;
-                            Image img = ImageTools.LoadImage(b);
-                            if (img != null)
-                                background.Texture = ImageTexture.CreateFromImage(img);
-                            else
+                            bool img = ImageTools.LoadImage(background, b);
+                            if (!img)
                             {
                                 ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });
-                        Show();
+                        icon.Hide();
+                        isLoaded = true;
+                        shouldShow = true;
                     });
                 }
+                else
+                    isLoaded = true;
             }, avatarId);
         }
 
@@ -397,10 +408,8 @@ namespace Hypernex.UI
                         {
                             if (!IsInstanceValid(icon))
                                 return;
-                            Image img = ImageTools.LoadImage(b);
-                            if (img != null)
-                                icon.Texture = ImageTexture.CreateFromImage(img);
-                            else
+                            bool img = ImageTools.LoadImage(icon, b);
+                            if (!img)
                             {
                                 ImageTools.LoadFFmpeg(videoIcon, b);
                                 icon.Hide();
@@ -410,18 +419,19 @@ namespace Hypernex.UI
                         {
                             if (!IsInstanceValid(background))
                                 return;
-                            Image img = ImageTools.LoadImage(b);
-                            if (img != null)
-                                background.Texture = ImageTexture.CreateFromImage(img);
-                            else
+                            bool img = ImageTools.LoadImage(background, b);
+                            if (!img)
                             {
                                 ImageTools.LoadFFmpeg(videoBackground, b);
                                 background.Hide();
                             }
                         });
-                        Show();
+                        isLoaded = true;
+                        shouldShow = true;
                     });
                 }
+                else
+                    isLoaded = true;
             }, userId, isUserId: true);
         }
     }

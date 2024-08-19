@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
@@ -47,21 +48,37 @@ namespace Hypernex.UI
             }, APITools.CurrentUser, APITools.CurrentToken);
         }
 
-        private void OnVisible()
+        public async void UpdateWith(SafeInstance[] instances)
         {
-            label.Text = string.Format(labelFormat, instances.Count);
-            foreach (var node in container.GetChildren())
-            {
-                node.QueueFree();
-            }
-            if (!label.Visible)
-                return;
-            foreach (var inst in instances)
+            var oldNodes = container.GetChildren();
+            List<CardTemplate> templates = new List<CardTemplate>();
+            foreach (var item in instances)
             {
                 CardTemplate node = worldUI.Instantiate<CardTemplate>();
                 container.AddChild(node);
-                node.SetSafeInstance(inst);
+                node.SetSafeInstance(item);
+                templates.Add(node);
             }
+            while (templates.Any(x => !x.isLoaded))
+            {
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            }
+            label.Text = string.Format(labelFormat, instances.Length);
+            foreach (var node in templates)
+            {
+                if (IsInstanceValid(node))
+                    node.Visible = node.shouldShow;
+            }
+            foreach (var node in oldNodes)
+            {
+                if (IsInstanceValid(node))
+                    node.QueueFree();
+            }
+        }
+
+        private void OnVisible()
+        {
+            UpdateWith(instances.ToArray());
         }
     }
 }

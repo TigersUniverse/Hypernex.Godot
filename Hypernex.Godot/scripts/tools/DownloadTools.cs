@@ -27,7 +27,8 @@ namespace Hypernex.Tools
             {
                 if (Cache.ContainsKey(url) && !skipCache)
                 {
-                    QuickInvoke.InvokeActionOnMainThread(DownloadProgress, 1f);
+                    if (DownloadProgress != null)
+                        QuickInvoke.InvokeActionOnMainThread(DownloadProgress, 1f);
                     QuickInvoke.InvokeActionOnMainThread(OnDownload, Cache[url]);
                     return;
                 }
@@ -60,6 +61,13 @@ namespace Hypernex.Tools
         {
             using MD5 md5 = MD5.Create();
             byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+
+        public static string GetBufferHash(byte[] s)
+        {
+            using MD5 md5 = MD5.Create();
+            byte[] hash = md5.ComputeHash(s);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 

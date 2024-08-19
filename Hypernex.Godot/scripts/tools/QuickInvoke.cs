@@ -23,6 +23,8 @@ namespace Hypernex.Tools
 
         public void CallMe(object action, object[] args)
         {
+            if (action == null)
+                return;
             action.GetType().GetMethod("Invoke").Invoke(action, args);
         }
 

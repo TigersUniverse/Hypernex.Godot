@@ -180,8 +180,8 @@ namespace FFmpeg.Godot
             _audioDecoder?.Seek();
             if (IsInstanceValid(source))
             {
-                source.Stream = _audioClip;
-                source.Play();
+                // source.Stream = _audioClip;
+                // source.Play();
                 CallDeferred(nameof(SetAudioPlayback));
             }
             // _audioPlayback = (AudioStreamGeneratorPlayback)source.GetStreamPlayback();
@@ -192,29 +192,37 @@ namespace FFmpeg.Godot
         public void Play(Stream video, Stream audio)
         {
             DynamicallyLinkedBindings.Initialize();
-            _paused = true;
-            _decodeThread?.Join();
-            _videoDecoder?.Dispose();
-            _audioDecoder?.Dispose();
-            _streamVideoCtx?.Dispose();
-            _streamAudioCtx?.Dispose();
-            _streamVideoCtx = new FFmpegCtx(video);
-            _streamAudioCtx = new FFmpegCtx(audio);
-            Init();
+            // new Thread(() =>
+            // {
+                _paused = true;
+                _decodeThread?.Join();
+                _videoDecoder?.Dispose();
+                _audioDecoder?.Dispose();
+                _streamVideoCtx?.Dispose();
+                _streamAudioCtx?.Dispose();
+                _streamVideoCtx = new FFmpegCtx(video);
+                _streamAudioCtx = new FFmpegCtx(audio);
+                Init();
+                // CallDeferred(nameof(Init));
+            // }).Start();
         }
 
         public void Play(string urlV, string urlA)
         {
             DynamicallyLinkedBindings.Initialize();
-            _paused = true;
-            _decodeThread?.Join();
-            _videoDecoder?.Dispose();
-            _audioDecoder?.Dispose();
-            _streamVideoCtx?.Dispose();
-            _streamAudioCtx?.Dispose();
-            _streamVideoCtx = new FFmpegCtx(urlV);
-            _streamAudioCtx = new FFmpegCtx(urlA);
-            Init();
+            // new Thread(() =>
+            // {
+                _paused = true;
+                _decodeThread?.Join();
+                _videoDecoder?.Dispose();
+                _audioDecoder?.Dispose();
+                _streamVideoCtx?.Dispose();
+                _streamAudioCtx?.Dispose();
+                _streamVideoCtx = new FFmpegCtx(urlV);
+                _streamAudioCtx = new FFmpegCtx(urlA);
+                Init();
+                // CallDeferred(nameof(Init));
+            // }).Start();
         }
 
         public void Resume()
@@ -247,7 +255,11 @@ namespace FFmpeg.Godot
         private void SetAudioPlayback()
         {
             if (IsInstanceValid(source))
+            {
+                source.Stream = _audioClip;
+                source.Play();
                 _audioPlayback = (AudioStreamGeneratorPlayback)source.GetStreamPlayback();
+            }
         }
 
         private void Init()
@@ -283,12 +295,13 @@ namespace FFmpeg.Godot
                     MixRate = _audioDecoder.SampleRate,
                     BufferLength = 0.1f,
                 };
-                source.Stream = _audioClip;
-                source.Play();
+                // source.Stream = _audioClip;
+                // source.Play();
                 CallDeferred(nameof(SetAudioPlayback));
             }
-            _paused = false;
+            // _paused = false;
             Log(nameof(Play));
+            // CallDeferred(nameof(Seek), 0d);
             Seek(0d);
         }
 

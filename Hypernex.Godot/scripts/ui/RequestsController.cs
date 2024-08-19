@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Hypernex.Tools;
 
@@ -43,22 +45,38 @@ namespace Hypernex.UI
             });
         }
 
-        private void OnVisible()
+        public async void UpdateWith(string[] friends)
         {
-            var friends = APITools.CurrentUser.FriendRequests;
-            label.Text = string.Format(labelFormat, friends.Count);
-            foreach (var node in container.GetChildren())
-            {
-                node.QueueFree();
-            }
-            if (!label.Visible)
-                return;
-            foreach (var friend in friends)
+            var oldNodes = container.GetChildren();
+            List<CardTemplate> templates = new List<CardTemplate>();
+            foreach (var item in friends)
             {
                 CardTemplate node = friendUI.Instantiate<CardTemplate>();
                 container.AddChild(node);
-                node.SetUserId(friend, CardTemplate.CardUserType.FriendRequest);
+                node.SetUserId(item, CardTemplate.CardUserType.FriendRequest);
+                templates.Add(node);
             }
+            while (templates.Any(x => !x.isLoaded))
+            {
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            }
+            label.Text = string.Format(labelFormat, friends.Length);
+            foreach (var node in templates)
+            {
+                if (IsInstanceValid(node))
+                    node.Visible = node.shouldShow;
+            }
+            foreach (var node in oldNodes)
+            {
+                if (IsInstanceValid(node))
+                    node.QueueFree();
+            }
+        }
+
+        private void OnVisible()
+        {
+            var friends = APITools.CurrentUser.FriendRequests;
+            UpdateWith(friends.ToArray());
         }
     }
 }

@@ -57,8 +57,8 @@ namespace Hypernex.UI
         {
             if (IsInstanceValid(currentBigCard) && tabs.GetTabIdxFromControl(currentBigCard) != tab)
             {
-                // currentBigCard.QueueFree();
-                // currentBigCard = null;
+                currentBigCard.QueueFree();
+                currentBigCard = null;
             }
         }
 

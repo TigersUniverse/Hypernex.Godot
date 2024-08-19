@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Hypernex.Tools;
@@ -46,18 +47,31 @@ namespace Hypernex.UI
             });
         }
 
-        public void UpdateWith(string[] avatars)
+        public async void UpdateWith(string[] avatars)
         {
-            label.Text = string.Format(labelFormat, avatars.Length);
-            foreach (var node in container.GetChildren())
-            {
-                node.QueueFree();
-            }
-            foreach (var avatar in avatars)
+            var oldNodes = container.GetChildren();
+            List<CardTemplate> templates = new List<CardTemplate>();
+            foreach (var item in avatars)
             {
                 CardTemplate node = avatarUI.Instantiate<CardTemplate>();
                 container.AddChild(node);
-                node.SetAvatarId(avatar);
+                node.SetAvatarId(item);
+                templates.Add(node);
+            }
+            while (templates.Any(x => !x.isLoaded))
+            {
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            }
+            label.Text = string.Format(labelFormat, avatars.Length);
+            foreach (var node in templates)
+            {
+                if (IsInstanceValid(node))
+                    node.Visible = node.shouldShow;
+            }
+            foreach (var node in oldNodes)
+            {
+                if (IsInstanceValid(node))
+                    node.QueueFree();
             }
         }
 

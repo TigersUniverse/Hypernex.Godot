@@ -1,30 +1,46 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using FFmpeg.Godot;
 using Godot;
+using Hypernex.CCK;
 
 namespace Hypernex.Tools
 {
     public static class ImageTools
     {
-        public static Image LoadImage(byte[] buffer)
+        public static bool LoadImage(TextureRect rect, byte[] buffer)
         {
-            Image img = new Image();
-            Error err;
+            Image img = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
             if (IsPng(buffer))
             {
-                err = img.LoadPngFromBuffer(buffer);
-                if (err == Error.Ok)
-                    return img;
+                new Thread(() =>
+                {
+                    img.LoadPngFromBuffer(buffer);
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        if (GodotObject.IsInstanceValid(rect))
+                            rect.Texture = ImageTexture.CreateFromImage(img);
+                    });
+                }).Start();
+                return true;
             }
             if (IsJpg(buffer))
             {
-                err = img.LoadJpgFromBuffer(buffer);
-                if (err == Error.Ok)
-                    return img;
+                new Thread(() =>
+                {
+                    img.LoadJpgFromBuffer(buffer);
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        if (GodotObject.IsInstanceValid(rect))
+                            rect.Texture = ImageTexture.CreateFromImage(img);
+                    });
+                }).Start();
+                return true;
             }
-            return null;
+            return false;
         }
 
         public static FFGodot LoadFFmpeg(byte[] buffer, TextureRect texture, AudioStreamPlayer3D sound)
@@ -38,18 +54,28 @@ namespace Hypernex.Tools
             ff.source = sound;
             texture.AddChild(ff);
             ff.Play(path, path);
-            // ff.Pause();
             return ff;
         }
 
         public static void LoadFFmpeg(FFGodot ff, byte[] buffer)
         {
-            string hash = Convert.ToBase64String(MD5.HashData(buffer));
-            string path = DownloadTools.GetFilePath($"media_{hash.Replace("=", null).Replace("/", null)}.cache");
-            if (!File.Exists(path))
-                File.WriteAllBytes(path, buffer);
-            ff.Log = _ => { };
-            ff.Play(path, path);
+            new Thread(() =>
+            {
+                // Stopwatch sw = new Stopwatch();
+                // sw.Start();
+                string hash = DownloadTools.GetBufferHash(buffer);
+                // sw.Stop();
+                string path = DownloadTools.GetFilePath($"media_{hash}.cache");
+                if (!File.Exists(path))
+                    File.WriteAllBytes(path, buffer);
+                ff.Log = _ => { };
+                QuickInvoke.InvokeActionOnMainThread(() =>
+                {
+                    if (GodotObject.IsInstanceValid(ff))
+                        ff.Play(path, path);
+                });
+                // Logger.CurrentLogger.Log($"{sw.ElapsedMilliseconds}ms");
+            }).Start();
         }
 
         public static bool IsVideoStream(Uri uri)

@@ -173,10 +173,8 @@ namespace Hypernex.UI
             {
                 if (!IsInstanceValid(foreground))
                     return;
-                Image img = ImageTools.LoadImage(b);
-                if (img != null)
-                    foreground.Texture = ImageTexture.CreateFromImage(img);
-                else
+                bool img = ImageTools.LoadImage(foreground, b);
+                if (!img)
                 {
                     ImageTools.LoadFFmpeg(videoForeground, b);
                     foreground.Hide();
@@ -206,10 +204,8 @@ namespace Hypernex.UI
                         {
                             if (!IsInstanceValid(foreground))
                                 return;
-                            Image img = ImageTools.LoadImage(b);
-                            if (img != null)
-                                foreground.Texture = ImageTexture.CreateFromImage(img);
-                            else
+                            bool img = ImageTools.LoadImage(foreground, b);
+                            if (!img)
                             {
                                 ImageTools.LoadFFmpeg(videoForeground, b);
                                 foreground.Hide();
@@ -263,10 +259,8 @@ namespace Hypernex.UI
                 if (!IsInstanceValid(foreground))
                     return;
                 foregroundContainer.Ratio = 1f;
-                Image img = ImageTools.LoadImage(b);
-                if (img != null)
-                    foreground.Texture = ImageTexture.CreateFromImage(img);
-                else
+                bool img = ImageTools.LoadImage(foreground, b);
+                if (!img)
                 {
                     ImageTools.LoadFFmpeg(videoForeground, b);
                     foreground.Hide();
@@ -276,10 +270,8 @@ namespace Hypernex.UI
             {
                 if (!IsInstanceValid(background))
                     return;
-                Image img = ImageTools.LoadImage(b);
-                if (img != null)
-                    background.Texture = ImageTexture.CreateFromImage(img);
-                else
+                bool img = ImageTools.LoadImage(background, b);
+                if (!img)
                 {
                     ImageTools.LoadFFmpeg(videoBackground, b);
                     background.Hide();
@@ -307,10 +299,8 @@ namespace Hypernex.UI
             {
                 if (!IsInstanceValid(foreground))
                     return;
-                Image img = ImageTools.LoadImage(b);
-                if (img != null)
-                    foreground.Texture = ImageTexture.CreateFromImage(img);
-                else
+                bool img = ImageTools.LoadImage(foreground, b);
+                if (!img)
                 {
                     ImageTools.LoadFFmpeg(videoForeground, b);
                     foreground.Hide();
