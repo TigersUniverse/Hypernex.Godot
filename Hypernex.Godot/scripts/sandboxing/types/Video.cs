@@ -55,10 +55,10 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public static void SetVolume(Item item, float value) => GetFFGodot(item).source.VolumeDb = Mathf.LinearToDb(Mathf.Clamp(value, 0f, 1f));
         
-        public static double GetPosition(Item item) => GetFFGodot(item).PlaybackTime;
+        public static float GetPosition(Item item) => (float)GetFFGodot(item).PlaybackTime;
         public static void SetPosition(Item item, float value) => GetFFGodot(item).Seek(value);
 
-        public static double GetLength(Item item)
+        public static float GetLength(Item item)
         {
             throw new NotImplementedException();
         }

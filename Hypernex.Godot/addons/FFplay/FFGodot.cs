@@ -294,7 +294,7 @@ namespace FFmpeg.Godot
 
         private void Update()
         {
-            if (_videoWatch == null)
+            if (_videoWatch == null || _streamVideoCtx == null)
                 return;
             
             if (CanSeek && (_offset >= _streamVideoCtx.GetLength() || (_streamVideoCtx.EndReached && (_audioDecoder == null || _streamAudioCtx.EndReached) && _videoTextures.Count == 0 && (_audioDecoder == null || _audioStream.Count == 0))) && !_paused)

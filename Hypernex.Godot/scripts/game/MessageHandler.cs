@@ -98,6 +98,7 @@ namespace Hypernex.Game
                 {
                     ServerConsoleLog serverConsoleLog =
                         (ServerConsoleLog) Convert.ChangeType(msgMeta.Data, typeof(ServerConsoleLog));
+                    Logger.CurrentLogger.Log($"{serverConsoleLog.ScriptName} {serverConsoleLog.LogLevel}: {serverConsoleLog.Log}");
                     // ConsoleTemplate.AddMessage(serverConsoleLog);
                     break;
                 }
