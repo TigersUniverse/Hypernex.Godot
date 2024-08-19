@@ -379,6 +379,7 @@ namespace Hypernex.Tools
                 new Thread(() =>
                 {
                     World = WorldRoot.LoadFromFile(s);
+                    World.gameInstance = this;
                     QuickInvoke.InvokeActionOnMainThread(() =>
                     {
                         if (World == null)

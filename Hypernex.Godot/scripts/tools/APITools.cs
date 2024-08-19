@@ -256,6 +256,7 @@ namespace Hypernex.Tools
         public static void UploadWorld(string fullPath, WorldMeta meta, List<string> serverScripts, Action<bool, string> callback = null)
         {
             WorldMeta metaFinal = new WorldMeta(meta.Id, meta.OwnerId, meta.Publicity, meta.Name, meta.Description, meta.ThumbnailURL);
+            metaFinal.ServerScripts.AddRange(serverScripts);
             try
             {
                 FileStream fs = new FileStream(fullPath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Delete | FileShare.Read);
