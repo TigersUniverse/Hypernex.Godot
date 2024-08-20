@@ -54,8 +54,6 @@ triggerClickThreshold = 0.25
 use_xr = true
 use_debanding = true
 use_occlusion_culling = true
-vrs_mode = 3
-audio_listener_enable_3d = true
 size = Vector2i(0, 0)
 
 [node name="Origin" type="XROrigin3D" parent="SubViewport"]

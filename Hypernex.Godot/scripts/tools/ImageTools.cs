@@ -50,6 +50,8 @@ namespace Hypernex.Tools
             if (!File.Exists(path))
                 File.WriteAllBytes(path, buffer);
             FFGodot ff = new FFGodot();
+            if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
+                ff._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
             ff.renderMesh = texture;
             ff.source = sound;
             texture.AddChild(ff);

@@ -15,6 +15,11 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
     {
         internal static CobaltSharp.Cobalt c = new CobaltSharp.Cobalt(new CobaltServer("https://api.cobalt.tools/"));
 
+        static Cobalt()
+        {
+            c.GetType().GetField("_httpClient", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(c, Init.http);
+        }
+
         public static void GetOptions(GetMedia getMedia, object callback)
         {
             GetOptions(getMedia, (opts) =>

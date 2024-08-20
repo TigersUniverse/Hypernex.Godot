@@ -34,6 +34,11 @@ project/assembly_name="Hypernex.Godot"
 
 enabled=PackedStringArray("res://addons/cck/plugin.cfg", "res://addons/onscreenkeyboard/plugin.cfg")
 
+[filesystem]
+
+import/fbx2gltf/enabled=false
+import/blender/enabled=false
+
 [input]
 
 move_forward={
@@ -73,6 +78,7 @@ chat_text={
 
 [rendering]
 
+renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/use_debanding=true
 occlusion_culling/use_occlusion_culling=true
@@ -80,9 +86,9 @@ occlusion_culling/use_occlusion_culling=true
 [xr]
 
 openxr/enabled=true
-openxr/foveation_level=2
-openxr/foveation_dynamic=true
+openxr/reference_space=2
 openxr/submit_depth_buffer=true
 openxr/startup_alert=false
-openxr/extensions/eye_gaze_interaction=true
 shaders/enabled=true
+openxr/foveation_dynamic.mobile=true
+openxr/foveation_level.mobile=3

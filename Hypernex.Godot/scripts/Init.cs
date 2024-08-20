@@ -72,10 +72,6 @@ public partial class Init : Node
         // this is only needed on android, and exposes MITM attacks
         if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
         {
-            GetViewport().PositionalShadowAtlasQuad0 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
-            GetViewport().PositionalShadowAtlasQuad1 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
-            GetViewport().PositionalShadowAtlasQuad2 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
-            GetViewport().PositionalShadowAtlasQuad3 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
             http = new System.Net.Http.HttpClient(new HttpClientHandler()
             {
                 ClientCertificateOptions = ClientCertificateOption.Manual,
@@ -192,6 +188,7 @@ public partial class Init : Node
                     libHandle = NativeLibrary.Load(Path.Combine(dir, $"{libraryName}.dll"));
                 break;
             case "linux":
+            case "android":
                 if (libraryName.Contains(".so"))
                     libHandle = NativeLibrary.Load(Path.Combine(dir, libraryName));
                 else

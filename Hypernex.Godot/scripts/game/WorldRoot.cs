@@ -64,6 +64,10 @@ namespace Hypernex.Game
             {
                 audio3d.Bus = "World";
             }
+            if (worldObject is Light3D light && OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
+            {
+                light.ShadowEnabled = false;
+            }
             worldObject.Owner = this;
             Objects.Add(worldObject);
             foreach (var child in worldObject.GetChildren())
