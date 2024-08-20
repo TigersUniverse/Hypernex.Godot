@@ -678,7 +678,8 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
             img.GenerateMipmaps();
-            // img.Compress(Image.CompressMode.S3Tc, Image.CompressSource.Generic);
+            if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
+                    img.Compress(Image.CompressMode.Etc2, Image.CompressSource.Generic);
             ImageTexture tex = ImageTexture.CreateFromImage(img);
             return tex;
         }

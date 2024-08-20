@@ -70,8 +70,12 @@ public partial class Init : Node
         http = new System.Net.Http.HttpClient();
 
         // this is only needed on android, and exposes MITM attacks
-        /*
+        if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
         {
+            GetViewport().PositionalShadowAtlasQuad0 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
+            GetViewport().PositionalShadowAtlasQuad1 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
+            GetViewport().PositionalShadowAtlasQuad2 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
+            GetViewport().PositionalShadowAtlasQuad3 = Viewport.PositionalShadowAtlasQuadrantSubdiv.Disabled;
             http = new System.Net.Http.HttpClient(new HttpClientHandler()
             {
                 ClientCertificateOptions = ClientCertificateOption.Manual,
@@ -79,7 +83,6 @@ public partial class Init : Node
             });
             ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
         }
-        */
 
         typeof(HypernexSharp.HypernexSettings).Assembly.GetType("HypernexSharp.API.HTTPTools").GetField("_client", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, http);
 
