@@ -17,7 +17,8 @@ func _notification(what) -> void:
 			quad.material_override = material
 		else:
 			quad.material_override = StandardMaterial3D.new()
-			quad.material_override.albedo_texture = subViewport.get_texture()
+			if subViewport:
+				quad.material_override.albedo_texture = subViewport.get_texture()
 			quad.material_override.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
 
 func _enter_tree() -> void:
@@ -29,7 +30,8 @@ func _enter_tree() -> void:
 		quad.material_override = material
 	else:
 		quad.material_override = StandardMaterial3D.new()
-		quad.material_override.albedo_texture = subViewport.get_texture()
+		if subViewport:
+			quad.material_override.albedo_texture = subViewport.get_texture()
 		quad.material_override.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
 
 func _exit_tree() -> void:

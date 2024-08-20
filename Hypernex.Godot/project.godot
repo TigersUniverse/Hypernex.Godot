@@ -13,7 +13,8 @@ config_version=5
 config/name="Hypernex.Godot"
 run/main_scene="res://scenes/init.tscn"
 config/features=PackedStringArray("4.3", "C#", "Mobile")
-config/icon="res://icon.svg"
+boot_splash/image="res://textures/banner.png"
+config/icon="res://textures/tigers_im_not_calling_it_that.png"
 
 [audio]
 
