@@ -353,19 +353,17 @@ namespace FFmpeg.Godot
                 // */
                 if (_streamVideoCtx.TryGetFps(_videoDecoder, out double fps))
                 {
-                    if (_videoMutex.WaitOne(0))
                     {
-                        while (_elapsedOffsetVideo - timer >= 0.1d)
+                        while (_elapsedOffsetVideo - timer >= -0.1d)
                         {
-                            // timer += 1d / fps;
-                            UpdateVideoFromClones(idx);
+                            timer += 1d / fps;
+                            if (_videoMutex.WaitOne(0))
+                            {
+                                UpdateVideoFromClones(idx);
+                                _videoMutex.ReleaseMutex();
+                            }
                             Present(idx);
-                            // if ()
-                                // timer = _lastVideoTex.pts;
-                            // else
-                                timer += 1d / fps;
                         }
-                        _videoMutex.ReleaseMutex();
                     }
                     int k = 0;
                     if (CanSeek && _elapsedOffset > PlaybackTime + _videoSkipBuffer && k < fps)
