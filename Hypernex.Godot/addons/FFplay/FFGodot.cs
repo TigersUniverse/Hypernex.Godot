@@ -344,25 +344,34 @@ namespace FFmpeg.Godot
                 AudioCallback();
 
                 int idx = _videoDisplayIndex;
+                // /*
                 if (_videoMutex.WaitOne(0))
                 {
                     UpdateVideoFromClones(idx);
                     _videoMutex.ReleaseMutex();
                 }
+                // */
                 if (_streamVideoCtx.TryGetFps(_videoDecoder, out double fps))
                 {
-                    while (_elapsedOffset - timer >= 0d)
+                    if (_videoMutex.WaitOne(0))
                     {
-                        timer += 1d / fps;
-                        Present(idx);
-                        // AudioCallback();
+                        while (_elapsedOffsetVideo - timer >= 0.1d)
+                        {
+                            // timer += 1d / fps;
+                            UpdateVideoFromClones(idx);
+                            Present(idx);
+                            // if ()
+                                // timer = _lastVideoTex.pts;
+                            // else
+                                timer += 1d / fps;
+                        }
+                        _videoMutex.ReleaseMutex();
                     }
                     int k = 0;
                     if (CanSeek && _elapsedOffset > PlaybackTime + _videoSkipBuffer && k < fps)
                     {
                         k++;
                         Present(idx);
-                        // AudioCallback();
                     }
                 }
             }
@@ -400,11 +409,11 @@ namespace FFmpeg.Godot
         }
 
         #region Callbacks
-        private void Present(int idx)
+        private bool Present(int idx)
         {
             if (_videoTextures.Count == 0)
             {
-                return;
+                return false;
             }
             if (_streamVideoCtx.TryGetPts(_videoDecoder, out double pts))
                 _lastPts2 = (int)_elapsedOffset;
@@ -427,6 +436,7 @@ namespace FFmpeg.Godot
             {
                 OnDisplay.Invoke(tex.texture);
             }
+            return true;
         }
 
         private bool _lastAudioRead = false;
@@ -642,13 +652,13 @@ namespace FFmpeg.Godot
             return tex.texture;
         }
 
-        private unsafe void UpdateVideoFromClones(int idx)
+        private unsafe bool UpdateVideoFromClones(int idx)
         {
             // Profiler.BeginSample(nameof(UpdateVideoFromClones), this);
             if (_videoFrameClones.Count == 0)
             {
                 // Profiler.EndSample();
-                return;
+                return false;
             }
             TexData videoFrame = _videoFrameClones.Peek();
             _videoFrameClones.Dequeue();
@@ -663,6 +673,7 @@ namespace FFmpeg.Godot
             _lastTexData = videoFrame;
             _videoTextures.Enqueue(tex);
             // Profiler.EndSample();
+            return true;
         }
 
         private unsafe void UpdateAudio(int idx)
