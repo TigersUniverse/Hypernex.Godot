@@ -67,6 +67,9 @@ public partial class Init : Node
         Telepathy.Log.Warning = s => logger.Warn(s);
         Telepathy.Log.Error = s => logger.Error(s);
 
+        GetTree().Root.SizeChanged += Resized;
+        Resized();
+
         http = new System.Net.Http.HttpClient();
 
         // this is only needed on android, and exposes MITM attacks
@@ -107,6 +110,11 @@ public partial class Init : Node
         AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
 
         SetupAndRunGame();
+    }
+
+    private void Resized()
+    {
+        GetTree().Root.ContentScaleSize = new Vector2I(1280, 720);
     }
 
     public override void _Process(double delta)
