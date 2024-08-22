@@ -72,9 +72,18 @@ namespace Hypernex.CCK.GodotVersion.Classes
             return cam.GlobalTransform;
         }
 
+        public int GetCameraSize(Camera3D cam)
+        {
+            if (cam is XRCamera3D xrCam)
+            {
+                return (int)xr.GetRenderTargetSize().X;
+            }
+            return (int)GetTree().Root.Size.X;
+        }
+
         public void MoveCamera(SubViewport vp, Camera3D cam, uint idx, Camera3D realCamera)
         {
-            vp.Size = (Vector2I)(size * resolutionPerUnit);
+            vp.Size = Vector2I.One * GetCameraSize(realCamera);
             var normal = GlobalBasis.Z;
             var xform = MirrorTransform(normal, GlobalPosition);
             cam.GlobalTransform = xform * GetPositionOfCamera(realCamera, idx);
