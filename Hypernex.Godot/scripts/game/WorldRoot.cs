@@ -21,15 +21,16 @@ namespace Hypernex.Game
 
         public void AddPlayer(PlayerRoot player)
         {
+            RespawnPlayer(player);
+            AddChild(player);
             if (player.IsLocal)
             {
                 foreach (Mirror mirror in Objects.Where(x => x is Mirror))
                 {
-                    mirror.realCamera = Init.IsVRLoaded ? Init.Instance.vrRig.head : player.GetViewport().GetCamera3D();
+                    if (IsInstanceValid(mirror))
+                        mirror.realCamera = Init.IsVRLoaded ? Init.Instance.vrRig.head : player.GetViewport().GetCamera3D();
                 }
             }
-            RespawnPlayer(player);
-            AddChild(player);
         }
 
         public void RespawnPlayer(PlayerRoot player)

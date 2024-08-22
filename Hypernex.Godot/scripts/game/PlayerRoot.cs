@@ -207,7 +207,7 @@ namespace Hypernex.Game
 
         public void LerpTarget(int id, Node3D node, float speed)
         {
-            if (targetPos.ContainsKey(id) && targetRot.ContainsKey(id))
+            if (targetPos.ContainsKey(id) && targetRot.ContainsKey(id) && IsInstanceValid(node))
             {
                 Vector3 scl = node.Scale;
                 node.Position = node.Position.Lerp(targetPos[id], speed);
