@@ -21,6 +21,13 @@ namespace Hypernex.Game
 
         public void AddPlayer(PlayerRoot player)
         {
+            if (player.IsLocal)
+            {
+                foreach (Mirror mirror in Objects.Where(x => x is Mirror))
+                {
+                    mirror.realCamera = Init.IsVRLoaded ? Init.Instance.vrRig.head : player.GetViewport().GetCamera3D();
+                }
+            }
             RespawnPlayer(player);
             AddChild(player);
         }
@@ -51,6 +58,10 @@ namespace Hypernex.Game
                 runner.scriptRef = script;
                 script.AddSibling(runner);
                 Runners.Add(runner);
+            }
+            if (worldObject is Mirror mirror)
+            {
+                mirror.CallbackGetNodes = () => Objects;
             }
             if (worldObject is AudioStreamPlayer audio)
             {
@@ -106,6 +117,7 @@ namespace Hypernex.Game
             loader.validScripts.Add(UICanvas.TypeName, SafeLoader.LoadScript<UICanvas>());
             loader.validScripts.Add(VideoPlayer.TypeName, SafeLoader.LoadScript<VideoPlayer>());
             loader.validScripts.Add(WorldAsset.TypeName, SafeLoader.LoadScript<WorldAsset>());
+            loader.validScripts.Add(Mirror.TypeName, SafeLoader.LoadScript<Mirror>());
             if (IsInstanceValid(Init.Instance))
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>
