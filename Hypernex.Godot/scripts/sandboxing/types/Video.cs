@@ -51,16 +51,16 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             throw new NotImplementedException();
         }
         
-        public static float GetVolume(Item item) => Mathf.DbToLinear(GetFFGodot(item).source.VolumeDb);
+        public static float GetVolume(Item item) => Mathf.DbToLinear(GetFFGodot(item).source.VolumeDb); //Mathf.Remap(GetFFGodot(item).source.VolumeDb, -80f, 0f, 0f, 1f);
 
-        public static void SetVolume(Item item, float value) => GetFFGodot(item).source.VolumeDb = Mathf.LinearToDb(Mathf.Clamp(value, 0f, 1f));
+        public static void SetVolume(Item item, float value) => GetFFGodot(item).source.VolumeDb = Mathf.LinearToDb(Mathf.Clamp(value, 0f, 1f)); //Mathf.Remap(Mathf.Clamp(value, 0f, 1f), 0f, 1f, -80f, 0f);
         
         public static float GetPosition(Item item) => (float)GetFFGodot(item).PlaybackTime;
         public static void SetPosition(Item item, float value) => GetFFGodot(item).Seek(value);
 
         public static float GetLength(Item item)
         {
-            throw new NotImplementedException();
+            return (float)GetFFGodot(item).Length;
         }
 
         public static void LoadUrl(Item item, string url)

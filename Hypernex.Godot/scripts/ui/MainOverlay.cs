@@ -27,6 +27,12 @@ namespace Hypernex.UI
         public int currentInstanceIdx;
         [Export]
         public PackedScene bigCardUI;
+        [Export]
+        public Label profileName;
+        [Export]
+        public TextureRect profilePhoto;
+        [Export]
+        public Texture2D defaultPfp;
         public BigCardTemplate currentBigCard;
 
         public override void _EnterTree()
@@ -72,6 +78,12 @@ namespace Hypernex.UI
         {
             currentBigCard?.Free();
             currentBigCard = null;
+            profileName.Text = $"Hello, {APITools.CurrentUser.GetUsersName()}";
+            profilePhoto.Texture = defaultPfp;
+            DownloadTools.DownloadBytes(APITools.CurrentUser.Bio.PfpURL, d =>
+            {
+                ImageTools.LoadImage(profilePhoto, d);
+            });
         }
 
         private void ChangedTabs2(long tab)
