@@ -1,4 +1,6 @@
-[gd_resource type="Theme" load_steps=7 format=3 uid="uid://1cua8ppjbi8u"]
+[gd_resource type="Theme" load_steps=8 format=3 uid="uid://1cua8ppjbi8u"]
+
+[ext_resource type="FontFile" uid="uid://ttt3esh2se74" path="res://fonts/Lexend/Lexend-VariableFont_wght.ttf" id="1_kr3eu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l4dt1"]
 
@@ -17,6 +19,7 @@ bg_color = Color(0, 0.8, 0.4, 1)
 bg_color = Color(0.8, 0.6, 0, 1)
 
 [resource]
+default_font = ExtResource("1_kr3eu")
 Button_Custom/base_type = &"Button"
 Button_Custom/colors/button_color_type = Color(1, 1, 1, 1)
 Button_Custom/styles/normal = SubResource("StyleBoxFlat_l4dt1")

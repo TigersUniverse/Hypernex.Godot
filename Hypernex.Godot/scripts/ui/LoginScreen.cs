@@ -11,7 +11,7 @@ namespace Hypernex.UI
     public partial class LoginScreen : Node
     {
         [Export]
-        public VBoxContainer root;
+        public Control root;
         [Export]
         public LineEdit serverAddressEdit;
         [Export]
@@ -28,6 +28,8 @@ namespace Hypernex.UI
         public AcceptDialog messagePopup;
         [Export]
         public bool useHttp = false;
+        [Export]
+        public Button exitButton;
 
         public override void _EnterTree()
         {
@@ -38,6 +40,7 @@ namespace Hypernex.UI
             passwordEdit.TextSubmitted += Submit;
             loginOptions.ItemSelected += AccountSelected;
             ConfigManager.OnConfigLoaded += LoadedConfig;
+            exitButton.Pressed += Exit;
         }
 
         public override void _ExitTree()
@@ -48,6 +51,7 @@ namespace Hypernex.UI
             passwordEdit.TextSubmitted -= Submit;
             loginOptions.ItemSelected -= AccountSelected;
             ConfigManager.OnConfigLoaded -= LoadedConfig;
+            exitButton.Pressed -= Exit;
         }
 
         private void LoadedConfig(Config config)
@@ -125,6 +129,8 @@ namespace Hypernex.UI
             APITools.Create(settings);
             APITools.Login((s, m) =>
             {
+                if (s)
+                    return;
                 QuickInvoke.InvokeActionOnMainThread(() =>
                 {
                     messagePopup.DialogText = m;
@@ -134,6 +140,11 @@ namespace Hypernex.UI
                     twoFactorEdit.Clear();
                 });
             });
+        }
+
+        public void Exit()
+        {
+            GetTree().Quit();
         }
     }
 }
