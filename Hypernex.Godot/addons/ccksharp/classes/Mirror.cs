@@ -74,7 +74,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public int GetCameraSize(Camera3D cam)
         {
-            if (cam is XRCamera3D xrCam)
+            if (cam is XRCamera3D)
             {
                 return (int)xr.GetRenderTargetSize().X;
             }
@@ -98,23 +98,27 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
             var cam2mirror_camlocal = cam.GlobalBasis.Inverse() * cam2MirrorOffset;
             var frustum_offset = new Vector2(cam2mirror_camlocal.X, cam2mirror_camlocal.Y);
+            cam.ForceUpdateTransform();
             cam.SetFrustum(size.X, frustum_offset, near, realCamera.Far);
         }
 
         public override void _Process(double delta)
         {
-            Update();
+            // Update();
         }
 
         public override void _PhysicsProcess(double delta)
         {
-            Update();
+            // Update();
         }
 
         public void Update()
         {
             if (!IsInstanceValid(realCamera))
+            {
+                realCamera = GetViewport().GetCamera3D();
                 return;
+            }
             MoveCamera(leftVp, leftCam, 0, realCamera);
             MoveCamera(rightVp, rightCam, 1, realCamera);
         }

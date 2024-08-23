@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Hypernex.Tools;
@@ -10,6 +11,8 @@ namespace Hypernex.UI
     {
         [Export]
         public Control root;
+        [Export]
+        public TabBar bar;
         [Export]
         public TabContainer tabs;
         [Export]
@@ -33,6 +36,7 @@ namespace Hypernex.UI
             logoutButton.Pressed += APITools.Logout;
             exitButton.Pressed += Exit;
             GameInstance.OnGameInstanceLoaded += GameInstanceLoaded;
+            bar.TabChanged += ChangedTabs2;
             tabs.TabChanged += ChangedTabs;
             tabs.SetTabHidden(currentInstanceIdx, true);
         }
@@ -44,13 +48,35 @@ namespace Hypernex.UI
             logoutButton.Pressed -= APITools.Logout;
             exitButton.Pressed -= Exit;
             GameInstance.OnGameInstanceLoaded -= GameInstanceLoaded;
+            bar.TabChanged -= ChangedTabs2;
             tabs.TabChanged -= ChangedTabs;
+        }
+
+        public override void _Process(double delta)
+        {
+            // bar.ClearTabs();
+            for (int i = 0; i < tabs.GetTabCount(); i++)
+            {
+                string title = tabs.GetTabTitle(i);
+                if (bar.TabCount >= i)
+                    bar.AddTab(title);
+                else
+                    bar.SetTabTitle(i, title);
+                bar.SetTabHidden(i, tabs.IsTabHidden(i));
+            }
+            bar.TabCount = tabs.GetTabCount();
+            bar.CurrentTab = tabs.CurrentTab;
         }
 
         private void Login(User user)
         {
             currentBigCard?.Free();
             currentBigCard = null;
+        }
+
+        private void ChangedTabs2(long tab)
+        {
+            tabs.CurrentTab = (int)tab;
         }
 
         private void ChangedTabs(long tab)
