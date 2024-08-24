@@ -1,9 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://b4nrx2xxp1xio"]
+[gd_scene load_steps=13 format=3 uid="uid://b4nrx2xxp1xio"]
 
 [ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_e3jbc"]
 [ext_resource type="Script" path="res://scripts/player/PlayerInputs.cs" id="2_777if"]
 [ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_4k47x"]
 [ext_resource type="Script" path="res://scripts/player/PlayerChat.cs" id="4_r7ubo"]
+[ext_resource type="Texture2D" uid="uid://bld874d24tptw" path="res://textures/external/microphone-line-icon.png" id="5_35sqb"]
+[ext_resource type="Texture2D" uid="uid://bsia472ymxhlq" path="res://textures/external/microphone-line-icon-white.png" id="6_3o0os"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_td8dh"]
 top_radius = 0.01
@@ -23,6 +25,13 @@ albedo_color = Color(1, 0, 0, 0.176471)
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_cutx8"]
 viewport_path = NodePath("CharacterBody3D/Sprite3D/SubViewport")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_whqug"]
+bg_color = Color(0, 0.7, 0.7, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Player" type="Node3D" node_paths=PackedStringArray("view", "loadingBar", "loadingSprite")]
 script = ExtResource("1_e3jbc")
@@ -98,11 +107,12 @@ grow_vertical = 2
 max_value = 1.0
 step = 0.0
 
-[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root", "textChat", "audioSource")]
+[node name="Chat" type="Node" parent="." node_paths=PackedStringArray("root", "textChat", "audioSource", "voiceMeter")]
 script = ExtResource("4_r7ubo")
 root = NodePath("..")
 textChat = NodePath("../Control/LineEdit")
 audioSource = NodePath("../CharacterBody3D/Voice")
+voiceMeter = NodePath("../Control/MarginContainer/Control/VoiceMeter")
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -120,3 +130,47 @@ anchor_right = 1.0
 offset_bottom = 31.0
 grow_horizontal = 2
 placeholder_text = "Type to chat..."
+
+[node name="MarginContainer" type="MarginContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 200
+theme_override_constants/margin_bottom = 100
+
+[node name="Control" type="Control" parent="Control/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="VoiceMeter" type="TextureProgressBar" parent="Control/MarginContainer/Control"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -64.0
+offset_right = 44.0
+grow_vertical = 0
+mouse_filter = 2
+max_value = 1.0
+step = 0.0
+fill_mode = 3
+nine_patch_stretch = true
+texture_under = ExtResource("5_35sqb")
+texture_progress = ExtResource("6_3o0os")
+
+[node name="Panel" type="Panel" parent="Control/MarginContainer/Control/VoiceMeter"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_whqug")

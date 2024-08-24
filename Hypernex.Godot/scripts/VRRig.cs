@@ -24,6 +24,8 @@ public partial class VRRig : Node3D
     public RayCast3D[] raycasts = Array.Empty<RayCast3D>();
     [Export]
     public UICanvas canvas;
+    [Export]
+    public Godot.Range voiceMeter;
 
     [Export]
     public SubViewport vp;
@@ -33,6 +35,7 @@ public partial class VRRig : Node3D
     private bool lastLeftTriggerState = false;
     private bool lastRightTriggerState = false;
     private bool lastPrimaryTriggerState = false;
+    private bool lastVoiceState = false;
     private string primaryTracker;
     private bool lastMenuToggleState = false;
 
@@ -173,6 +176,8 @@ public partial class VRRig : Node3D
         lastLeftTriggerState = leftTriggerState;
         lastRightTriggerState = rightTriggerState;
 
+        bool voiceState = rightHand.GetFloat("ax_button") > 0.5f;
+
         if (IsInstanceValid(PlayerRoot.Local))
         {
             origin.GlobalPosition = PlayerRoot.Local.Controller.GlobalPosition;
@@ -182,7 +187,16 @@ public partial class VRRig : Node3D
             inputs.move = leftHand.GetVector2("primary") * new Vector2(1f, -1f);
             inputs.lastMouseDelta.X = -rightHand.GetVector2("primary").X * (float)delta * Mathf.Pi;
             if (IsInstanceValid(PlayerRoot.Local.GetPart<PlayerChat>().voice))
-                PlayerRoot.Local.GetPart<PlayerChat>().voice.Recording = rightHand.GetFloat("ax_button") > 0.5f;
+            {
+                var voice = PlayerRoot.Local.GetPart<PlayerChat>().voice;
+                if (voiceState != lastVoiceState && voiceState)
+                    voice.Recording = !voice.Recording;
+                if (IsInstanceValid(voiceMeter))
+                {
+                    voiceMeter.Visible = voice.IsSpeaking;
+                    voiceMeter.Value = voice.Loudness * 80f;
+                }
+            }
             if (IsInstanceValid(PlayerRoot.Local.Avatar))
             {
                 XRServer.WorldScale = PlayerRoot.Local.Avatar.ikSystem.floorDistance;
@@ -195,5 +209,12 @@ public partial class VRRig : Node3D
                 // PlayerRoot.Local.Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
             }
         }
+        else
+        {
+            if (IsInstanceValid(voiceMeter))
+                voiceMeter.Visible = false;
+        }
+
+        lastVoiceState = voiceState;
     }
 }

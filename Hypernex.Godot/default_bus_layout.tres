@@ -1,7 +1,12 @@
-[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://rqwnssql5wc5"]
+[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://rqwnssql5wc5"]
 
 [sub_resource type="AudioEffectCapture" id="AudioEffectCapture_22agc"]
 resource_name = "Capture"
+
+[sub_resource type="AudioEffectSpectrumAnalyzer" id="AudioEffectSpectrumAnalyzer_tme51"]
+resource_name = "SpectrumAnalyzer"
+buffer_length = 0.1
+fft_size = 0
 
 [sub_resource type="AudioEffectCompressor" id="AudioEffectCompressor_nk0ms"]
 resource_name = "Compressor"
@@ -21,6 +26,8 @@ bus/2/volume_db = 0.0
 bus/2/send = &"Master"
 bus/2/effect/0/effect = SubResource("AudioEffectCapture_22agc")
 bus/2/effect/0/enabled = true
+bus/2/effect/1/effect = SubResource("AudioEffectSpectrumAnalyzer_tme51")
+bus/2/effect/1/enabled = true
 bus/3/name = &"World"
 bus/3/solo = false
 bus/3/mute = false

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FFmpeg.Godot;
 using Godot;
 using Hypernex.Tools;
 using HypernexSharp.APIObjects;
@@ -33,6 +34,8 @@ namespace Hypernex.UI
         public TextureRect profilePhoto;
         [Export]
         public Texture2D defaultPfp;
+        [Export]
+        public FFGodot pfpVideo;
         public BigCardTemplate currentBigCard;
 
         public override void _EnterTree()
@@ -45,6 +48,7 @@ namespace Hypernex.UI
             bar.TabChanged += ChangedTabs2;
             tabs.TabChanged += ChangedTabs;
             tabs.SetTabHidden(currentInstanceIdx, true);
+            pfpVideo.Finished += PfpLoop;
         }
 
         public override void _ExitTree()
@@ -56,22 +60,25 @@ namespace Hypernex.UI
             GameInstance.OnGameInstanceLoaded -= GameInstanceLoaded;
             bar.TabChanged -= ChangedTabs2;
             tabs.TabChanged -= ChangedTabs;
+            pfpVideo.Finished -= PfpLoop;
         }
 
         public override void _Process(double delta)
         {
-            // bar.ClearTabs();
+            bar.TabCount = tabs.GetTabCount();
             for (int i = 0; i < tabs.GetTabCount(); i++)
             {
                 string title = tabs.GetTabTitle(i);
-                if (bar.TabCount >= i)
-                    bar.AddTab(title);
-                else
-                    bar.SetTabTitle(i, title);
+                bar.SetTabTitle(i, title);
                 bar.SetTabHidden(i, tabs.IsTabHidden(i));
             }
             bar.TabCount = tabs.GetTabCount();
             bar.CurrentTab = tabs.CurrentTab;
+        }
+
+        private void PfpLoop()
+        {
+            pfpVideo.Seek(0);
         }
 
         private void Login(User user)
@@ -79,10 +86,20 @@ namespace Hypernex.UI
             currentBigCard?.Free();
             currentBigCard = null;
             profileName.Text = $"Hello, {APITools.CurrentUser.GetUsersName()}";
+            profilePhoto.Show();
+            pfpVideo.renderMesh.Hide();
             profilePhoto.Texture = defaultPfp;
             DownloadTools.DownloadBytes(APITools.CurrentUser.Bio.PfpURL, d =>
             {
-                ImageTools.LoadImage(profilePhoto, d);
+                if (!IsInstanceValid(profilePhoto))
+                    return;
+                bool img = ImageTools.LoadImage(profilePhoto, d);
+                if (!img)
+                {
+                    ImageTools.LoadFFmpeg(pfpVideo, d);
+                    profilePhoto.Hide();
+                    pfpVideo.renderMesh.Show();
+                }
             });
         }
 

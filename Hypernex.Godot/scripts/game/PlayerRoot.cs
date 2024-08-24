@@ -30,7 +30,7 @@ namespace Hypernex.Game
         [Export]
         public Sprite3D loadingSprite;
         [Export]
-        public Label3D username;
+        public Label username;
         [Export]
         public NodePath[] parts = Array.Empty<NodePath>();
         public Node[] Parts => parts.Select(x => GetNode(x)).ToArray();

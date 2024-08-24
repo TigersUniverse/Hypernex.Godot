@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Godot;
 using Hypernex.CCK;
@@ -16,6 +15,8 @@ namespace Hypernex.Player
         public LineEdit textChat;
         [Export]
         public AudioStreamPlayer3D audioSource;
+        [Export]
+        public Range voiceMeter;
         public VoiceChat voice;
         public bool IsSpeaking => voice?.IsSpeaking ?? false;
 
@@ -56,7 +57,16 @@ namespace Hypernex.Player
             }
             if (voice != null && !Init.IsVRLoaded)
             {
-                voice.Recording = Input.IsActionPressed("chat_voice");
+                if (Input.IsActionJustPressed("chat_voice"))
+                    voice.Recording = !voice.Recording;
+            }
+            if (IsInstanceValid(voice) && IsInstanceValid(voiceMeter))
+            {
+                if (!root.IsLocal || !Init.IsVRLoaded)
+                {
+                    voiceMeter.Visible = voice.IsSpeaking;
+                    voiceMeter.Value = voice.Loudness * 80f;
+                }
             }
         }
 
