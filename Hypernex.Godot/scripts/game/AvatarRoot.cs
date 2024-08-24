@@ -11,6 +11,7 @@ namespace Hypernex.Game
 {
     public partial class AvatarRoot : Node
     {
+        public SafeLoader safeLoader;
         public AvatarDescriptor descriptor;
         public IKSystem ikSystem;
         public Node3D target;
@@ -219,10 +220,16 @@ namespace Hypernex.Game
             return null;
         }
 
+        public override void _ExitTree()
+        {
+            safeLoader.Unload();
+        }
+
         public static AvatarRoot LoadFromFile(string path)
         {
             AvatarRoot root = new AvatarRoot();
             SafeLoader loader = new SafeLoader();
+            root.safeLoader = loader;
             loader.validScripts.Add(AvatarDescriptor.TypeName, SafeLoader.LoadScript<AvatarDescriptor>());
             try
             {

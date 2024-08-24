@@ -13,6 +13,7 @@ namespace Hypernex.Game
 {
     public partial class WorldRoot : Node
     {
+        public SafeLoader safeLoader;
         public GameInstance gameInstance;
         public WorldDescriptor descriptor;
         public List<Node> Objects = new List<Node>();
@@ -21,8 +22,8 @@ namespace Hypernex.Game
 
         public void AddPlayer(PlayerRoot player)
         {
-            RespawnPlayer(player);
             AddChild(player);
+            RespawnPlayer(player);
             if (player.IsLocal)
             {
                 foreach (Mirror mirror in Objects.Where(x => x is Mirror))
@@ -35,7 +36,8 @@ namespace Hypernex.Game
 
         public void RespawnPlayer(PlayerRoot player)
         {
-            player.Pos = descriptor.GetRandomSpawn().GlobalPosition;
+            if (IsInstanceValid(descriptor))
+                player.Pos = descriptor.GetRandomSpawn().GlobalPosition;
         }
 
         public void AddObject(Node worldObject)
@@ -108,10 +110,20 @@ namespace Hypernex.Game
             Logger.CurrentLogger.Log("World Load");
         }
 
+        public void Unload()
+        {
+            gameInstance = null;
+            foreach (var obj in Objects)
+                if (IsInstanceValid(obj))
+                    obj.Free();
+            safeLoader.Unload();
+        }
+
         public static WorldRoot LoadFromFile(string path)
         {
             WorldRoot root = new WorldRoot();
             SafeLoader loader = new SafeLoader();
+            root.safeLoader = loader;
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
@@ -145,6 +157,7 @@ namespace Hypernex.Game
             if (!IsInstanceValid(loader.scene))
             {
                 Logger.CurrentLogger.Error("Unable to load world!");
+                loader.Unload();
                 return root;
             }
             Node node = scn.Instantiate();

@@ -136,6 +136,7 @@ namespace Hypernex.CCK.GodotVersion
             }
             PackedScene safeScn = new PackedScene();
             safeScn.Pack(root);
+            root.Free();
             return safeScn;
         }
 

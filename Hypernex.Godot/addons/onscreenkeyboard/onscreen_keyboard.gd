@@ -70,8 +70,9 @@ func _enter_tree():
 		get_tree().get_root().size_changed.connect(size_changed)
 	_init_keyboard()
 
-#func _exit_tree():
-#    pass
+func _exit_tree():
+	if is_instance_valid(KeyListHandler):
+		KeyListHandler.free()
 
 #func _process(delta):
 #    pass
@@ -105,6 +106,7 @@ func _init_keyboard():
 	if custom_layout_file == null:
 		var default_layout = preload("default_layout.gd").new()
 		_create_keyboard(default_layout.data)
+		default_layout.free()
 	else:
 		_create_keyboard(_load_json(custom_layout_file))
 
@@ -312,7 +314,9 @@ func _create_keyboard(layout_data):
 		print("ERROR. No layout file found")
 		return
 
-	KeyListHandler = preload("keylist.gd").new()
+	if not is_instance_valid(KeyListHandler):
+		KeyListHandler = preload("keylist.gd").new()
+		add_child(KeyListHandler)
 	KeyboardButton = preload("keyboard_button.gd")
 
 	var ICON_DELETE = preload("icons/delete.png")

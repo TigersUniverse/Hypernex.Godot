@@ -9,7 +9,7 @@ using Hypernex.CCK.GodotVersion.Classes;
 
 namespace Hypernex.CCK.GodotVersion
 {
-    public partial class SafeLoader
+    public partial class SafeLoader : IDisposable
     {
         public class ParsedSubTres
         {
@@ -27,7 +27,14 @@ namespace Hypernex.CCK.GodotVersion
             public Dictionary<string, Resource> LoadedSubResources = new Dictionary<string, Resource>();
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
+            public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
             public Resource cachedRes;
+            public string zippath;
+
+            public ParsedTres(string path)
+            {
+                zippath = path;
+            }
 
             public Variant ConvertPropertyString(string prop)
             {
@@ -56,7 +63,7 @@ namespace Hypernex.CCK.GodotVersion
                     if (ClassDB.IsParentClass(sub.Type, nameof(Script)))
                         return new Variant();
                         // sub.Type = nameof(Resource);
-                    Resource res = ClassDB.Instantiate(sub.Type).As<Resource>();
+                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, validScripts);
                     foreach (var kvp in sub.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -126,9 +133,10 @@ namespace Hypernex.CCK.GodotVersion
 
             public Resource ToResource(Dictionary<string, Script> scripts)
             {
+                validScripts = scripts;
                 if (!GodotObject.IsInstanceValid(cachedRes))
                 {
-                    cachedRes = CreateResource(Type, Properties, scripts);
+                    cachedRes = CreateResource(zippath, Type, Properties, scripts);
                     foreach (var kvp in Properties)
                     {
                         cachedRes.Set(kvp.Key, ConvertProperty(kvp.Value));
@@ -166,6 +174,12 @@ namespace Hypernex.CCK.GodotVersion
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
             public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
+            public string zippath;
+
+            public ParsedTscn(string path)
+            {
+                zippath = path;
+            }
 
             public Variant ConvertPropertyString(string prop)
             {
@@ -191,7 +205,7 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedSubResources[id];
 
                     var sub = SubResources[id];
-                    Resource res = CreateResource(sub.Type, sub.Properties, validScripts);
+                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, validScripts);
                     foreach (var kvp in sub.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -279,6 +293,8 @@ namespace Hypernex.CCK.GodotVersion
                         {
                             if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                                 continue;
+                            if (kvp.Key.StartsWith("name", StringComparison.OrdinalIgnoreCase))
+                                continue;
                             // GD.PrintS(kvp.Key, kvp.Value);
                             node2.Set(kvp.Key, ConvertProperty(kvp.Value));
                         }
@@ -314,7 +330,7 @@ namespace Hypernex.CCK.GodotVersion
                         }
                         continue;
                     }
-                    if (ClassDB.IsParentClass(parNode.Type, nameof(Script)) || string.IsNullOrWhiteSpace(parNode.Type))
+                    if (ClassDB.IsParentClass(parNode.Type, nameof(Resource)) || string.IsNullOrWhiteSpace(parNode.Type))
                         parNode.Type = nameof(Node);
                     Node node = null;
                     foreach (var kvp in parNode.Properties)
@@ -400,12 +416,34 @@ namespace Hypernex.CCK.GodotVersion
                 sw.Stop();
                 GD.Print($"End compile {sw.ElapsedMilliseconds}ms");
                 // GD.PrintS(string.Join(", ", paths));
-                GD.Print($"Begin pack");
+                string name = root.Name;
+                GD.Print($"Begin pack {name}");
                 sw.Restart();
                 PackedScene scene = new PackedScene();
                 scene.Pack(root);
+                foreach (var node in root.FindChildren("*", owned: false))
+                {
+                    // if (GodotObject.IsInstanceValid(node))
+                        // node.Free();
+                }
+                if (GodotObject.IsInstanceValid(root))
+                    root.QueueFree();
+                /*
+                foreach (var node in subscenes)
+                {
+                    if (GodotObject.IsInstanceValid(node.Value))
+                    {
+                        node.Value.Free();
+                    }
+                }
+                foreach (var node in nodes)
+                {
+                    if (GodotObject.IsInstanceValid(node.Value))
+                        node.Value.Free();
+                }
+                */
                 sw.Stop();
-                GD.Print($"End pack {sw.ElapsedMilliseconds}ms");
+                GD.Print($"End pack {name} {sw.ElapsedMilliseconds}ms");
                 return scene;
             }
         }
@@ -490,9 +528,9 @@ namespace Hypernex.CCK.GodotVersion
             return null;
         }
 
-        public static Resource CreateResource(string type, Dictionary<string, Variant> properties, Dictionary<string, Script> scripts)
+        public static Resource CreateResource(string path, string type, Dictionary<string, Variant> properties, Dictionary<string, Script> scripts)
         {
-            if (ClassDB.IsParentClass(type, nameof(Script)) || ClassDB.IsParentClass(type, nameof(PackedScene)))
+            if (ClassDB.IsParentClass(type, nameof(Script)) || ClassDB.IsParentClass(type, nameof(PackedScene)) || ClassDB.IsParentClass(type, nameof(Node)))
                 return null;
             Resource res = null;
             foreach (var kvp in properties)
@@ -516,6 +554,7 @@ namespace Hypernex.CCK.GodotVersion
                 res = ClassDB.Instantiate(type).As<Resource>();
             if (!GodotObject.IsInstanceValid(res))
                 return null;
+            loadedResources[path].Add(res);
             /*
             foreach (var kvp in properties)
             {
@@ -530,11 +569,40 @@ namespace Hypernex.CCK.GodotVersion
         public ZipReader reader;
         public ParsedTscn world;
         public PackedScene scene;
+        public string zippath;
         public Dictionary<string, Resource> cachedResources = new Dictionary<string, Resource>();
         public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
+        public static Dictionary<string, List<Resource>> loadedResources = new Dictionary<string, List<Resource>>();
+
+        public void Unload()
+        {
+            scene = null;
+            if (loadedResources.TryGetValue(zippath, out var resources))
+            {
+                foreach (var res in resources)
+                {
+                    if (res is Mesh || res is Texture || res is Shader || res is Material || res is Image)
+                        RenderingServer.FreeRid(res.GetRid());
+                }
+                resources.Clear();
+                loadedResources.Remove(zippath);
+            }
+        }
+
+        public void Dispose()
+        {
+            Unload();
+        }
 
         public void ReadZip(string path)
         {
+            if (!string.IsNullOrEmpty(zippath))
+            {
+                return;
+            }
+            zippath = path;
+            Unload();
+            loadedResources.Add(path, new List<Resource>());
             if (charArr == null)
                 charArr = new List<char>();
             reader = new ZipReader();
@@ -577,17 +645,7 @@ namespace Hypernex.CCK.GodotVersion
             Resource res = null;
             if (resPath.GetExtension().Equals("scn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "scn")))
             {
-                ParsedTscn tscn = ParseBin(path.ReplaceN(path.GetExtension(), "scn"), reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "scn")));
-                foreach (var resKvp in tscn.ExtResources)
-                {
-                    Resource res2 = LoadFile(resKvp.Value);
-                    tscn.LoadedExtResources.Add(resKvp.Key, res2);
-                }
-                res = tscn.ToPackedScene(validScripts);
-            }
-            else if (resPath.GetExtension().Equals("tscn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "tscn")))
-            {
-                ParsedTscn tscn = ParseTscn(path.ReplaceN(path.GetExtension(), "tscn"), Encoding.UTF8.GetString(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "tscn"))));
+                ParsedTscn tscn = ParseBin(zippath, reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "scn")));
                 foreach (var resKvp in tscn.ExtResources)
                 {
                     Resource res2 = LoadFile(resKvp.Value);
@@ -608,7 +666,7 @@ namespace Hypernex.CCK.GodotVersion
             Stopwatch sw = new Stopwatch();
             GD.Print("Begin parse");
             sw.Start();
-            ParsedTres tscn = new ParsedTres();
+            ParsedTres tscn = new ParsedTres(zippath);
 
             var dict = GD.BytesToVar(data).AsGodotDictionary();
             var rootDict = dict["resource"].AsGodotDictionary();
@@ -641,7 +699,7 @@ namespace Hypernex.CCK.GodotVersion
 
         public Resource ReadData(string path, byte[] data)
         {
-            Image img = new Image();
+            Image img = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
             switch (path.GetExtension().ToLower())
             {
                 case "png":
@@ -681,6 +739,8 @@ namespace Hypernex.CCK.GodotVersion
             if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
                     img.Compress(Image.CompressMode.Etc2, Image.CompressSource.Generic);
             ImageTexture tex = ImageTexture.CreateFromImage(img);
+            loadedResources[zippath].Add(tex);
+            loadedResources[zippath].Add(img);
             return tex;
         }
 
@@ -693,12 +753,12 @@ namespace Hypernex.CCK.GodotVersion
             return va;
         }
 
-        public static ParsedTscn ParseBin(string path, byte[] data)
+        public static ParsedTscn ParseBin(string zippath, byte[] data)
         {
             Stopwatch sw = new Stopwatch();
             GD.Print("Begin parse");
             sw.Start();
-            ParsedTscn tscn = new ParsedTscn();
+            ParsedTscn tscn = new ParsedTscn(zippath);
 
             var dict = GD.BytesToVar(data).AsGodotDictionary();
             if (dict.ContainsKey("ext_resources"))
@@ -738,101 +798,8 @@ namespace Hypernex.CCK.GodotVersion
             return tscn;
         }
 
-        [Obsolete]
-        public static ParsedTscn ParseTscn(string path, string data)
-        {
-            if (!data.StartsWith("[gd_scene"))
-            {
-                GD.PrintErr("World isn't a scene!");
-                return null;
-            }
-            data = data.Replace("\r", null);
-            Stopwatch sw = new Stopwatch();
-            GD.Print("Begin parse");
-            sw.Start();
-            ParsedTscn tscn = new ParsedTscn();
-            for (int i = 0; i < data.Length; i++)
-            {
-                var attribs = ParseTag(data, i, out var tag, out var offset);
-                i = offset;
-                switch (tag.ToLower())
-                {
-                    case "ext_resource":
-                        tscn.ExtResources.Add(attribs["id"], attribs["path"]);
-                        break;
-                    case "sub_resource":
-                        ParsedSubTres sub = new ParsedSubTres();
-                        while (ParseProperty(data, i, out var key, out var val, out var off))
-                        {
-                            i = off;
-                            sub.Properties.Add(key, val);
-                        }
-                        sub.Type = attribs["type"];
-                        tscn.SubResources.Add(attribs["id"], sub);
-                        break;
-                    case "node":
-                        ParsedNode node = new ParsedNode();
-                        while (ParseProperty(data, i, out var key, out var val, out var off))
-                        {
-                            i = off;
-                            node.Properties.Add(key, val);
-                        }
-                        node.Name = attribs["name"];
-                        if (attribs.ContainsKey("type"))
-                            node.Type = attribs["type"];
-                        if (attribs.ContainsKey("parent"))
-                            node.Parent = attribs["parent"];
-                        if (attribs.ContainsKey("instance"))
-                            node.Instance = attribs["instance"];
-                        tscn.Nodes.Add(node);
-                        break;
-                    case "connection":
-                        // TODO
-                        break;
-                    default:
-                        break;
-                }
-            }
-            sw.Stop();
-            GD.Print($"End parse {sw.ElapsedMilliseconds}ms");
-            return tscn;
-        }
-
         [ThreadStatic]
         public static List<char> charArr = new List<char>();
-
-        [Obsolete]
-        public static ParsedTres ParseTres(string path, string data)
-        {
-            if (!data.StartsWith("[gd_resource"))
-                return null;
-            data = data.Replace("\r", null);
-            ParsedTres tres = new ParsedTres();
-            for (int i = 0; i < data.Length; i++)
-            {
-                var attribs = ParseTag(data, i, out var tag, out var offset);
-                i = offset;
-                switch (tag.ToLower())
-                {
-                    case "gd_resource":
-                        tres.Type = attribs["type"].Replace("\"", null);
-                        break;
-                    case "ext_resource":
-                        tres.ExtResources.Add(attribs["id"].Replace("\"", null), attribs["path"].Replace("\"", null));
-                        break;
-                    case "resource":
-                        while (ParseProperty(data, i, out var key, out var val, out var off))
-                        {
-                            i = off;
-                            tres.Properties.Add(key, val);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-            return tres;
-        }
 
         public static bool ParseProperty(string data, int offset, out string key, out string value, out int newOffset)
         {

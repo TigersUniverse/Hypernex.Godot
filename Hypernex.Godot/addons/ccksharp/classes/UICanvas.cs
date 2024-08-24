@@ -41,12 +41,6 @@ namespace Hypernex.CCK.GodotVersion.Classes
                     Size = size,
                 },
             };
-            keyboard = ResourceLoader.Load<GDScript>("res://addons/onscreenkeyboard/onscreen_keyboard.gd").New().As<Control>();
-            keyboard.Set("auto_show", false);
-            keyboard.Set("set_tool_tip", false);
-            keyboard.Set("custom_layout_file", "res://addons/ccksharp/keyboard_layout_en.json");
-            keyboard.Connect("key_pressed", Callable.From<Variant>(KeyPressed));
-            keyboard.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
             if (IsInstanceValid(VP))
             {
                 VP.GuiEmbedSubwindows = true;
@@ -58,6 +52,12 @@ namespace Hypernex.CCK.GodotVersion.Classes
                     AlbedoTexture = VP.GetTexture(),
                     Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
                 };
+                keyboard = ResourceLoader.Load<GDScript>("res://addons/onscreenkeyboard/onscreen_keyboard.gd").New().As<Control>();
+                keyboard.Set("auto_show", false);
+                keyboard.Set("set_tool_tip", false);
+                keyboard.Set("custom_layout_file", "res://addons/ccksharp/keyboard_layout_en.json");
+                keyboard.Connect("key_pressed", Callable.From<Variant>(KeyPressed));
+                keyboard.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
                 VP.AddChild(keyboard);
             }
             if (IsInstanceValid(material))

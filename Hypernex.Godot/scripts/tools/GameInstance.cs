@@ -488,7 +488,9 @@ namespace Hypernex.Tools
             isDisposed = true;
             FocusedInstance = null;
             OnGameInstanceLoaded?.Invoke(this, worldMeta);
-            World?.QueueFree();
+            World?.Unload();
+            World?.Free();
+            World = null;
             // Physics.gravity = new Vector3(0, LocalPlayer.Instance.Gravity, 0);
             sandboxes?.ForEach(x => x.Stop());
             Close();
