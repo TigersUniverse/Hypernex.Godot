@@ -44,7 +44,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
             if (IsInstanceValid(VP))
             {
                 VP.GuiEmbedSubwindows = true;
-                VP.Disable3D = true;
+                // VP.Disable3D = true;
                 VP.HandleInputLocally = true;
                 VP.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
                 quad.MaterialOverride = new StandardMaterial3D()

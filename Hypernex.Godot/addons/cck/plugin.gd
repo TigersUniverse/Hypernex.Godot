@@ -30,7 +30,7 @@ static func export_deps(writer: ZIPPacker, path: String) -> void:
 		if dep_res.is_class("PackedScene"):
 			# write tscn
 			export_scn(writer, dep_path)
-		elif dep_res.is_class("CompressedTexture2D"):
+		elif dep_res.is_class("CompressedTexture2D") or dep_res.is_class("FontFile"):
 			# write raw file
 			var dep_file := FileAccess.get_file_as_bytes(dep_path)
 			writer.start_file(dep_path.replacen("res://", ""))

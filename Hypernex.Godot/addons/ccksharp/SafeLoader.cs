@@ -734,6 +734,20 @@ namespace Hypernex.CCK.GodotVersion
                 case "ktx":
                     img.LoadKtxFromBuffer(data);
                     break;
+                case "ttf":
+                case "otf":
+                case "woff":
+                case "woff2":
+                case "pfb":
+                case "pfm":
+                {
+                    var font = new FontFile();
+                    var file = FileAccess.Open($"user://{path.GetFile()}", FileAccess.ModeFlags.Write);
+                    file.StoreBuffer(data);
+                    file.Close();
+                    font.LoadDynamicFont($"user://{path.GetFile()}");
+                    return font;
+                }
                 default:
                 {
                     var tscn = ParseBinRes(path, data);
