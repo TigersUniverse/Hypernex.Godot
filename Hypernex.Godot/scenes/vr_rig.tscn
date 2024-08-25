@@ -137,10 +137,9 @@ tracker = &"left_hand"
 pose = &"aim"
 
 [node name="Raycast" type="RayCast3D" parent="SubViewport/Origin/LeftAim"]
-exclude_parent = false
 target_position = Vector3(0, 0, -5)
+hit_back_faces = false
 collide_with_areas = true
-collide_with_bodies = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/Origin/LeftAim/Raycast"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -2.5)
@@ -155,11 +154,9 @@ tracker = &"right_hand"
 pose = &"aim"
 
 [node name="Raycast" type="RayCast3D" parent="SubViewport/Origin/RightAim"]
-exclude_parent = false
 target_position = Vector3(0, 0, -5)
 hit_back_faces = false
 collide_with_areas = true
-collide_with_bodies = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewport/Origin/RightAim/Raycast"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -2.5)

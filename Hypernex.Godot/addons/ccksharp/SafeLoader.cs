@@ -139,6 +139,10 @@ namespace Hypernex.CCK.GodotVersion
                     cachedRes = CreateResource(zippath, Type, Properties, scripts);
                     foreach (var kvp in Properties)
                     {
+                        if (kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        if (kvp.Key == Resource.PropertyName.ResourcePath)
+                            continue;
                         cachedRes.Set(kvp.Key, ConvertProperty(kvp.Value));
                     }
                 }
@@ -591,6 +595,7 @@ namespace Hypernex.CCK.GodotVersion
 
         public void Dispose()
         {
+            reader.Dispose();
             Unload();
         }
 
@@ -610,6 +615,7 @@ namespace Hypernex.CCK.GodotVersion
             if (err != Error.Ok)
             {
                 GD.PrintErr(err);
+                reader.Close();
                 return;
             }
             try
@@ -629,6 +635,10 @@ namespace Hypernex.CCK.GodotVersion
                 {
                     GD.PrintErr("Failed to find world.txt");
                 }
+            }
+            catch (Exception e)
+            {
+                Logger.CurrentLogger.Critical(e);
             }
             finally
             {

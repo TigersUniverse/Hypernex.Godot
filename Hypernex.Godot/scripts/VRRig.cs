@@ -156,6 +156,10 @@ public partial class VRRig : Node3D
                     catch
                     { }
                 }
+                else
+                {
+                    cast.Visible = false;
+                }
             }
             else
             {

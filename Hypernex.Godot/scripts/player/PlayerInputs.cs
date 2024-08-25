@@ -105,6 +105,10 @@ namespace Hypernex.Player
                     catch
                     { }
                 }
+                else
+                {
+                    cast.Visible = false;
+                }
             }
             else
             {

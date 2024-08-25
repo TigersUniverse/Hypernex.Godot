@@ -90,12 +90,14 @@ namespace Hypernex.Tools
             CurrentUser = user;
             CurrentToken = token;
             QuickInvoke.InvokeActionOnMainThread(OnUserLogin, CurrentUser);
+            CachedWorldMeta.Clear();
         }
 
         public static void Logout()
         {
             OnLogout.Invoke();
             // APIObject.Logout(r => QuickInvoke.InvokeActionOnMainThread(OnLogout), CurrentUser, CurrentToken);
+            CachedWorldMeta.Clear();
         }
 
         public static void CreateUserSocket(Action callback)
@@ -116,6 +118,7 @@ namespace Hypernex.Tools
 
         public static void RefreshUser(Action callback)
         {
+            CachedWorldMeta.Clear();
             APIObject.GetUser(CurrentToken, r =>
             {
                 if (r.success)
@@ -142,6 +145,7 @@ namespace Hypernex.Tools
 
         public static void GetWorldMeta(string worldId, Action<WorldMeta> callback)
         {
+            /*
             if (CachedWorldMeta.Any(x => x.Id == worldId))
             {
                 WorldMeta worldMeta = CachedWorldMeta.First(x => x.Id == worldId);
@@ -149,6 +153,7 @@ namespace Hypernex.Tools
                 callback.Invoke(worldMeta);
                 return;
             }
+            */
             APIObject.GetWorldMeta(result =>
             {
                 if (result.success)

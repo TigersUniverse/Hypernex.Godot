@@ -31,7 +31,7 @@ namespace Hypernex.Game
             PlayerRoot netPlayer = GetNetPlayer(instance, userid);
             if (netPlayer != null)
             {
-                instance.ScriptEvents.OnUserJoin.Invoke(userid);
+                // instance.ScriptEvents.OnUserJoin.Invoke(userid);
                 return netPlayer;
             }
             netPlayer = Init.NewPlayer(false);

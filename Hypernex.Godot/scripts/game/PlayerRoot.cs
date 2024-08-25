@@ -72,8 +72,12 @@ namespace Hypernex.Game
             {
                 if (r.success)
                 {
-                    User = r.result.UserData;
-                    username.Text = User.GetUsersName();
+                    QuickInvoke.InvokeActionOnMainThread(() =>
+                    {
+                        User = r.result.UserData;
+                        if (IsInstanceValid(username))
+                            username.Text = User.GetUsersName();
+                    });
                 }
             }, UserId, isUserId: true);
             GetPart<PlayerChat>()?.UserSet();
