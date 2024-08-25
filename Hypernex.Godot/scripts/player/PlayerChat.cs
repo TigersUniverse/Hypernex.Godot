@@ -89,6 +89,7 @@ namespace Hypernex.Player
                 Message = newText,
                 MessageTags = new List<string>(),
             });
+            root.Controller.PlayMessage(newText);
             CancelText();
         }
 

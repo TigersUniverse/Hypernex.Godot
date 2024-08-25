@@ -8,8 +8,8 @@
 [ext_resource type="Texture2D" uid="uid://bsia472ymxhlq" path="res://textures/external/microphone-line-icon-white.png" id="6_3o0os"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_td8dh"]
-top_radius = 0.01
-bottom_radius = 0.01
+top_radius = 0.005
+bottom_radius = 0.005
 height = 4.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4uruo"]
