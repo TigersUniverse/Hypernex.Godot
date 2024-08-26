@@ -742,10 +742,10 @@ namespace Hypernex.CCK.GodotVersion
                 case "pfm":
                 {
                     var font = new FontFile();
-                    var file = FileAccess.Open($"user://{path.GetFile()}", FileAccess.ModeFlags.Write);
+                    var file = FileAccess.Open($"user://font.{path.GetExtension()}", FileAccess.ModeFlags.Write);
                     file.StoreBuffer(data);
                     file.Close();
-                    font.LoadDynamicFont($"user://{path.GetFile()}");
+                    font.LoadDynamicFont($"user://font.{path.GetExtension()}");
                     return font;
                 }
                 default:
