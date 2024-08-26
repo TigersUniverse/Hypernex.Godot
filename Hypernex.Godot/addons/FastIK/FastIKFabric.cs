@@ -74,21 +74,21 @@ namespace DitzelGames.FastIK
             }
             public Vector3 GlobalRotation
             {
-                get => GlobalTransform.Basis.GetEuler();
+                get => GlobalTransform.Basis.Orthonormalized().GetEuler();
                 set
                 {
                     var t = GlobalTransform;
-                    t.Basis = Basis.FromEuler(value).Scaled(GlobalTransform.Basis.Scale);
+                    t.Basis = Basis.FromEuler(value).Scaled(GlobalTransform.Basis.Scale).Orthonormalized();
                     GlobalTransform = t;
                 }
             }
             public Quaternion GlobalQuaternion
             {
-                get => GlobalTransform.Basis.GetRotationQuaternion().Normalized();
+                get => GlobalTransform.Basis.Orthonormalized().GetRotationQuaternion();
                 set
                 {
                     var t = GlobalTransform;
-                    t.Basis = new Basis(value).Scaled(GlobalTransform.Basis.Scale);
+                    t.Basis = new Basis(value).Scaled(GlobalTransform.Basis.Scale).Orthonormalized();
                     GlobalTransform = t;
                 }
             }
@@ -201,7 +201,7 @@ namespace DitzelGames.FastIK
 
         protected float[] BonesLength; //Target to Origin
         public float CompleteLength { get; protected set; }
-        protected BoneData[] Bones;
+        public BoneData[] Bones { get; protected set; }
         protected Vector3[] Positions;
         protected Vector3[] StartDirectionSucc;
         protected Quaternion[] StartRotationBone;

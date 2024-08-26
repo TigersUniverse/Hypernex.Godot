@@ -138,9 +138,10 @@ namespace Hypernex.Game
             {
                 if (IsLocal && !Init.IsVRLoaded)
                 {
-                    Avatar.ProcessIk(false, true, view.GlobalTransform.Translated(Controller.GlobalBasis.Z * 0.2f), Controller.GlobalTransform, Transform3D.Identity, Transform3D.Identity);
+                    view.Position = new Vector3(0f, Avatar.ikSystem.floorDistance + Avatar.ikSystem.hipsDistance * 0.75f, 0f);
+                    Avatar.ProcessIk(false, true, view.GlobalTransform.Translated(view.GlobalBasis.Z * 0.2f), Controller.GlobalTransform/*.Translated(Controller.GlobalBasis.Y * 0.05f)*/, Transform3D.Identity, Transform3D.Identity);
                     // if (IsInstanceValid(Avatar.ikSystem))
-                    //     Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
+                        // Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
                 }
                 else if (!IsLocal)
                     Avatar.ProcessIk(false, false, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity, Transform3D.Identity);

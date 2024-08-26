@@ -62,7 +62,7 @@ namespace Hypernex.UI
                 return;
             foreach (var acct in config.SavedAccounts)
             {
-                loginOptions.AddItem(acct.Username);
+                loginOptions.AddItem($"{acct.Username} - {acct.Server}");
             }
         }
 

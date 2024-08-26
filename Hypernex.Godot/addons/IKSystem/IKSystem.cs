@@ -325,8 +325,8 @@ public partial class IKSystem : Node
                 humanoid.AddChild(leftFootData.target);
                 leftFootData.target.GlobalTransform = leftFoot.GlobalTransform;
                 leftFootData.pole = new Node3D() { Name = "LeftFoot_Pole" };
-                leftUpperLeg.AddChild(leftFootData.pole);
-                leftFootData.pole.GlobalPosition = leftUpperLeg.GlobalPosition - right * 1f * scl + forward * 2f * scl + up * 0.9f * scl;
+                hips.AddChild(leftFootData.pole);
+                leftFootData.pole.GlobalPosition = leftFoot.GlobalPosition - right * 0f * scl + forward * 0.5f * scl + up * 0.5f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
                 // leftFoot.AddChild(ik);
@@ -346,8 +346,8 @@ public partial class IKSystem : Node
                 humanoid.AddChild(rightFootData.target);
                 rightFootData.target.GlobalTransform = rightFoot.GlobalTransform;
                 rightFootData.pole = new Node3D() { Name = "RightFoot_Pole" };
-                rightUpperLeg.AddChild(rightFootData.pole);
-                rightFootData.pole.GlobalPosition = rightUpperLeg.GlobalPosition + right * 1f * scl + forward * 2f * scl + up * 0.9f * scl;
+                hips.AddChild(rightFootData.pole);
+                rightFootData.pole.GlobalPosition = rightFoot.GlobalPosition + right * 0f * scl + forward * 0.5f * scl + up * 0.5f * scl;
 
                 FastIKFabric ik = new FastIKFabric();
                 // rightFoot.AddChild(ik);

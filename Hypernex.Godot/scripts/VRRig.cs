@@ -36,6 +36,7 @@ public partial class VRRig : Node3D
     private bool lastRightTriggerState = false;
     private bool lastPrimaryTriggerState = false;
     private bool lastVoiceState = false;
+    private bool lastJumpState = false;
     private string primaryTracker;
     private bool lastMenuToggleState = false;
 
@@ -181,6 +182,7 @@ public partial class VRRig : Node3D
         lastRightTriggerState = rightTriggerState;
 
         bool voiceState = rightHand.GetFloat("ax_button") > 0.5f;
+        bool jumpState = rightHand.GetFloat("primary_click") > 0.5f;
 
         if (IsInstanceValid(PlayerRoot.Local))
         {
@@ -189,6 +191,8 @@ public partial class VRRig : Node3D
             PlayerRoot.Local.view.GlobalTransform = head.GlobalTransform;
             PlayerInputs inputs = PlayerRoot.Local.GetPart<PlayerInputs>();
             inputs.move = leftHand.GetVector2("primary") * new Vector2(1f, -1f);
+            if (jumpState)
+                inputs.shouldJump = true;
             inputs.lastMouseDelta.X = -rightHand.GetVector2("primary").X * (float)delta * Mathf.Pi;
             if (IsInstanceValid(PlayerRoot.Local.GetPart<PlayerChat>().voice))
             {
@@ -203,7 +207,8 @@ public partial class VRRig : Node3D
             }
             if (IsInstanceValid(PlayerRoot.Local.Avatar))
             {
-                XRServer.WorldScale = PlayerRoot.Local.Avatar.ikSystem.floorDistance;
+                // The 1.75 is the player's real world height, placeholder for now.
+                XRServer.WorldScale = (PlayerRoot.Local.Avatar.ikSystem.floorDistance + PlayerRoot.Local.Avatar.ikSystem.hipsDistance * 0.75f) / 1.75f;
                 Transform3D floor = head.GlobalTransform;
                 floor.Origin += Vector3.Down * head.Position.Y;
                 // TODO: eye offsets
@@ -220,5 +225,6 @@ public partial class VRRig : Node3D
         }
 
         lastVoiceState = voiceState;
+        lastJumpState = jumpState;
     }
 }

@@ -17,6 +17,7 @@ namespace Hypernex.Player
         public bool textChatOpen;
         public Vector2 lastMousePosition;
         public Vector2 lastMouseDelta;
+        public bool shouldJump = false;
 
         private bool lastPrimaryTriggerState = false;
 
@@ -133,6 +134,8 @@ namespace Hypernex.Player
             else
             {
                 move = Input.GetVector("move_left", "move_right", "move_forward", "move_back");
+                if (Input.IsActionJustPressed("move_jump"))
+                    shouldJump = true;
             }
         }
     }

@@ -13,6 +13,8 @@ namespace Hypernex.Player
         public float accel = 1f;
         [Export]
         public float speed = 1f;
+        [Export]
+        public float jumpHeight = 2f;
         public float gravity;
         [Export]
         public Camera3D cam;
@@ -42,9 +44,12 @@ namespace Hypernex.Player
 
             if (!IsOnFloor())
                 vel.Y -= gravity * (float)delta;
+            else if (inputs.shouldJump)
+                vel.Y = jumpHeight;
             else
                 vel.Y = 0f;
 
+            inputs.shouldJump = false;
             Basis viewB = root.view.GlobalBasis;
             viewB.Y = Vector3.Up;
 
