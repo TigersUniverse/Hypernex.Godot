@@ -22,12 +22,20 @@ namespace Hypernex.Game
         public Node3D LeftHandTransform => ikSystem.leftHandData.target;
         public Node3D RightHandTransform => ikSystem.rightHandData.target;
 
+        public Transform3D eyesOffset;
+        public Transform3D headOffset;
+
         public void AddObject(Node worldObject)
         {
             if (Objects.Contains(worldObject))
                 return;
             if (worldObject is AvatarDescriptor desc)
+            {
                 descriptor = desc;
+                if (IsInstanceValid(desc.GetEyes()))
+                    eyesOffset = desc.GetEyes().Transform;
+                headOffset = desc.GetSkeleton().GetBoneGlobalRest(desc.GetSkeleton().FindBone("Head"));
+            }
             if (worldObject is AudioStreamPlayer audio)
             {
                 audio.Bus = "Avatar";

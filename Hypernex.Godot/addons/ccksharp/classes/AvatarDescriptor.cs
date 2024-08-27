@@ -14,6 +14,6 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public Skeleton3D GetSkeleton() => GetNode<Skeleton3D>(Skeleton);
 
-        public Marker3D GetEyes() => GetNode<Marker3D>(Eyes);
+        public Node3D GetEyes() => GetNodeOrNull<Node3D>(Eyes);
     }
 }

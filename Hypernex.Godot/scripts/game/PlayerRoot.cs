@@ -139,7 +139,20 @@ namespace Hypernex.Game
                 if (IsLocal && !Init.IsVRLoaded)
                 {
                     view.Position = new Vector3(0f, Avatar.ikSystem.floorDistance + Avatar.ikSystem.hipsDistance * 0.75f, 0f);
-                    Avatar.ProcessIk(false, true, view.GlobalTransform.Translated(view.GlobalBasis.Z * 0.2f), Controller.GlobalTransform/*.Translated(Controller.GlobalBasis.Y * 0.05f)*/, Transform3D.Identity, Transform3D.Identity);
+                    Transform3D headFinal = view.GlobalTransform;
+                    var eyesNode = Avatar.descriptor.GetEyes();
+                    if (IsInstanceValid(eyesNode))
+                    {
+                        var eyes = Avatar.eyesOffset.Origin * Avatar.ikSystem.GetScale();
+                        var head = Avatar.headOffset.Origin * Avatar.ikSystem.GetScale();
+                        headFinal = headFinal.TranslatedLocal((head - eyes) * new Vector3(1f, 1f, -1f));
+                        // view.Position -= eyes - head - Vector3.Forward * 0.2f;
+                    }
+                    else
+                    {
+                        headFinal = view.GlobalTransform.Translated(view.GlobalBasis.Z * 0.2f);
+                    }
+                    Avatar.ProcessIk(false, true, headFinal, Controller.GlobalTransform/*.Translated(Controller.GlobalBasis.Y * 0.05f)*/, Transform3D.Identity, Transform3D.Identity);
                     // if (IsInstanceValid(Avatar.ikSystem))
                         // Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
                 }

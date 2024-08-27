@@ -74,21 +74,21 @@ namespace DitzelGames.FastIK
             }
             public Vector3 GlobalRotation
             {
-                get => GlobalTransform.Basis.Orthonormalized().GetEuler();
+                get => GlobalTransform.Basis.GetEuler();
                 set
                 {
                     var t = GlobalTransform;
-                    t.Basis = Basis.FromEuler(value).Scaled(GlobalTransform.Basis.Scale).Orthonormalized();
+                    t.Basis = Basis.FromEuler(value).Scaled(GlobalTransform.Basis.Scale);
                     GlobalTransform = t;
                 }
             }
             public Quaternion GlobalQuaternion
             {
-                get => GlobalTransform.Basis.Orthonormalized().GetRotationQuaternion();
+                get => GlobalTransform.Basis.GetRotationQuaternion();
                 set
                 {
                     var t = GlobalTransform;
-                    t.Basis = new Basis(value).Scaled(GlobalTransform.Basis.Scale).Orthonormalized();
+                    t.Basis = new Basis(value).Scaled(GlobalTransform.Basis.Scale);
                     GlobalTransform = t;
                 }
             }
