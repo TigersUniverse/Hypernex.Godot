@@ -653,7 +653,8 @@ namespace Hypernex.CCK.GodotVersion
             cachedResources.Add(path, null);
             string resPath = path.ReplaceN("res://", "");
             Resource res = null;
-            if (resPath.GetExtension().Equals("scn", StringComparison.OrdinalIgnoreCase) || reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "scn")))
+            bool exists = reader.FileExists(resPath);
+            if (resPath.GetExtension().Equals("scn", StringComparison.OrdinalIgnoreCase) || (!exists && reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "scn"))))
             {
                 ParsedTscn tscn = ParseBin(zippath, reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "scn")));
                 foreach (var resKvp in tscn.ExtResources)
@@ -709,6 +710,46 @@ namespace Hypernex.CCK.GodotVersion
 
         public Resource ReadData(string path, byte[] data)
         {
+            byte[] texLayered = Encoding.UTF8.GetBytes("TextureLayered");
+            bool found = false;
+            for (int i = 0; i < Mathf.Min(texLayered.Length, data.Length); i++)
+            {
+                if (texLayered[i] != data[i])
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                // GD.Print("Found 2D Layered");
+                // string strData = Encoding.UTF8.GetString(data);
+                Image[] imgs = new Image[128];
+                var arr = new Godot.Collections.Array<Image>();
+                for (int i = 0; i < imgs.Length; i++)
+                {
+                    string metaPath = $"{path.ReplaceN("res://", "")}.meta.{i}.webp";
+                    GD.PrintS("metapath", metaPath);
+                    if (reader.FileExists(metaPath))
+                    {
+                        imgs[i] = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
+                        imgs[i].LoadWebpFromBuffer(reader.ReadFile(metaPath));
+                        imgs[i].GenerateMipmaps();
+                        if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
+                            imgs[i].Compress(Image.CompressMode.Etc2, Image.CompressSource.Generic);
+                        arr.Add(imgs[i]);
+                        loadedResources[zippath].Add(imgs[i]);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                Texture2DArray layered = new Texture2DArray();
+                layered.CreateFromImages(arr);
+                loadedResources[zippath].Add(layered);
+                return layered;
+            }
             Image img = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
             switch (path.GetExtension().ToLower())
             {

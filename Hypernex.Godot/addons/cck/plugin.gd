@@ -30,6 +30,18 @@ static func export_deps(writer: ZIPPacker, path: String) -> void:
 		if dep_res.is_class("PackedScene"):
 			# write tscn
 			export_scn(writer, dep_path)
+		elif dep_res.is_class("TextureLayered"):
+			# write raw file
+			var layer_count: int = dep_res.get_layers()
+			writer.start_file(dep_path.replacen("res://", ""))
+			writer.write_file(("TextureLayered:%s" % [ layer_count ]).to_utf8_buffer())
+			writer.close_file()
+			# write .meta files
+			for i in range(dep_res.get_layers()):
+				var img: Image = dep_res.get_layer_data(i)
+				writer.start_file(dep_path.replacen("res://", "") + str(".meta.", i, ".webp"))
+				writer.write_file(img.save_webp_to_buffer())
+				writer.close_file()
 		elif dep_res.is_class("CompressedTexture2D") or dep_res.is_class("FontFile"):
 			# write raw file
 			var dep_file := FileAccess.get_file_as_bytes(dep_path)
@@ -136,7 +148,6 @@ static func export_world(name: String, ext: String) -> String:
 	var root := EditorInterface.get_edited_scene_root()
 	if not root:
 		return "No Scene Open"
-	DirAccess.make_dir_absolute("res://temp/")
 	DirAccess.make_dir_absolute("user://temp/")
 
 	# write zip file
