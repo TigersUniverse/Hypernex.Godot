@@ -114,7 +114,7 @@ public partial class Init : Node
 
     private void Resized()
     {
-        GetTree().Root.ContentScaleSize = new Vector2I(1280, 720);
+        // GetTree().Root.ContentScaleSize = new Vector2I(1280, 720);
     }
 
     public override void _Process(double delta)
