@@ -154,6 +154,7 @@ public partial class Init : Node
     {
         List<string> list = new List<string>(ClassDB.GetClassList().Where(x => ClassDB.IsParentClass(x, nameof(Node)) || ClassDB.IsParentClass(x, nameof(Resource))).Select(x => x.ToLower()));
         // Viewport/Window classes
+        list.Remove(nameof(StatusIndicator).ToLower());
         list.Remove(nameof(Viewport).ToLower());
         list.Remove(nameof(Window).ToLower());
         list.Remove(nameof(AcceptDialog).ToLower());
