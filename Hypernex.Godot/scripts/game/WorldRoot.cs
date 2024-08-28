@@ -124,6 +124,7 @@ namespace Hypernex.Game
             WorldRoot root = new WorldRoot();
             SafeLoader loader = new SafeLoader();
             root.safeLoader = loader;
+            loader.allowedClasses = Init.GetValidClasses();
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());

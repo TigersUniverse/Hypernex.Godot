@@ -238,6 +238,7 @@ namespace Hypernex.Game
             AvatarRoot root = new AvatarRoot();
             SafeLoader loader = new SafeLoader();
             root.safeLoader = loader;
+            loader.allowedClasses = Init.GetValidClasses();
             loader.validScripts.Add(AvatarDescriptor.TypeName, SafeLoader.LoadScript<AvatarDescriptor>());
             try
             {

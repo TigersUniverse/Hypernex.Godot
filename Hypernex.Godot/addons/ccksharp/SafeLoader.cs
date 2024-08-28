@@ -27,6 +27,7 @@ namespace Hypernex.CCK.GodotVersion
             public Dictionary<string, Resource> LoadedSubResources = new Dictionary<string, Resource>();
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
+            public List<string> allowedClasses = new List<string>();
             public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
             public Resource cachedRes;
             public string zippath;
@@ -60,10 +61,10 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedSubResources[id];
 
                     var sub = SubResources[id];
-                    if (ClassDB.IsParentClass(sub.Type, nameof(Script)))
+                    if (ClassDB.IsParentClass(sub.Type, nameof(Script)) || !allowedClasses.Contains(sub.Type.ToLower()))
                         return new Variant();
                         // sub.Type = nameof(Resource);
-                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, validScripts);
+                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, allowedClasses, validScripts);
                     foreach (var kvp in sub.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -131,12 +132,13 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
 
-            public Resource ToResource(Dictionary<string, Script> scripts)
+            public Resource ToResource(List<string> classes, Dictionary<string, Script> scripts)
             {
+                allowedClasses = classes;
                 validScripts = scripts;
                 if (!GodotObject.IsInstanceValid(cachedRes))
                 {
-                    cachedRes = CreateResource(zippath, Type, Properties, scripts);
+                    cachedRes = CreateResource(zippath, Type, Properties, classes, scripts);
                     foreach (var kvp in Properties)
                     {
                         if (kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
@@ -177,6 +179,7 @@ namespace Hypernex.CCK.GodotVersion
             public Dictionary<string, Resource> LoadedSubResources = new Dictionary<string, Resource>();
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
+            public List<string> allowedClasses = new List<string>();
             public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
             public string zippath;
 
@@ -209,7 +212,7 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedSubResources[id];
 
                     var sub = SubResources[id];
-                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, validScripts);
+                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, allowedClasses, validScripts);
                     foreach (var kvp in sub.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -270,8 +273,9 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
 
-            public PackedScene ToPackedScene(Dictionary<string, Script> scripts)
+            public PackedScene ToPackedScene(List<string> classes, Dictionary<string, Script> scripts)
             {
+                allowedClasses = classes;
                 validScripts = scripts;
                 // return new PackedScene();
                 Stopwatch sw = new Stopwatch();
@@ -334,7 +338,7 @@ namespace Hypernex.CCK.GodotVersion
                         }
                         continue;
                     }
-                    if (ClassDB.IsParentClass(parNode.Type, nameof(Resource)) || string.IsNullOrWhiteSpace(parNode.Type))
+                    if (ClassDB.IsParentClass(parNode.Type, nameof(Resource)) || string.IsNullOrWhiteSpace(parNode.Type) || !classes.Contains(parNode.Type.ToLower()))
                         parNode.Type = nameof(Node);
                     Node node = null;
                     foreach (var kvp in parNode.Properties)
@@ -532,9 +536,9 @@ namespace Hypernex.CCK.GodotVersion
             return null;
         }
 
-        public static Resource CreateResource(string path, string type, Dictionary<string, Variant> properties, Dictionary<string, Script> scripts)
+        public static Resource CreateResource(string path, string type, Dictionary<string, Variant> properties, List<string> classes, Dictionary<string, Script> scripts)
         {
-            if (ClassDB.IsParentClass(type, nameof(Script)) || ClassDB.IsParentClass(type, nameof(PackedScene)) || ClassDB.IsParentClass(type, nameof(Node)))
+            if (ClassDB.IsParentClass(type, nameof(Script)) || ClassDB.IsParentClass(type, nameof(PackedScene)) || ClassDB.IsParentClass(type, nameof(Node)) || !classes.Contains(type.ToLower()))
                 return null;
             Resource res = null;
             foreach (var kvp in properties)
@@ -575,6 +579,7 @@ namespace Hypernex.CCK.GodotVersion
         public PackedScene scene;
         public string zippath;
         public Dictionary<string, Resource> cachedResources = new Dictionary<string, Resource>();
+        public List<string> allowedClasses = new List<string>(); // MUST BE LOWERCASE!!
         public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
         public static Dictionary<string, List<Resource>> loadedResources = new Dictionary<string, List<Resource>>();
 
@@ -597,6 +602,11 @@ namespace Hypernex.CCK.GodotVersion
         {
             reader.Dispose();
             Unload();
+        }
+
+        public SafeLoader()
+        {
+            allowedClasses.AddRange(ClassDB.GetClassList().Select(x => x.ToLower()));
         }
 
         public void ReadZip(string path)
@@ -629,7 +639,7 @@ namespace Hypernex.CCK.GodotVersion
                         Resource res = LoadFile(resKvp.Value);
                         world.LoadedExtResources.Add(resKvp.Key, res);
                     }
-                    scene = world.ToPackedScene(validScripts);
+                    scene = world.ToPackedScene(allowedClasses, validScripts);
                 }
                 else
                 {
@@ -662,7 +672,7 @@ namespace Hypernex.CCK.GodotVersion
                     Resource res2 = LoadFile(resKvp.Value);
                     tscn.LoadedExtResources.Add(resKvp.Key, res2);
                 }
-                res = tscn.ToPackedScene(validScripts);
+                res = tscn.ToPackedScene(allowedClasses, validScripts);
             }
             else if (reader.FileExists(resPath))
                 res = ReadData(path, reader.ReadFile(resPath));
@@ -797,7 +807,7 @@ namespace Hypernex.CCK.GodotVersion
                         Resource res2 = LoadFile(resKvp.Value);
                         tscn.LoadedExtResources.Add(resKvp.Key, res2);
                     }
-                    return tscn.ToResource(validScripts);
+                    return tscn.ToResource(allowedClasses, validScripts);
                 }
             }
             img.GenerateMipmaps();

@@ -9,7 +9,9 @@ using Hypernex.Tools.Godot;
 using Hypernex.UI;
 using HypernexSharp.APIObjects;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -110,6 +112,8 @@ public partial class Init : Node
         AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
 
         SetupAndRunGame();
+
+        // GD.Print(string.Join(" ", GetValidClasses()));
     }
 
     private void Resized()
@@ -144,6 +148,34 @@ public partial class Init : Node
             instance.World.AddPlayer(plr);
             // Instance.ui.Hide();
         }
+    }
+
+    public static List<string> GetValidClasses()
+    {
+        List<string> list = new List<string>(ClassDB.GetClassList().Where(x => ClassDB.IsParentClass(x, nameof(Node)) || ClassDB.IsParentClass(x, nameof(Resource))).Select(x => x.ToLower()));
+        // Viewport/Window classes
+        list.Remove(nameof(Viewport).ToLower());
+        list.Remove(nameof(Window).ToLower());
+        list.Remove(nameof(AcceptDialog).ToLower());
+        list.Remove(nameof(ConfirmationDialog).ToLower());
+        list.Remove(nameof(FileDialog).ToLower());
+        list.Remove(nameof(Popup).ToLower());
+        list.Remove(nameof(PopupMenu).ToLower());
+        list.Remove(nameof(PopupPanel).ToLower());
+        // PackedScene and Scripts
+        list.Remove(nameof(PackedScene).ToLower());
+        list.Remove(nameof(Script).ToLower());
+        list.Remove(nameof(GDScript).ToLower());
+        list.Remove(nameof(CSharpScript).ToLower());
+        // XR/3D
+        list.Remove(nameof(XRCamera3D).ToLower());
+        list.Remove(nameof(XROrigin3D).ToLower());
+        list.Remove(nameof(XRNode3D).ToLower());
+        list.Remove(nameof(XRAnchor3D).ToLower());
+        list.Remove(nameof(XRController3D).ToLower());
+        list.Remove(nameof(XRBodyModifier3D).ToLower());
+        list.Remove(nameof(XRFaceModifier3D).ToLower());
+        return list;
     }
 
     public static PlayerRoot NewPlayer(bool isLocal)
