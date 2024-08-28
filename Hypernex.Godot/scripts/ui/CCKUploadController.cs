@@ -17,6 +17,11 @@ namespace Hypernex.UI
             Avatar = 1,
         }
 
+        [Signal]
+        public delegate void UploadStartEventHandler();
+        [Signal]
+        public delegate void UploadEndEventHandler();
+
         [Export]
         public CCKController cck;
         [Export]
@@ -193,6 +198,8 @@ namespace Hypernex.UI
             // selectedWorldMeta.Publicity = WorldPublicity.Anyone;
             // selectedAvatarMeta.Publicity = AvatarPublicity.Anyone;
 
+            EmitSignal(SignalName.UploadStart);
+
             if (!string.IsNullOrWhiteSpace(worldNameEdit.Text))
                 selectedWorldMeta.Name = worldNameEdit.Text;
             if (!string.IsNullOrWhiteSpace(worldDescriptionEdit.Text))
@@ -212,9 +219,11 @@ namespace Hypernex.UI
                             Name = System.IO.Path.GetFileNameWithoutExtension(script),
                         });
                     }
-                    APITools.UploadScripts(serverScripts, scripts => {
+                    APITools.UploadScripts(serverScripts, scripts =>
+                    {
                         APITools.UploadWorld(selectedWorldPath, selectedWorldMeta, scripts, (success, msg) =>
                         {
+                            EmitSignal(SignalName.UploadEnd);
                             string title;
                             if (success)
                             {
@@ -231,6 +240,7 @@ namespace Hypernex.UI
                 case CCKFileType.Avatar:
                     APITools.UploadAvatar(selectedWorldPath, selectedAvatarMeta, (success, msg) =>
                     {
+                        EmitSignal(SignalName.UploadEnd);
                         string title;
                         if (success)
                         {

@@ -729,7 +729,7 @@ namespace Hypernex.CCK.GodotVersion
                 for (int i = 0; i < imgs.Length; i++)
                 {
                     string metaPath = $"{path.ReplaceN("res://", "")}.meta.{i}.webp";
-                    GD.PrintS("metapath", metaPath);
+                    // GD.PrintS("metapath", metaPath);
                     if (reader.FileExists(metaPath))
                     {
                         imgs[i] = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
