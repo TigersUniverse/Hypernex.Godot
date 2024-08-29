@@ -80,7 +80,10 @@ namespace Hypernex.Game
                     });
                 }
             }, UserId, isUserId: true);
-            GetPart<PlayerChat>()?.UserSet();
+            QuickInvoke.InvokeActionOnMainThread(() =>
+            {
+                GetPart<PlayerChat>()?.UserSet();
+            });
             OnUserSet?.Invoke();
         }
 

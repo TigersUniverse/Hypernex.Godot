@@ -212,6 +212,33 @@ public partial class Init : Node
         return fliteLibHandle;
     }
 
+    public static string GetLibPath(string libraryName)
+    {
+        string dir = OS.GetExecutablePath().GetBaseDir();
+        if (OS.HasFeature("editor"))
+        {
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+        }
+        string libHandle = string.Empty;
+        switch (OS.GetName().ToLower())
+        {
+            case "windows":
+                if (libraryName.Contains(".dll"))
+                    libHandle = Path.Combine(dir, libraryName);
+                else
+                    libHandle = Path.Combine(dir, $"{libraryName}.dll");
+                break;
+            case "linux":
+            case "android":
+                if (libraryName.Contains(".so"))
+                    libHandle = Path.Combine(dir, libraryName);
+                else
+                    libHandle = Path.Combine(dir, $"lib{libraryName}.so");
+                break;
+        }
+        return libHandle;
+    }
+
     public static IntPtr Resolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         string dir = OS.GetExecutablePath().GetBaseDir();

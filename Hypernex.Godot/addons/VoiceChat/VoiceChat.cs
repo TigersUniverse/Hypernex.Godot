@@ -23,6 +23,7 @@ public partial class VoiceChat : Node
     public struct VoiceData
     {
         // public int sampleRate;
+        public float[] pcm;
         public byte[] data;
         public int encodedLength;
         public int freq;
@@ -355,11 +356,12 @@ public partial class VoiceChat : Node
         Speak(decodedData, decodedLength);
     }
 
-    private void SendRpcSpeak(byte[] data, int encodedLength, int freq, int channels)
+    private void SendRpcSpeak(float[] pcmData, byte[] data, int encodedLength, int freq, int channels)
     {
         OnSpeak?.Invoke(new VoiceData()
         {
             // sampleRate = OpusSampleRate,
+            pcm = pcmData,
             data = data,
             encodedLength = encodedLength,
             freq = freq,
@@ -492,7 +494,7 @@ public partial class VoiceChat : Node
                 // else if (Listen)
                 //     RpcSpeak(encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
 
-                CallDeferred(nameof(SendRpcSpeak), encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
+                CallDeferred(nameof(SendRpcSpeak), data, encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
                 // Rpc(nameof(RpcSpeak), encodedDataFinal, encodedLength, encoder.InputSamplingRate, encoder.InputChannels);
             }
         }
