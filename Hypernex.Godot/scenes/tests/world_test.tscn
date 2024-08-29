@@ -67,7 +67,6 @@ shape = SubResource("ConcavePolygonShape3D_1l7cg")
 
 [node name="WorldDescriptor" type="Node3D" parent="Test/World"]
 script = ExtResource("3_xf3ip")
-StartPosition = Vector3(0, 10, 0)
 metadata/typename = "WorldDescriptor"
 
 [node name="Node" type="Node" parent="Test/World/WorldDescriptor"]

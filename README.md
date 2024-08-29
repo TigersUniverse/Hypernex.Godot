@@ -19,8 +19,7 @@ This client is very Work-in-Progress.
 ### In Progress
 
 - Godot Editor CCK (second iteration since May of 2024)
-- - All builtin nodes are accepted (which isn't good)
-- - Signals aren't supported yet
+- - Signals aren't supported as of current
 - Avatars (since May of 2024)
 - - Missing animations and scripting
 - VR (since August of 2024)
