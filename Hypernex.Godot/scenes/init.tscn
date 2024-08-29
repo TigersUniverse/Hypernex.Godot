@@ -48,11 +48,13 @@ vrRigScene = ExtResource("4_yte2b")
 [node name="ThemeManager" type="Node" parent="."]
 script = ExtResource("4_ju6j5")
 buttonBaseBox = SubResource("StyleBoxFlat_k8o0g")
-colorPrimary = Color(0.2, 0.4, 1, 1)
-colorSecondary = Color(0.6, 0.6, 0.6, 1)
-colorSuccess = Color(0, 0.8, 0.4, 1)
-colorWarning = Color(0.8, 0.6, 0, 1)
-colorInfo = Color(0, 0.7, 0.7, 1)
+colorPrimary = Color(0.2, 0.4, 1, 0.6)
+colorSecondary = Color(0.101961, 0.101961, 0.101961, 0.6)
+colorSuccess = Color(0, 0.8, 0.4, 0.6)
+colorDanger = Color(1, 0, 0, 0.6)
+colorWarning = Color(0.8, 0.6, 0, 0.6)
+colorInfo = Color(0, 0.701961, 0.701961, 0.6)
+baseTheme = ExtResource("4_f5hfe")
 
 [node name="VROverlay" type="TextureRect" parent="."]
 visible = false
@@ -87,6 +89,7 @@ theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
+metadata/_edit_lock_ = true
 
 [node name="Panel" type="PanelContainer" parent="UI/Margin"]
 layout_mode = 2
@@ -104,7 +107,31 @@ twoFactorEdit = NodePath("../2FA")
 loginButton = NodePath("../LoginBtn")
 loginOptions = NodePath("../LoginOptions")
 messagePopup = NodePath("../../../../AcceptDialog")
-exitButton = NodePath("../Exit")
+exitButton = NodePath("../TopBar/Exit")
+
+[node name="TopBar" type="HBoxContainer" parent="UI/Margin/Panel/Login"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="UI/Margin/Panel/Login/TopBar"]
+layout_mode = 2
+texture = ExtResource("10_0l1xh")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="UI/Margin/Panel/Login/TopBar"]
+layout_mode = 2
+text = "Hypernex"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Exit" type="Button" parent="UI/Margin/Panel/Login/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_type_variation = &"Danger"
+text = "Exit"
+
+[node name="HSeparator" type="HSeparator" parent="UI/Margin/Panel/Login"]
+layout_mode = 2
+theme_override_constants/separation = 15
 
 [node name="ServerAddress" type="LineEdit" parent="UI/Margin/Panel/Login"]
 layout_mode = 2
@@ -136,14 +163,6 @@ layout_mode = 2
 alignment = 1
 allow_reselect = true
 
-[node name="HSeparator" type="HSeparator" parent="UI/Margin/Panel/Login"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="Exit" type="Button" parent="UI/Margin/Panel/Login"]
-layout_mode = 2
-text = "Exit"
-
 [node name="MainOverlay" type="MarginContainer" parent="UI"]
 layout_mode = 1
 anchors_preset = 15
@@ -155,6 +174,7 @@ theme_override_constants/margin_left = 15
 theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
+metadata/_edit_lock_ = true
 
 [node name="Overlay" type="Node" parent="UI/MainOverlay" node_paths=PackedStringArray("root", "bar", "tabs", "cckButton", "cckWindow", "logoutButton", "exitButton", "profileName", "profilePhoto", "pfpVideo")]
 script = ExtResource("3_yxb3m")
@@ -442,11 +462,13 @@ text = "Launch CCK"
 
 [node name="LogoutBtn" type="Button" parent="UI/MainOverlay/MainOverlay/VBox/Margin/Tabs/Settings"]
 layout_mode = 2
+theme_type_variation = &"Warning"
 text = "Logout"
 
 [node name="ExitBtn" type="Button" parent="UI/MainOverlay/MainOverlay/VBox/Margin/Tabs/Settings"]
 layout_mode = 2
 tooltip_text = ":("
+theme_type_variation = &"Danger"
 text = "Exit"
 
 [node name="Current Instance" parent="UI/MainOverlay/MainOverlay/VBox/Margin/Tabs" instance=ExtResource("11_6bljf")]

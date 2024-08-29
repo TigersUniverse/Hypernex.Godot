@@ -40,6 +40,8 @@ namespace Hypernex.UI
 
         private void ReloadConfig(Config config)
         {
+            if (ConfigManager.SelectedConfigUser == null)
+                return;
             externalUrlsToggle.ButtonPressed = ConfigManager.LoadedConfig.UseTrustedURLs;
             volumeSlider.Value = ConfigManager.SelectedConfigUser.WorldAudioVolume * 100f;
             volumeLabel.Text = $"Volume {(int)volumeSlider.Value}%";

@@ -5,9 +5,9 @@ namespace Hypernex.UI
 {
     public static class UITools
     {
-        public static ThemedButton AddButton(this Control control, string text, Action<ThemedButton> callback)
+        public static Button AddButton(this Control control, string text, Action<Button> callback)
         {
-            var ui = new ThemedButton();
+            var ui = new Button();
             ui.Name = text;
             ui.Text = text;
             ui.Pressed += () => callback?.Invoke(ui);
@@ -15,9 +15,9 @@ namespace Hypernex.UI
             return ui;
         }
 
-        public static ThemedButton AddButton(this Control control, string text, UIButtonTheme theme, Action<ThemedButton> callback)
+        public static Button AddButton(this Control control, string text, UIButtonTheme theme, Action<Button> callback)
         {
-            var ui = new ThemedButton();
+            var ui = new Button();
             ui.Name = text;
             ui.Text = text;
             ui.ThemeTypeVariation = theme.ToString();//$"Button_{theme}";

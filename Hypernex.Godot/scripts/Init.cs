@@ -68,6 +68,8 @@ public partial class Init : Node
         Telepathy.Log.Info = s => logger.Debug(s);
         Telepathy.Log.Warning = s => logger.Warn(s);
         Telepathy.Log.Error = s => logger.Error(s);
+        SafeLoader.Log = s => logger.Debug(s);
+        SafeLoader.LogError = s => logger.Error(s);
 
         GetTree().Root.SizeChanged += Resized;
         Resized();
@@ -331,6 +333,7 @@ public partial class Init : Node
             AddChild(vrRig);
         }
 
+        ui.Theme = ThemeManager.Instance.realTheme;
         ui.Show();
         overlay.root.Hide();
         login.root.Show();

@@ -48,7 +48,6 @@ namespace Hypernex.CCK.GodotVersion
                     string id = prop.Substr(startIdx + begin, endIdx - startIdx - end);
                     if (LoadedExtResources.ContainsKey(id))
                         return LoadedExtResources[id];
-                    // GD.Print($"Failed {id}");
                     return new Variant();
                 }
                 if (prop.Trim().StartsWith("SubResource"))
@@ -63,7 +62,6 @@ namespace Hypernex.CCK.GodotVersion
                     var sub = SubResources[id];
                     if (ClassDB.IsParentClass(sub.Type, nameof(Script)) || !allowedClasses.Contains(sub.Type.ToLower()))
                         return new Variant();
-                        // sub.Type = nameof(Resource);
                     Resource res = CreateResource(zippath, sub.Type, sub.Properties, allowedClasses, validScripts);
                     foreach (var kvp in sub.Properties)
                     {
@@ -101,7 +99,6 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         dict.Add(item.Key, ConvertPropertyString(item.Value));
                     }
-                    // GD.Print(dict);
                     return dict;
                 }
                 return SafeLoader.ConvertPropertyString(prop);
@@ -199,7 +196,6 @@ namespace Hypernex.CCK.GodotVersion
                     string id = prop.Substr(startIdx + begin, endIdx - startIdx - end);
                     if (LoadedExtResources.ContainsKey(id))
                         return LoadedExtResources[id];
-                    // GD.Print($"Failed {id}");
                     return new Variant();
                 }
                 if (prop.Trim().StartsWith("SubResource"))
@@ -242,7 +238,6 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         dict.Add(item.Key, ConvertPropertyString(item.Value));
                     }
-                    // GD.Print(dict);
                     return dict;
                 }
                 return SafeLoader.ConvertPropertyString(prop);
@@ -277,9 +272,8 @@ namespace Hypernex.CCK.GodotVersion
             {
                 allowedClasses = classes;
                 validScripts = scripts;
-                // return new PackedScene();
                 Stopwatch sw = new Stopwatch();
-                GD.Print($"Begin compile");
+                Log($"Begin compile");
                 sw.Start();
                 Dictionary<string, Node> nodes = new Dictionary<string, Node>();
                 Dictionary<string, Node> subscenes = new Dictionary<string, Node>();
@@ -289,11 +283,9 @@ namespace Hypernex.CCK.GodotVersion
                     if (!string.IsNullOrWhiteSpace(parNode.Instance))
                     {
                         NodePath path2 = new NodePath($"{parNode.Parent}/{parNode.Name}");
-                        // GD.Print(path2);
                         Variant prop = ConvertPropertyString(parNode.Instance);
                         if (prop.VariantType == Variant.Type.Nil)
                         {
-                            // GD.Print($"inst={parNode.Instance} path2={path2}");
                             continue;
                         }
                         Node node2 = prop.As<PackedScene>().Instantiate();
@@ -303,7 +295,6 @@ namespace Hypernex.CCK.GodotVersion
                                 continue;
                             if (kvp.Key.StartsWith("name", StringComparison.OrdinalIgnoreCase))
                                 continue;
-                            // GD.PrintS(kvp.Key, kvp.Value);
                             node2.Set(kvp.Key, ConvertProperty(kvp.Value));
                         }
                         node2.Name = parNode.Name;
@@ -323,14 +314,12 @@ namespace Hypernex.CCK.GodotVersion
                         {
                             string path2 = path.ToString().Replace(scn.Key.TrimPrefix("./"), ".");
                             Node node2 = scn.Value.GetNodeOrNull(path2);
-                            // GD.PrintS(path, scn.Key, path2, node2);
                             if (GodotObject.IsInstanceValid(node2))
                             {
                                 foreach (var kvp in parNode.Properties)
                                 {
                                     if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                                         continue;
-                                    // GD.PrintS(kvp.Key, kvp.Value);
                                     node2.Set(kvp.Key, ConvertProperty(kvp.Value));
                                 }
                                 break;
@@ -365,7 +354,6 @@ namespace Hypernex.CCK.GodotVersion
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                             continue;
-                        // GD.PrintS(kvp.Key, kvp.Value);
                         node.Set(kvp.Key, ConvertProperty(kvp.Value));
                     }
                     if (string.IsNullOrEmpty(parNode.Parent))
@@ -376,7 +364,6 @@ namespace Hypernex.CCK.GodotVersion
                     nodes.Add(path.ToString(), node);
                 }
                 Node root = nodes.FirstOrDefault(x => x.Key == ".").Value;
-                // GD.Print(root.Name);
                 Node lastParent = root;
                 List<string> paths = new List<string>(nodes.Keys/*nodes.Keys.OrderBy(x => new NodePath(x).GetNameCount())*/);
                 int k = 0;
@@ -386,120 +373,55 @@ namespace Hypernex.CCK.GodotVersion
                 {
                     for (int i = 0; i < paths.Count; i++)
                     {
-                        // GD.PrintS(paths[i], GetParent(paths[i]));
                         Node parent = root.GetNodeOrNull(GetParent(paths[i]));
                         if (GodotObject.IsInstanceValid(parent))
                         {
                             parent.AddChild(nodes[paths[i]]);
-                            // GD.Print(paths[i]);
-                            // /*
                             foreach (var ch in nodes[paths[i]].FindChildren("*", "", true, false))
                             {
                                 ch.Owner = root;
                             }
-                            // */
                             nodes[paths[i]].Owner = root;
                             paths.RemoveAt(i);
                             i--;
                         }
-                        // else
-                        //     GD.PrintS(paths[i], GetParent(paths[i]));
-                            // GD.Print(paths[i]);
                     }
                     if (paths.Count == prevCount)
                     {
-                        GD.Print("This should not happen");
-                        // k = maxk;
+                        LogError("This should not happen");
                         k++;
                         if (k >= maxk)
                             break;
                     }
                     prevCount = paths.Count;
-                    // k++;
                 }
                 if (k >= maxk)
                 {
-                    GD.Print(string.Join(" ", paths));
+                    Log(string.Join(" ", paths));
                 }
                 sw.Stop();
-                GD.Print($"End compile {sw.ElapsedMilliseconds}ms");
-                // GD.PrintS(string.Join(", ", paths));
+                Log($"End compile {sw.ElapsedMilliseconds}ms");
                 string name = root.Name;
-                GD.Print($"Begin pack {name}");
+                Log($"Begin pack {name}");
                 sw.Restart();
                 PackedScene scene = new PackedScene();
                 scene.Pack(root);
-                foreach (var node in root.FindChildren("*", owned: false))
-                {
-                    // if (GodotObject.IsInstanceValid(node))
-                        // node.Free();
-                }
                 if (GodotObject.IsInstanceValid(root))
                     root.QueueFree();
-                /*
-                foreach (var node in subscenes)
-                {
-                    if (GodotObject.IsInstanceValid(node.Value))
-                    {
-                        node.Value.Free();
-                    }
-                }
-                foreach (var node in nodes)
-                {
-                    if (GodotObject.IsInstanceValid(node.Value))
-                        node.Value.Free();
-                }
-                */
                 sw.Stop();
-                GD.Print($"End pack {name} {sw.ElapsedMilliseconds}ms");
+                Log($"End pack {name} {sw.ElapsedMilliseconds}ms");
                 return scene;
             }
         }
 
-        public static bool IsParentPath(NodePath path, NodePath parent)
-        {
-            if (parent.GetNameCount() != path.GetNameCount() - 1)
-            {
-                return false;
-            }
-            for (int i = 0; i < path.GetNameCount() - 1; i++)
-            {
-                if (path.GetName(i) != parent.GetName(i))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         public static NodePath GetParent(NodePath path)
         {
-            // if (path.ToString() == ".")
-                // return new NodePath(".");
             List<string> names = new List<string>();
             for (int i = 0; i < path.GetNameCount() - 1; i++)
             {
                 names.Add(path.GetName(i));
             }
             return string.Join('/', names);
-        }
-
-        public static string GetName(NodePath path)
-        {
-            return path.GetName(path.GetNameCount() - 1);
-        }
-
-        public static bool IsRoot(NodePath path)
-        {
-            int j = 0;
-            for (int i = 0; i < path.GetNameCount(); i++)
-            {
-                if (path.GetName(i) != ".")
-                {
-                    j++;
-                }
-            }
-            return j == 0;
         }
 
         public static Script LoadScript(string path)
@@ -582,6 +504,8 @@ namespace Hypernex.CCK.GodotVersion
         public List<string> allowedClasses = new List<string>(); // MUST BE LOWERCASE!!
         public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
         public static Dictionary<string, List<Resource>> loadedResources = new Dictionary<string, List<Resource>>();
+        public static Action<string> Log = GD.Print;
+        public static Action<string> LogError = GD.PrintErr;
 
         public void Unload()
         {
@@ -624,7 +548,7 @@ namespace Hypernex.CCK.GodotVersion
             Error err = reader.Open(path);
             if (err != Error.Ok)
             {
-                GD.PrintErr(err);
+                LogError(err.ToString());
                 reader.Close();
                 return;
             }
@@ -643,12 +567,12 @@ namespace Hypernex.CCK.GodotVersion
                 }
                 else
                 {
-                    GD.PrintErr("Failed to find world.txt");
+                    LogError("Failed to find world.txt");
                 }
             }
             catch (Exception e)
             {
-                Logger.CurrentLogger.Critical(e);
+                LogError(e.ToString());
             }
             finally
             {
@@ -685,7 +609,7 @@ namespace Hypernex.CCK.GodotVersion
         public ParsedTres ParseBinRes(string path, byte[] data)
         {
             Stopwatch sw = new Stopwatch();
-            GD.Print("Begin parse");
+            Log("Begin parse");
             sw.Start();
             ParsedTres tscn = new ParsedTres(zippath);
 
@@ -714,7 +638,7 @@ namespace Hypernex.CCK.GodotVersion
                 }
 
             sw.Stop();
-            GD.Print($"End parse {sw.ElapsedMilliseconds}ms");
+            Log($"End parse {sw.ElapsedMilliseconds}ms");
             return tscn;
         }
 
@@ -732,14 +656,11 @@ namespace Hypernex.CCK.GodotVersion
             }
             if (!found)
             {
-                // GD.Print("Found 2D Layered");
-                // string strData = Encoding.UTF8.GetString(data);
                 Image[] imgs = new Image[128];
                 var arr = new Godot.Collections.Array<Image>();
                 for (int i = 0; i < imgs.Length; i++)
                 {
                     string metaPath = $"{path.ReplaceN("res://", "")}.meta.{i}.webp";
-                    // GD.PrintS("metapath", metaPath);
                     if (reader.FileExists(metaPath))
                     {
                         imgs[i] = Image.CreateEmpty(16, 16, false, Image.Format.Rgba8);
@@ -831,7 +752,7 @@ namespace Hypernex.CCK.GodotVersion
         public static ParsedTscn ParseBin(string zippath, byte[] data)
         {
             Stopwatch sw = new Stopwatch();
-            GD.Print("Begin parse");
+            Log("Begin parse");
             sw.Start();
             ParsedTscn tscn = new ParsedTscn(zippath);
 
@@ -869,7 +790,7 @@ namespace Hypernex.CCK.GodotVersion
                 }
 
             sw.Stop();
-            GD.Print($"End parse {sw.ElapsedMilliseconds}ms");
+            Log($"End parse {sw.ElapsedMilliseconds}ms");
             return tscn;
         }
 

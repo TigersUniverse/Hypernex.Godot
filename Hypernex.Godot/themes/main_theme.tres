@@ -1,35 +1,19 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://1cua8ppjbi8u"]
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://1cua8ppjbi8u"]
 
 [ext_resource type="FontFile" uid="uid://ttt3esh2se74" path="res://fonts/Lexend/Lexend-VariableFont_wght.ttf" id="1_kr3eu"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l4dt1"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jiy5c"]
-bg_color = Color(1, 0, 0, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dhmka"]
-bg_color = Color(0.2, 0.4, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bw5nm"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uovju"]
-bg_color = Color(0, 0.8, 0.4, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pjhwr"]
-bg_color = Color(0.8, 0.6, 0, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qjuje"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [resource]
 default_font = ExtResource("1_kr3eu")
-Button_Custom/base_type = &"Button"
-Button_Custom/colors/button_color_type = Color(1, 1, 1, 1)
-Button_Custom/styles/normal = SubResource("StyleBoxFlat_l4dt1")
-Button_Danger/base_type = &"Button_Custom"
-Button_Danger/styles/normal = SubResource("StyleBoxFlat_jiy5c")
-Button_Primary/base_type = &"Button_Custom"
-Button_Primary/styles/normal = SubResource("StyleBoxFlat_dhmka")
-Button_Secondary/base_type = &"Button_Custom"
-Button_Secondary/styles/normal = SubResource("StyleBoxFlat_bw5nm")
-Button_Success/base_type = &"Button_Custom"
-Button_Success/styles/normal = SubResource("StyleBoxFlat_uovju")
-Button_Warning/base_type = &"Button_Custom"
-Button_Warning/styles/normal = SubResource("StyleBoxFlat_pjhwr")
+Button/styles/normal = SubResource("StyleBoxFlat_qjuje")
