@@ -35,7 +35,7 @@ namespace FFmpeg.Godot.Helpers
                 index++;
             if (pool[index % pool.Count].inUse)
             {
-                GD.Print($"Adding to texture pool {pool.Count}");
+                // GD.Print($"Adding to texture pool {pool.Count}");
                 var n = new TexturePoolState()
                 {
                     texture = Image.CreateEmpty(16, 16, false, Image.Format.Rgb8),
@@ -44,6 +44,8 @@ namespace FFmpeg.Godot.Helpers
                 index = pool.Count - 1;
             }
             pool[index % pool.Count].inUse = true;
+            // if (GodotObject.IsInstanceValid(pool[index % pool.Count].texture))
+            //     RenderingServer.FreeRid(pool[index % pool.Count].texture.GetRid());
             return pool[index % pool.Count];
         }
 
@@ -52,11 +54,17 @@ namespace FFmpeg.Godot.Helpers
             if (state == null)
                 return;
             state.inUse = false;
+            // if (GodotObject.IsInstanceValid(state.texture))
+            //     RenderingServer.FreeRid(state.texture.GetRid());
             // state.texture = Image.Create(16, 16, false, Image.Format.Rgb8);
         }
 
         public void Dispose()
         {
+            foreach (var tex in pool)
+            {
+                RenderingServer.FreeRid(tex.texture.GetRid());
+            }
             pool.Clear();
         }
     }

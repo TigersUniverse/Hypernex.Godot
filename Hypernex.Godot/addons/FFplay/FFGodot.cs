@@ -55,18 +55,20 @@ namespace FFmpeg.Godot
         public double _elapsedTotalSeconds => _videoWatch?.Elapsed.TotalSeconds ?? 0d;
         public double _elapsedOffsetVideo => _elapsedTotalSeconds + _videoOffset - _timeOffset;
         public double _elapsedOffset => _elapsedTotalSeconds - _timeOffset;
+        private double? seekTarget = null;
 
         // buffer controls
-        private int _videoBufferCount = 1024;
+        private int _videoBufferCount = 4;
+        private int _videoBufferCount2 = 128;
         private int _audioBufferCount = 1;
         [Export]
         public double _videoTimeBuffer = 1d;
         [Export]
-        public double _videoSkipBuffer = 0.2d;
+        public double _videoSkipBuffer = 0.5d;
         [Export]
         public double _audioTimeBuffer = 1d;
         [Export]
-        public double _audioSkipBuffer = 0.2d;
+        public double _audioSkipBuffer = 0.5d;
         private int _audioBufferSize = 1024;
 
         // godot assets
@@ -137,6 +139,7 @@ namespace FFmpeg.Godot
         {
             _paused = true;
             _decodeThread?.Join();
+            _texturePool?.Dispose();
             _videoDecoder?.Dispose();
             _audioDecoder?.Dispose();
             _streamVideoCtx?.Dispose();
@@ -147,7 +150,13 @@ namespace FFmpeg.Godot
         {
             Log(nameof(Seek));
             _paused = true;
-            _decodeThread?.Join();
+            seekTarget = seek;
+        }
+
+        public void SeekInternal(double seek)
+        {
+            // _paused = true;
+            // _decodeThread?.Join();
             if (IsInstanceValid(source))
                 source.Stop();
             {
@@ -180,11 +189,9 @@ namespace FFmpeg.Godot
             _audioDecoder?.Seek();
             if (IsInstanceValid(source))
             {
-                // source.Stream = _audioClip;
-                // source.Play();
                 CallDeferred(nameof(SetAudioPlayback));
             }
-            // _audioPlayback = (AudioStreamGeneratorPlayback)source.GetStreamPlayback();
+            seekTarget = null;
             _paused = false;
             StartDecodeThread();
         }
@@ -196,6 +203,7 @@ namespace FFmpeg.Godot
             // {
                 _paused = true;
                 _decodeThread?.Join();
+                _texturePool?.Dispose();
                 _videoDecoder?.Dispose();
                 _audioDecoder?.Dispose();
                 _streamVideoCtx?.Dispose();
@@ -214,6 +222,7 @@ namespace FFmpeg.Godot
             // {
                 _paused = true;
                 _decodeThread?.Join();
+                _texturePool?.Dispose();
                 _videoDecoder?.Dispose();
                 _audioDecoder?.Dispose();
                 _streamVideoCtx?.Dispose();
@@ -270,7 +279,7 @@ namespace FFmpeg.Godot
             _videoWatch = new Stopwatch();
 
             // pre-allocate buffers, prevent the C# GC from using CPU
-            _texturePool = new TexturePool(_videoBufferCount);
+            _texturePool = new TexturePool(_videoBufferCount2);
             _videoTextures = new Queue<TexturePool.TexturePoolState>(_videoBufferCount);
             _audioClip = null; // don't create audio clip yet, we have nothing to play.
             _videoFrames = new AVFrame[_videoBufferCount];
@@ -314,6 +323,11 @@ namespace FFmpeg.Godot
             {
                 Pause();
                 EmitSignal(SignalName.Finished);
+            }
+
+            if (seekTarget.HasValue && (_decodeThread == null || !_decodeThread.IsAlive))
+            {
+                SeekInternal(seekTarget.Value);
             }
 
             if (!_paused)
@@ -381,13 +395,18 @@ namespace FFmpeg.Godot
         private void Update_Thread()
         {
             Log("AV Thread started.");
+            double fps;
+            if (!_streamVideoCtx.TryGetFps(_videoDecoder, out fps))
+                fps = 30d;
+            double fpsMs = 1d / fps * 1000;
             while (!_paused)
             {
                 try
                 {
-                    FillVideoBuffers(false);
-                    Thread.Sleep(1);
-                    Thread.Yield();
+                    long ms = FillVideoBuffers(false, fps, fpsMs);
+                    Thread.Sleep((int)Math.Max(5, fpsMs - ms));
+                    // Thread.Sleep(1);
+                    // Thread.Yield();
                 }
                 catch (Exception e)
                 {
@@ -426,7 +445,11 @@ namespace FFmpeg.Godot
                     if (IsInstanceValid(_imageTexture) && (Vector2I)_imageTexture.GetSize() == _lastVideoTex.texture.GetSize())
                         _imageTexture.Update(_lastVideoTex.texture);
                     else
+                    {
+                        if (IsInstanceValid(_imageTexture))
+                            RenderingServer.FreeRid(_imageTexture.GetRid());
                         _imageTexture = ImageTexture.CreateFromImage(_lastVideoTex.texture);
+                    }
                     renderMesh.Texture = _imageTexture;
                 }
             }
@@ -474,19 +497,17 @@ namespace FFmpeg.Godot
         [NonSerialized]
         public int skippedFrames = 0;
 
-        private void FillVideoBuffers(bool mainThread)
+        private long FillVideoBuffers(bool mainThread, double fps, double fpsMs)
         {
             if (_streamVideoCtx == null || _streamAudioCtx == null)
-                return;
+                return 0;
             bool found = false;
             int k = 0;
             Stopwatch sw = new Stopwatch();
             sw.Restart();
-            if (!_streamVideoCtx.TryGetFps(_videoDecoder, out var fps))
-                return;
             fps *= 2;
             // fps = 120;
-            while (k < fps && sw.ElapsedMilliseconds <= 16)
+            while (k < fps && sw.ElapsedMilliseconds <= fpsMs)
             {
                 double timeBuffer = 0.5d;
                 double timeBufferSkip = 0.15d;
@@ -623,6 +644,7 @@ namespace FFmpeg.Godot
             }
             if (k >= fps)
                 LogWarning("Max while true reached!");
+            return sw.ElapsedMilliseconds;
         }
         #endregion
 
