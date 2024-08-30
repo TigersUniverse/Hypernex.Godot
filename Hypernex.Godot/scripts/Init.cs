@@ -2,6 +2,7 @@ using Godot;
 using Hypernex;
 using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
+using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Configuration;
 using Hypernex.Game;
 using Hypernex.Tools;
@@ -47,6 +48,9 @@ public partial class Init : Node
     public static bool IsVRLoaded => xrInterface != null && xrInterface.IsInitialized();
 
     public static bool resolverSet = false;
+
+    public static Func<ISceneProvider> WorldProvider;
+    public static Func<ISceneProvider> AvatarProvider;
 
     static Init()
     {
@@ -98,6 +102,8 @@ public partial class Init : Node
         worldsRoot = new Node() { Name = "Worlds" };
         AddChild(worldsRoot);
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
+
+        SetupSceneProviders();
 
         int pluginsLoaded;
         try
@@ -301,6 +307,30 @@ public partial class Init : Node
                 Engine.PhysicsTicksPerSecond = (int)openxr.DisplayRefreshRate;
             }
         }
+    }
+    
+    public void SetupSceneProviders()
+    {
+        WorldProvider = () =>
+        {
+            SafeLoader loader = new SafeLoader();
+            loader.allowedClasses = GetValidClasses();
+            loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
+            loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
+            loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
+            loader.validScripts.Add(UICanvas.TypeName, SafeLoader.LoadScript<UICanvas>());
+            loader.validScripts.Add(VideoPlayer.TypeName, SafeLoader.LoadScript<VideoPlayer>());
+            loader.validScripts.Add(WorldAsset.TypeName, SafeLoader.LoadScript<WorldAsset>());
+            loader.validScripts.Add(Mirror.TypeName, SafeLoader.LoadScript<Mirror>());
+            return loader;
+        };
+        AvatarProvider = () =>
+        {
+            SafeLoader loader = new SafeLoader();
+            loader.allowedClasses = GetValidClasses();
+            loader.validScripts.Add(AvatarDescriptor.TypeName, SafeLoader.LoadScript<AvatarDescriptor>());
+            return loader;
+        };
     }
 
     public void SetupAndRunGame()

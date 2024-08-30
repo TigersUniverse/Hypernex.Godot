@@ -13,6 +13,7 @@ viewport_path = NodePath("CharacterBody3D/View/Username/SubViewport")
 viewport_path = NodePath("CharacterBody3D/View/Sprite3D/SubViewport")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
+height = 1.8
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_i7wyo"]
 
@@ -101,7 +102,7 @@ max_value = 1.0
 step = 0.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_wyrxg")
 disabled = true
 

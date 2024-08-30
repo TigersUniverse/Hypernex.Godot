@@ -11,7 +11,7 @@ namespace Hypernex.Game
 {
     public partial class AvatarRoot : Node
     {
-        public SafeLoader safeLoader;
+        public ISceneProvider safeLoader;
         public AvatarDescriptor descriptor;
         public IKSystem ikSystem;
         public Node3D target;
@@ -230,26 +230,24 @@ namespace Hypernex.Game
 
         public override void _ExitTree()
         {
-            safeLoader.Unload();
+            safeLoader.Dispose();
         }
 
         public static AvatarRoot LoadFromFile(string path)
         {
             AvatarRoot root = new AvatarRoot();
-            SafeLoader loader = new SafeLoader();
+            ISceneProvider loader = Init.AvatarProvider();
             root.safeLoader = loader;
-            loader.allowedClasses = Init.GetValidClasses();
-            loader.validScripts.Add(AvatarDescriptor.TypeName, SafeLoader.LoadScript<AvatarDescriptor>());
+            PackedScene scn = null;
             try
             {
-                loader.ReadZip(path);
+                scn = loader.LoadFromFile(path);
             }
             catch (Exception e)
             {
                 Logger.CurrentLogger.Critical(e);
             }
-            PackedScene scn = loader.scene;
-            if (!IsInstanceValid(loader.scene))
+            if (!IsInstanceValid(scn))
             {
                 Logger.CurrentLogger.Error("Unable to load avatar!");
                 return root;

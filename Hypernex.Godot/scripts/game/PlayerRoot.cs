@@ -137,7 +137,7 @@ namespace Hypernex.Game
 
         public override void _Process(double delta)
         {
-            if (IsInstanceValid(Avatar))
+            if (IsInstanceValid(Avatar) && IsInstanceValid(Avatar.descriptor))
             {
                 if (IsLocal && !Init.IsVRLoaded)
                 {

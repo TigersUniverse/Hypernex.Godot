@@ -20,6 +20,7 @@ shading_mode = 0
 albedo_color = Color(1, 0, 0, 0.176471)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
+height = 1.8
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_i7wyo"]
 
@@ -72,7 +73,7 @@ mesh = SubResource("CylinderMesh_td8dh")
 surface_material_override/0 = SubResource("StandardMaterial3D_4uruo")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_wyrxg")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]

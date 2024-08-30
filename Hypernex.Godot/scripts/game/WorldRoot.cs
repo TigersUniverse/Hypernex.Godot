@@ -13,7 +13,7 @@ namespace Hypernex.Game
 {
     public partial class WorldRoot : Node
     {
-        public SafeLoader safeLoader;
+        public ISceneProvider safeLoader;
         public GameInstance gameInstance;
         public WorldDescriptor descriptor;
         public List<Node> Objects = new List<Node>();
@@ -116,22 +116,15 @@ namespace Hypernex.Game
             foreach (var obj in Objects)
                 if (IsInstanceValid(obj))
                     obj.Free();
-            safeLoader.Unload();
+            safeLoader.Dispose();
         }
 
         public static WorldRoot LoadFromFile(string path)
         {
             WorldRoot root = new WorldRoot();
-            SafeLoader loader = new SafeLoader();
+            ISceneProvider loader = Init.WorldProvider();
             root.safeLoader = loader;
-            loader.allowedClasses = Init.GetValidClasses();
-            loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
-            loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
-            loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
-            loader.validScripts.Add(UICanvas.TypeName, SafeLoader.LoadScript<UICanvas>());
-            loader.validScripts.Add(VideoPlayer.TypeName, SafeLoader.LoadScript<VideoPlayer>());
-            loader.validScripts.Add(WorldAsset.TypeName, SafeLoader.LoadScript<WorldAsset>());
-            loader.validScripts.Add(Mirror.TypeName, SafeLoader.LoadScript<Mirror>());
+            PackedScene scn = null;
             if (IsInstanceValid(Init.Instance))
             {
                 QuickInvoke.InvokeActionOnMainThread(() =>
@@ -141,7 +134,7 @@ namespace Hypernex.Game
             }
             try
             {
-                loader.ReadZip(path);
+                scn = loader.LoadFromFile(path);
             }
             catch (Exception e)
             {
@@ -154,11 +147,10 @@ namespace Hypernex.Game
                     Init.Instance.loadingOverlay.isLoading--;
                 });
             }
-            PackedScene scn = loader.scene;
-            if (!IsInstanceValid(loader.scene))
+            if (!IsInstanceValid(scn))
             {
                 Logger.CurrentLogger.Error("Unable to load world!");
-                loader.Unload();
+                loader.Dispose();
                 return root;
             }
             Node node = scn.Instantiate();

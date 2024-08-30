@@ -15,7 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="addons\Nexport\Nexport.csproj" />
-    <!-- <ProjectReference Include="addons\DiscordGameSDK\DiscordGameSDK.csproj" /> -->
     <ProjectReference Include="addons\VoiceChat\VoiceChat.csproj" />
     <ProjectReference Include="addons\Flite\Flite.csproj" />
   </ItemGroup>

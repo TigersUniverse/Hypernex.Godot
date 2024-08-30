@@ -9,7 +9,7 @@ using Hypernex.CCK.GodotVersion.Classes;
 
 namespace Hypernex.CCK.GodotVersion
 {
-    public partial class SafeLoader : IDisposable
+    public partial class SafeLoader : ISceneProvider, IDisposable
     {
         public class ParsedSubTres
         {
@@ -524,13 +524,20 @@ namespace Hypernex.CCK.GodotVersion
 
         public void Dispose()
         {
-            reader.Dispose();
+            reader?.Dispose();
             Unload();
         }
 
         public SafeLoader()
         {
             allowedClasses.AddRange(ClassDB.GetClassList().Select(x => x.ToLower()));
+        }
+
+        public PackedScene LoadFromFile(string filePath)
+        {
+            scene = null;
+            ReadZip(filePath);
+            return scene;
         }
 
         public void ReadZip(string path)
@@ -541,7 +548,7 @@ namespace Hypernex.CCK.GodotVersion
             }
             zippath = path;
             Unload();
-            loadedResources.Add(path, new List<Resource>());
+            loadedResources.Add(zippath, new List<Resource>());
             if (charArr == null)
                 charArr = new List<char>();
             reader = new ZipReader();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using Godot;
 
 namespace Hypernex.CCK.GodotVersion
@@ -14,6 +15,7 @@ namespace Hypernex.CCK.GodotVersion
 
         public static int LoadAllPlugins(string path)
         {
+            AssemblyLoadContext alc = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly());
             int pluginsLoaded = 0;
             if (!Directory.Exists(path))
             {
@@ -24,7 +26,7 @@ namespace Hypernex.CCK.GodotVersion
             {
                 try
                 {
-                    Assembly assembly = Assembly.LoadFile(Path.GetFullPath(possiblePluginFile));
+                    Assembly assembly = alc.LoadFromAssemblyPath(Path.GetFullPath(possiblePluginFile));
                     List<Type> plugins = assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(HypernexPlugin)))
                         .ToList();
                     foreach (Type pluginType in plugins)
