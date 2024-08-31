@@ -20,6 +20,7 @@ shading_mode = 0
 albedo_color = Color(1, 0, 0, 0.176471)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
+radius = 0.25
 height = 1.8
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_i7wyo"]

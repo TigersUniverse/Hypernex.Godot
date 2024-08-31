@@ -13,6 +13,7 @@ viewport_path = NodePath("CharacterBody3D/View/Username/SubViewport")
 viewport_path = NodePath("CharacterBody3D/View/Sprite3D/SubViewport")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wyrxg"]
+radius = 0.25
 height = 1.8
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_i7wyo"]
