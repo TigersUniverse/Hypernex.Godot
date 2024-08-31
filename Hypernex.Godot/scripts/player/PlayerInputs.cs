@@ -18,6 +18,7 @@ namespace Hypernex.Player
         public Vector2 lastMousePosition;
         public Vector2 lastMouseDelta;
         public bool shouldJump = false;
+        public bool isNoclip = false;
 
         private bool lastPrimaryTriggerState = false;
 
@@ -56,8 +57,8 @@ namespace Hypernex.Player
                 return;
             var position = GetViewport().GetMousePosition();
             lastMousePosition = position;
-            ReadInput();
-            HandleMouseRayCast();
+            // ReadInput();
+            // HandleMouseRayCast();
         }
 
         public override void _PhysicsProcess(double delta)
@@ -136,6 +137,8 @@ namespace Hypernex.Player
                 move = Input.GetVector("move_left", "move_right", "move_forward", "move_back");
                 if (Input.IsActionJustPressed("move_jump"))
                     shouldJump = true;
+                if (Input.IsActionJustPressed("move_noclip"))
+                    isNoclip = !isNoclip;
             }
         }
     }

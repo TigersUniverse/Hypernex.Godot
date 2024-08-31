@@ -14,6 +14,8 @@ namespace Hypernex.Player
         [Export]
         public float speed = 1f;
         [Export]
+        public float noclipSpeed = 2f;
+        [Export]
         public float jumpHeight = 2f;
         public float gravity;
         [Export]
@@ -41,6 +43,14 @@ namespace Hypernex.Player
             if (inputs == null)
                 return;
             Vector3 vel = Velocity;
+
+            if (inputs.isNoclip)
+            {
+                Vector3 noclipDir = root.view.GlobalBasis.Orthonormalized() * (new Vector3(inputs.move.X, 0f, inputs.move.Y).Normalized() * noclipSpeed);
+                Velocity = vel.MoveToward(noclipDir, (float)delta * accel);
+                Position += noclipDir * (float)delta;
+                return;
+            }
 
             if (!IsOnFloor())
                 vel.Y -= gravity * (float)delta;

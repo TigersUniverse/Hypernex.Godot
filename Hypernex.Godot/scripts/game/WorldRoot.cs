@@ -38,6 +38,17 @@ namespace Hypernex.Game
         {
             if (IsInstanceValid(descriptor))
                 player.Pos = descriptor.GetRandomSpawn().GlobalPosition;
+            else
+            {
+                var query = new PhysicsRayQueryParameters3D()
+                {
+                    From = Vector3.Up * 1000f,
+                    To = Vector3.Up * -1000f,
+                };
+                var results = player.GetWorld3D().DirectSpaceState.IntersectRay(query);
+                if (results.Count != 0)
+                    player.Pos = results["position"].AsVector3();
+            }
         }
 
         public void AddObject(Node worldObject)
