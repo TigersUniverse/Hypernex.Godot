@@ -10,7 +10,7 @@ public partial class LoadingOverlay : Node
     [Export]
     public Control barContainer;
     [Export]
-    public Label label;
+    public Control label;
     public Control root;
 
     public class LoadProgress

@@ -491,32 +491,43 @@ grow_vertical = 0
 
 [node name="Controller" type="Node" parent="UI/LoadingIcon" node_paths=PackedStringArray("bar", "barContainer", "label")]
 script = ExtResource("14_j4y3h")
-bar = NodePath("../CenterContainer/VBoxContainer/Bar/ProgressBar")
-barContainer = NodePath("../CenterContainer/VBoxContainer/Bar")
-label = NodePath("../CenterContainer/VBoxContainer/Label")
+bar = NodePath("../VBoxContainer/Bar/ProgressBar")
+barContainer = NodePath("../VBoxContainer/Bar")
+label = NodePath("../VBoxContainer/ProgressBar")
 
-[node name="CenterContainer" type="CenterContainer" parent="UI/LoadingIcon"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/LoadingIcon"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/LoadingIcon/CenterContainer"]
+[node name="ProgressBar" type="ProgressBar" parent="UI/LoadingIcon/VBoxContainer"]
+custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
+size_flags_vertical = 3
+show_percentage = false
+indeterminate = true
+editor_preview_indeterminate = false
 
-[node name="Label" type="Label" parent="UI/LoadingIcon/CenterContainer/VBoxContainer"]
-layout_mode = 2
+[node name="Label" type="Label" parent="UI/LoadingIcon/VBoxContainer/ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "Loading..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Bar" type="HBoxContainer" parent="UI/LoadingIcon/CenterContainer/VBoxContainer"]
+[node name="Bar" type="HBoxContainer" parent="UI/LoadingIcon/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="ProgressBar" type="ProgressBar" parent="UI/LoadingIcon/CenterContainer/VBoxContainer/Bar"]
+[node name="ProgressBar" type="ProgressBar" parent="UI/LoadingIcon/VBoxContainer/Bar"]
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 max_value = 1.0
 step = 0.0
 
-[node name="Button" type="Button" parent="UI/LoadingIcon/CenterContainer/VBoxContainer/Bar"]
+[node name="Button" type="Button" parent="UI/LoadingIcon/VBoxContainer/Bar"]
 layout_mode = 2
 text = "Cancel"
 
@@ -532,5 +543,5 @@ transient = true
 [node name="UILayer" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
-[connection signal="pressed" from="UI/LoadingIcon/CenterContainer/VBoxContainer/Bar/Button" to="UI/LoadingIcon/Controller" method="StopAllDownloads"]
+[connection signal="pressed" from="UI/LoadingIcon/VBoxContainer/Bar/Button" to="UI/LoadingIcon/Controller" method="StopAllDownloads"]
 [connection signal="close_requested" from="UI/Window" to="UI/Window" method="hide"]
