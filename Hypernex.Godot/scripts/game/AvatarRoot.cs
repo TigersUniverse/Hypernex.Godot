@@ -59,7 +59,8 @@ namespace Hypernex.Game
         public void AttachTo(Node3D to)
         {
             target = to;
-            InitIk();
+            if (IsInstanceValid(descriptor))
+                InitIk();
         }
 
         public async void InitIk()
@@ -93,6 +94,61 @@ namespace Hypernex.Game
             ikSystem.rightHandData.ik.ResolveIK();
             ikSystem.leftFootData.ik.ResolveIK();
             ikSystem.rightFootData.ik.ResolveIK();
+        }
+
+        public void ProcessIkFBT(bool useHead, Transform3D head, Transform3D floor, Transform3D leftHand, Transform3D rightHand, Transform3D hips, Transform3D leftFoot, Transform3D rightFoot)
+        {
+            if (IsInstanceValid(ikSystem) && ikSystem.IsNodeReady())
+            {
+                Node3D root = ikSystem.humanoid;
+
+                if (useHead)
+                {
+                    ikSystem.humanoid.GlobalPosition = floor.Origin;
+                    Vector3 hipRotation = floor.Basis.GetEuler();
+                    hipRotation.X = 0f;
+                    hipRotation.Y += Mathf.Pi;
+                    hipRotation.Z = 0f;
+                    ikSystem.humanoid.GlobalRotation = hipRotation;
+                    Vector3 headScl = ikSystem.headTarget.Scale;
+                    ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
+                    ikSystem.headTarget.Scale = headScl;
+                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                }
+                else
+                {
+                    Vector3 scale = root.Scale;
+                    root.GlobalPosition = target.GlobalPosition;
+                    root.GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
+                    root.Scale = scale;
+                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                }
+
+                Vector3 leftScl = ikSystem.leftHandData.target.Scale;
+                ikSystem.leftHandData.target.GlobalTransform = leftHand.RotatedLocal(Vector3.Up, Mathf.Pi).RotatedLocal(Vector3.Right, Mathf.Pi * 0.5f);//.RotatedLocal(Vector3.Up, Mathf.Pi * -0.5f);
+                ikSystem.leftHandData.target.Scale = leftScl;
+
+                Vector3 rightScl = ikSystem.rightHandData.target.Scale;
+                ikSystem.rightHandData.target.GlobalTransform = rightHand.RotatedLocal(Vector3.Up, Mathf.Pi).RotatedLocal(Vector3.Right, Mathf.Pi * 0.5f);//.RotatedLocal(Vector3.Up, Mathf.Pi * 0.5f);
+                ikSystem.rightHandData.target.Scale = rightScl;
+
+                Vector3 scl = ikSystem.hips.Scale;
+                ikSystem.hips.GlobalPosition = hips.Origin;
+                ikSystem.hips.GlobalBasis = hips.Basis;
+                ikSystem.hips.Scale = scl;
+
+                scl = ikSystem.leftFootData.target.Scale;
+                ikSystem.leftFootData.target.GlobalPosition = leftFoot.Origin;
+                ikSystem.leftFootData.target.GlobalBasis = leftFoot.Basis;
+                ikSystem.leftFootData.target.Scale = scl;
+
+                scl = ikSystem.rightFootData.target.Scale;
+                ikSystem.rightFootData.target.GlobalPosition = rightFoot.Origin;
+                ikSystem.rightFootData.target.GlobalBasis = rightFoot.Basis;
+                ikSystem.rightFootData.target.Scale = scl;
+
+                CalcIk();
+            }
         }
 
         public void ProcessIk(bool vr, bool useHead, Transform3D head, Transform3D floor, Transform3D leftHand, Transform3D rightHand)

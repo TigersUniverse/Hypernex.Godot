@@ -56,6 +56,13 @@ namespace Hypernex.Game
             return (T)Parts.FirstOrDefault(x => x is T);
         }
 
+        public void SetUserOffline(GameInstance instance)
+        {
+            Instance = instance;
+            Local = this;
+            OnUserSet?.Invoke();
+        }
+
         public void SetUser(string userid, GameInstance instance)
         {
             UserId = userid;

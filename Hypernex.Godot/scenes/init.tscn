@@ -18,7 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://bc42bxyk4uvjk" path="res://scenes/big_card.tscn" id="11_6bljf"]
 [ext_resource type="Script" path="res://addons/FFplay/FFGodot.cs" id="12_860td"]
 [ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="14_j4y3h"]
-[ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck.tscn" id="14_tnrj2"]
+[ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck_uploader.tscn" id="14_tnrj2"]
 [ext_resource type="Script" path="res://scripts/ui/AvatarsController.cs" id="15_xnq34"]
 [ext_resource type="Script" path="res://scripts/ui/SettingsController.cs" id="16_7yuv7"]
 

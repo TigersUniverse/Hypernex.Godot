@@ -21,6 +21,12 @@ public partial class VRRig : Node3D
     [Export]
     public XRController3D rightHandSkel;
     [Export]
+    public XRController3D hips;
+    [Export]
+    public XRController3D leftFoot;
+    [Export]
+    public XRController3D rightFoot;
+    [Export]
     public RayCast3D[] raycasts = Array.Empty<RayCast3D>();
     [Export]
     public UICanvas canvas;
@@ -39,6 +45,8 @@ public partial class VRRig : Node3D
     private bool lastJumpState = false;
     private string primaryTracker;
     private bool lastMenuToggleState = false;
+
+    public bool IsFBT => hips.GetIsActive() && leftFoot.GetIsActive() && rightFoot.GetIsActive();
 
     [Export]
     public float triggerClickThreshold = 0.75f;
@@ -214,7 +222,11 @@ public partial class VRRig : Node3D
                 // TODO: eye offsets
                 Vector3 backFloor = head.GlobalBasis.Z;
                 backFloor.Y = 0f;
-                PlayerRoot.Local.Avatar.ProcessIk(true, true, head.GlobalTransform.Translated(backFloor * 0.2f), floor, leftHandSkel.GlobalTransform, rightHandSkel.GlobalTransform);
+                PlayerRoot.Local.Avatar.ikSystem.moveFeet = !IsFBT;
+                if (IsFBT)
+                    PlayerRoot.Local.Avatar.ProcessIkFBT(true, head.GlobalTransform.Translated(backFloor * 0.2f), floor, leftHandSkel.GlobalTransform, rightHandSkel.GlobalTransform, hips.GlobalTransform, leftFoot.GlobalTransform, rightFoot.GlobalTransform);
+                else
+                    PlayerRoot.Local.Avatar.ProcessIk(true, true, head.GlobalTransform.Translated(backFloor * 0.2f), floor, leftHandSkel.GlobalTransform, rightHandSkel.GlobalTransform);
                 // PlayerRoot.Local.Avatar.ikSystem.head.Scale = Vector3.One * 0.01f;
             }
         }

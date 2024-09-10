@@ -6,6 +6,7 @@ using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.CCK.GodotVersion.Converters;
+using Hypernex.Player;
 using Hypernex.Sandboxing;
 using Hypernex.Tools;
 
@@ -43,10 +44,12 @@ namespace Hypernex.Game
                 var query = new PhysicsRayQueryParameters3D()
                 {
                     From = Vector3.Up * 1000f,
-                    To = Vector3.Up * -1000f,
+                    To = Vector3.Down * 1000f,
                 };
                 var results = player.GetWorld3D().DirectSpaceState.IntersectRay(query);
-                if (results.Count != 0)
+                if (results.Count == 0)
+                    player.GetPart<PlayerInputs>().isNoclip = true;
+                else
                     player.Pos = results["position"].AsVector3();
             }
         }

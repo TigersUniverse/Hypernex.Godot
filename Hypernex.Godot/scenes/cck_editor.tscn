@@ -1,0 +1,132 @@
+[gd_scene load_steps=5 format=3 uid="uid://r2lomnr0qtj5"]
+
+[ext_resource type="Script" path="res://scripts/cck/EditMode.cs" id="1_m3rwt"]
+[ext_resource type="Script" path="res://scripts/cck/SceneEditor.cs" id="2_frvxk"]
+[ext_resource type="Script" path="res://scripts/cck/EditorEntity.cs" id="3_2rt6i"]
+
+[sub_resource type="Theme" id="Theme_75xxj"]
+default_font_size = 12
+
+[node name="Editor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_lock_ = true
+
+[node name="Controller" type="Node" parent="." node_paths=PackedStringArray("menuContainer", "menuBar", "assetsTree", "openFile", "fileMenu", "assetsMenu")]
+script = ExtResource("1_m3rwt")
+menuContainer = NodePath("../VBoxContainer/Menu")
+menuBar = NodePath("../VBoxContainer/Menu/MenuBar")
+assetsTree = NodePath("../VBoxContainer/HBoxContainer/VBoxContainer/Assets/Tree")
+openFile = NodePath("../FileDialog")
+fileMenu = NodePath("../VBoxContainer/Menu/MenuBar/Project")
+assetsMenu = NodePath("../VBoxContainer/Menu/MenuBar/Assets")
+
+[node name="FileDialog" type="FileDialog" parent="."]
+initial_position = 2
+size = Vector2i(352, 180)
+ok_button_text = "Save"
+access = 2
+use_native_dialog = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+metadata/_edit_lock_ = true
+
+[node name="Menu" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme = SubResource("Theme_75xxj")
+
+[node name="MenuBar" type="MenuBar" parent="VBoxContainer/Menu"]
+layout_mode = 2
+
+[node name="Project" type="PopupMenu" parent="VBoxContainer/Menu/MenuBar"]
+size = Vector2i(100, 116)
+item_count = 5
+item_0/text = "Open"
+item_1/text = "Save"
+item_1/id = 1
+item_2/text = "Save As"
+item_2/id = 2
+item_3/text = "Close"
+item_3/id = 3
+item_4/text = "Export"
+item_4/id = 4
+
+[node name="Assets" type="PopupMenu" parent="VBoxContainer/Menu/MenuBar"]
+item_count = 2
+item_0/text = "Import"
+item_1/text = "Save Scene"
+item_1/id = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+theme_override_constants/separation = 0
+
+[node name="Scene" type="PanelContainer" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Controller" type="Node" parent="VBoxContainer/HBoxContainer/VBoxContainer/Scene" node_paths=PackedStringArray("tree", "rootEntity", "contextMenu")]
+script = ExtResource("2_frvxk")
+tree = NodePath("../Tree")
+rootEntity = NodePath("../../../3DView/SubViewport/Root")
+contextMenu = NodePath("../PopupMenu")
+
+[node name="Tree" type="Tree" parent="VBoxContainer/HBoxContainer/VBoxContainer/Scene"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/title_button_font_size = 12
+allow_reselect = true
+allow_rmb_select = true
+
+[node name="PopupMenu" type="PopupMenu" parent="VBoxContainer/HBoxContainer/VBoxContainer/Scene"]
+item_count = 2
+item_0/text = "New Entity"
+item_1/text = "Delete Entity"
+item_1/id = 1
+
+[node name="Assets" type="PanelContainer" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Tree" type="Tree" parent="VBoxContainer/HBoxContainer/VBoxContainer/Assets"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/title_button_font_size = 12
+allow_reselect = true
+
+[node name="3DView" type="SubViewportContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.5
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="VBoxContainer/HBoxContainer/3DView"]
+handle_input_locally = false
+size = Vector2i(2, 2)
+render_target_update_mode = 4
+
+[node name="Root" type="Node3D" parent="VBoxContainer/HBoxContainer/3DView/SubViewport"]
+script = ExtResource("3_2rt6i")
+
+[node name="Inspector" type="PanelContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5

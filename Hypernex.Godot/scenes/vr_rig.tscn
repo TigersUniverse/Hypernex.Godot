@@ -48,7 +48,7 @@ transparency = 1
 shading_mode = 0
 albedo_texture = SubResource("ViewportTexture_utwhu")
 
-[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "raycasts", "canvas", "voiceMeter", "vp", "cam")]
+[node name="VRRig" type="Node3D" node_paths=PackedStringArray("origin", "head", "leftHand", "rightHand", "leftHandSkel", "rightHandSkel", "hips", "leftFoot", "rightFoot", "raycasts", "canvas", "voiceMeter", "vp", "cam")]
 script = ExtResource("1_1xyfp")
 origin = NodePath("SubViewport/Origin")
 head = NodePath("SubViewport/Origin/Head")
@@ -56,6 +56,9 @@ leftHand = NodePath("SubViewport/Origin/Left")
 rightHand = NodePath("SubViewport/Origin/Right")
 leftHandSkel = NodePath("SubViewport/Origin/LeftSkel")
 rightHandSkel = NodePath("SubViewport/Origin/RightSkel")
+hips = NodePath("SubViewport/Origin/Hips")
+leftFoot = NodePath("SubViewport/Origin/LeftFoot")
+rightFoot = NodePath("SubViewport/Origin/RightFoot")
 raycasts = [NodePath("SubViewport/Origin/LeftAim/Raycast"), NodePath("SubViewport/Origin/RightAim/Raycast")]
 canvas = NodePath("SubViewport/Origin/UICanvas")
 voiceMeter = NodePath("SubViewport/Origin/Head/Sprite3D/SubViewport/VoiceMeter")
@@ -181,5 +184,17 @@ disable_3d = true
 transparent_bg = true
 gui_embed_subwindows = true
 size = Vector2i(1280, 720)
+
+[node name="LeftFoot" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"/user/vive_tracker_htcx/role/left_foot"
+show_when_tracked = true
+
+[node name="RightFoot" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"/user/vive_tracker_htcx/role/right_foot"
+show_when_tracked = true
+
+[node name="Hips" type="XRController3D" parent="SubViewport/Origin"]
+tracker = &"/user/vive_tracker_htcx/role/waist"
+show_when_tracked = true
 
 [node name="Camera3D" type="Camera3D" parent="."]

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 using Hypernex.Game;
 
@@ -11,6 +10,8 @@ namespace Hypernex.Player
         public PlayerInputs inputs;
         [Export]
         public float accel = 1f;
+        [Export]
+        public float airAccel = 1f;
         [Export]
         public float speed = 1f;
         [Export]
@@ -65,7 +66,10 @@ namespace Hypernex.Player
 
             Vector3 dir = viewB.Orthonormalized() * (new Vector3(inputs.move.X, 0f, inputs.move.Y).Normalized() * speed);
             dir.Y = vel.Y;
-            vel = vel.MoveToward(dir, (float)delta * accel);
+            if (IsOnFloor())
+                vel = vel.MoveToward(dir, (float)delta * accel);
+            else if (!inputs.move.IsZeroApprox())
+                vel = vel.MoveToward(dir, (float)delta * airAccel);
 
             Velocity = vel;
             MoveAndSlide();

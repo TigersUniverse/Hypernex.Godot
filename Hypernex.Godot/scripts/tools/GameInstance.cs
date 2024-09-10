@@ -167,8 +167,8 @@ namespace Hypernex.Tools
             gameServerId = "0";
             instanceId = "0";
             userIdToken = "";
-            instanceCreatorId = APITools.CurrentUser.Id;
-            worldMeta = new WorldMeta("0", APITools.CurrentUser.Id, WorldPublicity.OwnerOnly, "Local World", "", "");
+            instanceCreatorId = APITools.CurrentUser?.Id ?? string.Empty;
+            worldMeta = new WorldMeta("0", instanceCreatorId, WorldPublicity.OwnerOnly, "Local World", "", "");
             ScriptEvents = new ScriptEvents(this);
         }
 

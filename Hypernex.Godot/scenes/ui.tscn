@@ -10,7 +10,7 @@
 [ext_resource type="Script" path="res://scripts/ui/InstanceController.cs" id="8_fd74d"]
 [ext_resource type="Script" path="res://scripts/ui/WorldsController.cs" id="9_e3twq"]
 [ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="10_638y1"]
-[ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck.tscn" id="11_raxun"]
+[ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck_uploader.tscn" id="11_raxun"]
 
 [node name="UI" type="Control"]
 layout_mode = 3

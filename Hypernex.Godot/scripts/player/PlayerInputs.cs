@@ -11,7 +11,12 @@ namespace Hypernex.Player
         [Export]
         public PlayerRoot root;
         [Export]
-        public RayCast3D cast;
+        public RayCast3D uiCast;
+        [Export]
+        public RayCast3D grabCast;
+
+        public GrabbableDescriptor grabbedObject = null;
+        public float grabDistance = 1f;
 
         public Vector2 move;
         public bool textChatOpen;
@@ -20,12 +25,12 @@ namespace Hypernex.Player
         public bool shouldJump = false;
         public bool isNoclip = false;
 
+        private bool lastGrabTriggerState = false;
         private bool lastPrimaryTriggerState = false;
 
         public override void _Ready()
         {
             lastMousePosition = GetViewport().GetMousePosition();
-            // Input.MouseMode = Input.MouseModeEnum.Captured;
         }
 
         public override void _ExitTree()
@@ -57,24 +62,95 @@ namespace Hypernex.Player
                 return;
             var position = GetViewport().GetMousePosition();
             lastMousePosition = position;
-            // ReadInput();
-            // HandleMouseRayCast();
         }
 
         public override void _PhysicsProcess(double delta)
         {
             ReadInput();
             HandleMouseRayCast();
+            HandleMouseGrab(delta);
+        }
+
+        public void HandleMouseGrab(double delta)
+        {
+            if (Init.IsVRLoaded)
+            {
+                grabCast.Visible = false;
+                return;
+            }
+            bool triggerState = Input.IsMouseButtonPressed(MouseButton.Left) && !Init.Instance.ui.IsVisibleInTree();
+            if (IsInstanceValid(grabbedObject))
+            {
+                var vel = (root.view.GlobalPosition + root.view.GlobalBasis.Z * -grabDistance - grabbedObject.parent.GlobalPosition) * grabbedObject.VelocityAmount;
+                if (triggerState)
+                {
+                    if (grabbedObject.parent is RigidBody3D rb2)
+                    {
+                        rb2.LinearVelocity = vel;
+                    }
+                    else if (grabbedObject.parent is PhysicsBody3D pb)
+                    {
+                        vel *= (float)delta;
+                        pb.MoveAndCollide(vel);
+                    }
+                }
+                else
+                {
+                    if (grabbedObject.parent is RigidBody3D rb)
+                    {
+                        rb.LinearVelocity = vel;
+                        rb.GravityScale = 1f;
+                    }
+                    grabbedObject = null;
+                }
+                return;
+            }
+            if (grabCast.IsColliding())
+            {
+                bool shouldGrab = false;
+                if (triggerState != lastGrabTriggerState)
+                {
+                    shouldGrab = true;
+                }
+                lastGrabTriggerState = triggerState;
+                GodotObject collider = grabCast.GetCollider();
+                if (collider.HasMeta(GrabbableDescriptor.TypeName))
+                {
+                    try
+                    {
+                        grabCast.Visible = true;
+                        GrabbableDescriptor grabbable = collider.GetMeta(GrabbableDescriptor.TypeName).As<GrabbableDescriptor>();
+                        if (shouldGrab && grabbable.parent is PhysicsBody3D b)
+                        {
+                            grabbedObject = grabbable;
+                            grabDistance = root.view.GlobalPosition.DistanceTo(grabbedObject.parent.GlobalPosition);
+                            if (b is RigidBody3D rb)
+                                rb.GravityScale = 0f;
+                        }
+                    }
+                    catch
+                    { }
+                }
+                else
+                {
+                    grabCast.Visible = false;
+                }
+            }
+            else
+            {
+                grabCast.Visible = false;
+                lastGrabTriggerState = false;
+            }
         }
 
         public void HandleMouseRayCast()
         {
             if (Init.IsVRLoaded)
             {
-                cast.Visible = false;
+                uiCast.Visible = false;
                 return;
             }
-            if (cast.IsColliding())
+            if (uiCast.IsColliding())
             {
                 bool triggerState = Input.IsMouseButtonPressed(MouseButton.Left) && !Init.Instance.ui.IsVisibleInTree();
                 InputEventMouse ev;
@@ -94,27 +170,27 @@ namespace Hypernex.Player
                     };
                 }
                 lastPrimaryTriggerState = triggerState;
-                GodotObject collider = cast.GetCollider();
+                GodotObject collider = uiCast.GetCollider();
                 if (collider.HasMeta(UICanvas.TypeName))
                 {
                     // prevent people from fooling with the cck
                     try
                     {
-                        cast.Visible = true;
+                        uiCast.Visible = true;
                         UICanvas canvas = collider.GetMeta(UICanvas.TypeName).As<UICanvas>();
-                        canvas.HandleInput(root.view, ev, cast.GetCollisionPoint(), cast.GetCollisionNormal(), cast.GetColliderShape());
+                        canvas.HandleInput(root.view, ev, uiCast.GetCollisionPoint(), uiCast.GetCollisionNormal(), uiCast.GetColliderShape());
                     }
                     catch
                     { }
                 }
                 else
                 {
-                    cast.Visible = false;
+                    uiCast.Visible = false;
                 }
             }
             else
             {
-                cast.Visible = false;
+                uiCast.Visible = false;
                 lastPrimaryTriggerState = false;
             }
         }
