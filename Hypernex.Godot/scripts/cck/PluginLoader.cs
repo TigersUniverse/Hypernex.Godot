@@ -12,10 +12,13 @@ namespace Hypernex.CCK.GodotVersion
     {
         private static readonly List<HypernexPlugin> _loadedPlugins = new List<HypernexPlugin>();
         public static List<HypernexPlugin> LoadedPlugins => new List<HypernexPlugin>(_loadedPlugins);
+        private static string loadingPath;
 
         public static int LoadAllPlugins(string path)
         {
+            loadingPath = path;
             AssemblyLoadContext alc = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly());
+            alc.Resolving += ResolveManaged;
             int pluginsLoaded = 0;
             if (!Directory.Exists(path))
             {
@@ -46,6 +49,11 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
             return pluginsLoaded;
+        }
+
+        private static Assembly ResolveManaged(AssemblyLoadContext context, AssemblyName name)
+        {
+            return context.LoadFromAssemblyPath(Path.Combine(loadingPath, name.Name + ".dll"));
         }
 
         public override void _Ready()

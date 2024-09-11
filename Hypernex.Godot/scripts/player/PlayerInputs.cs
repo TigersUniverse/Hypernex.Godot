@@ -46,7 +46,7 @@ namespace Hypernex.Player
                 return;
             if (@event is InputEventMouseMotion mouseMotion)
             {
-                lastMouseDelta = mouseMotion.Relative * -0.005f;
+                lastMouseDelta = mouseMotion.Relative * -0.001f;
             }
         }
 
