@@ -68,6 +68,15 @@ namespace Hypernex.Game
                         AddAsset(asset);
                     }
             }
+            if (worldObject is NetworkSyncDescriptor syncDesc)
+            {
+                NetworkSync sync = new NetworkSync();
+                sync.world = this;
+                sync.InstanceHostOnly = syncDesc.InstanceHostOnly;
+                sync.CanSteal = syncDesc.CanSteal;
+                sync.AlwaysSync = syncDesc.AlwaysSync;
+                worldObject.AddSibling(sync);
+            }
             if (worldObject is WorldScript script)
             {
                 ScriptRunner runner = new ScriptRunner();
@@ -132,6 +141,33 @@ namespace Hypernex.Game
                 if (IsInstanceValid(obj))
                     obj.Free();
             safeLoader.Dispose();
+        }
+
+        public string GetLocalPath(Node node)
+        {
+            return rootNode.GetPathTo(node);
+        }
+
+        public Node GetByPath(string path)
+        {
+            string[] names = path.Split('/');
+            Node selected = rootNode;
+            foreach (var name in names)
+            {
+                bool found = false;
+                foreach (var ch in selected.GetChildren())
+                {
+                    if (ch.Name.Equals(name))
+                    {
+                        selected = ch;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!IsInstanceValid(selected) || !found)
+                    break;
+            }
+            return selected;
         }
 
         public static WorldRoot LoadFromFile(string path)

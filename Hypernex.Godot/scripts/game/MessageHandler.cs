@@ -1,4 +1,6 @@
 using System;
+using Godot;
+using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Networking.Messages;
 using Hypernex.Tools;
 using Nexport;
@@ -44,22 +46,22 @@ namespace Hypernex.Game
                 {
                     WorldObjectUpdate worldObjectUpdate =
                         (WorldObjectUpdate) Convert.ChangeType(msgMeta.Data, typeof(WorldObjectUpdate));
-                    /*
-                    Transform targetObject = AnimationUtility.GetObjectFromRoot(worldObjectUpdate.Object.ObjectLocation,
-                        gameInstance.loadedScene);
-                    if (targetObject != null)
+                    Node node = gameInstance.World.GetByPath(worldObjectUpdate.Object.ObjectLocation);
+                    if (GodotObject.IsInstanceValid(node))
                     {
-                        // We only want to sync objects that have a reason to be synced
-                        // Otherwise, clients could just say they claim a player (for example) and control them
-                        NetworkSync networkSync = targetObject.gameObject.GetComponent<NetworkSync>();
-                        if (networkSync != null)
-                            networkSync.HandleNetworkUpdate(worldObjectUpdate);
-                        else
-                            Logger.CurrentLogger.Warn("NetworkSync not found!");
+                        if (node is IEntity ent)
+                        {
+                            var sync = ent.GetComponent<NetworkSync>();
+                            if (GodotObject.IsInstanceValid(sync))
+                            {
+                                sync.HandleMessage(worldObjectUpdate);
+                            }
+                        }
+                        else if (node is NetworkSync sync)
+                        {
+                            sync.HandleMessage(worldObjectUpdate);
+                        }
                     }
-                    else
-                        Logger.CurrentLogger.Warn("No Object found at Path " + worldObjectUpdate.Object.ObjectLocation);
-                    */
                     break;
                 }
                 case "Hypernex.Networking.Messages.RespondAuth":
