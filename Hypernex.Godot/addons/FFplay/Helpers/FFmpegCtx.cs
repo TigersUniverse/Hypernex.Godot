@@ -260,7 +260,7 @@ namespace FFmpeg.Godot.Helpers
             // AVRational base_q = ffmpeg.av_get_time_base_q();
             // long target = ffmpeg.av_rescale_q(offset, base_q, _ctx._pFormatContext->streams[_streamIndex]->time_base);
             // ffmpeg.avformat_seek_file(_pFormatContext, -1, long.MinValue, offset, long.MaxValue, ffmpeg.AVSEEK_FLAG_ANY).ThrowExceptionIfError();
-            int flags = ffmpeg.AVSEEK_FLAG_FRAME;
+            int flags = ffmpeg.AVSEEK_FLAG_BACKWARD;
             ffmpeg.av_seek_frame(_pFormatContext, index, offset, flags).ThrowExceptionIfError();
             // ffmpeg.avformat_seek_file(_pFormatContext, index, 0, offset, offset, flags).ThrowExceptionIfError();
         }
@@ -276,10 +276,7 @@ namespace FFmpeg.Godot.Helpers
             double pts = (double)base_q.num / base_q.den;
             long frame = ffmpeg.av_rescale((long)(offset * 1000d), base_q.den, base_q.num);
             frame /= 1000;
-            // Debug.Log(frame);
-            Seek(_streamIndex, frame);
-            // UnityEngine.Debug.Log(AVRationalToString(base_q));
-            // Seek(_streamIndex, (long)Math.Floor(offset * pts));
+            Seek(_streamIndex, Math.Max(0, frame));
         }
 
         public void Dispose()
