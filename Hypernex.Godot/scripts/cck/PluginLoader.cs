@@ -27,6 +27,8 @@ namespace Hypernex.CCK.GodotVersion
             }
             foreach (string possiblePluginFile in Directory.GetFiles(path))
             {
+                if (!Path.GetExtension(possiblePluginFile).Equals(".dll", StringComparison.OrdinalIgnoreCase))
+                    continue;
                 try
                 {
                     Assembly assembly = alc.LoadFromAssemblyPath(Path.GetFullPath(possiblePluginFile));
