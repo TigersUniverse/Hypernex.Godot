@@ -331,6 +331,9 @@ namespace FFmpeg.Godot
                 SeekInternal(seekTarget.Value);
             }
 
+            if (IsInstanceValid(renderMesh) && !renderMesh.IsVisibleInTree() && !_paused)
+                Pause();
+
             if (!_paused)
             {
                 _offset = _elapsedOffset;
