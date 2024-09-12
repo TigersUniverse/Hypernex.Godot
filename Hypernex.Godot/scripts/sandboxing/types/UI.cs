@@ -1,5 +1,6 @@
 using System.Linq;
 using Godot;
+using Hypernex.Game;
 using Nexbox;
 
 namespace Hypernex.Sandboxing.SandboxedTypes
@@ -8,31 +9,64 @@ namespace Hypernex.Sandboxing.SandboxedTypes
     {
         public static string GetText(Item item)
         {
-            if (item.t is Label3D l3d)
-                return l3d.Text;
-            if (item.t is Label l)
-                return l.Text;
-            if (item.t is RichTextLabel rl)
-                return rl.Text;
-            if (item.t is Button btn)
-                return btn.Text;
-            if (item.t is LineEdit le)
-                return le.Text;
-            return string.Empty;
+            if (item.t is IEntity ent)
+            {
+                if (ent.TryGetComponent(out Label3D l3d))
+                    return l3d.Text;
+                if (ent.TryGetComponent(out Label l))
+                    return l.Text;
+                if (ent.TryGetComponent(out RichTextLabel rl))
+                    return rl.Text;
+                if (ent.TryGetComponent(out Button btn))
+                    return btn.Text;
+                if (ent.TryGetComponent(out LineEdit le))
+                    return le.Text;
+                return string.Empty;
+            }
+            {
+                if (item.t is Label3D l3d)
+                    return l3d.Text;
+                if (item.t is Label l)
+                    return l.Text;
+                if (item.t is RichTextLabel rl)
+                    return rl.Text;
+                if (item.t is Button btn)
+                    return btn.Text;
+                if (item.t is LineEdit le)
+                    return le.Text;
+                return string.Empty;
+            }
         }
 
         public static void SetText(Item item, string text)
         {
-            if (item.t is Label3D l3d)
-                l3d.Text = text;
-            if (item.t is Label l)
-                l.Text = text;
-            if (item.t is RichTextLabel rl)
-                rl.Text = text;
-            if (item.t is Button btn)
-                btn.Text = text;
-            if (item.t is LineEdit le)
-                le.Text = text;
+            if (item == null)
+                return;
+            if (item.t is IEntity ent)
+            {
+                if (ent.TryGetComponent(out Label3D l3d))
+                    l3d.Text = text;
+                if (ent.TryGetComponent(out Label l))
+                    l.Text = text;
+                if (ent.TryGetComponent(out RichTextLabel rl))
+                    rl.Text = text;
+                if (ent.TryGetComponent(out Button btn))
+                    btn.Text = text;
+                if (ent.TryGetComponent(out LineEdit le))
+                    le.Text = text;
+            }
+            {
+                if (item.t is Label3D l3d)
+                    l3d.Text = text;
+                if (item.t is Label l)
+                    l.Text = text;
+                if (item.t is RichTextLabel rl)
+                    rl.Text = text;
+                if (item.t is Button btn)
+                    btn.Text = text;
+                if (item.t is LineEdit le)
+                    le.Text = text;
+            }
         }
 
         public static void RegisterButtonClick(Item item, object o)

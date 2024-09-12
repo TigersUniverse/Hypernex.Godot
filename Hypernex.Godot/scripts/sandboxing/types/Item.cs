@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Hypernex.Game;
 using Hypernex.Networking.Messages.Data;
 using Hypernex.Tools.Godot;
 
@@ -30,9 +31,19 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public bool Enabled
         {
-            get => t.CanProcess();
+            get
+            {
+                if (t is IEntity ent)
+                    return ent.Enabled;
+                return t.CanProcess();
+            }
             set
             {
+                if (t is IEntity ent)
+                {
+                    ent.Enabled = value;
+                    return;
+                }
                 if (t is Node3D n3d)
                 {
                     n3d.Visible = value;

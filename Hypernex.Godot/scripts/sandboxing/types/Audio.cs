@@ -13,8 +13,12 @@ namespace Hypernex.Sandboxing.SandboxedTypes
         private static AudioStreamPlayer3D GetAudio3D(Item item)
         {
             if (GodotObject.IsInstanceValid(item.t))
+            {
+                if (item.t is IEntity ent)
+                    return ent.GetComponent<AudioStreamPlayer3D>();
                 if (item.t is AudioStreamPlayer3D plr)
                     return plr;
+            }
             return null;
         }
 

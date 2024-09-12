@@ -5,6 +5,7 @@ using FFmpeg.Godot;
 using Godot;
 using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion.Classes;
+using Hypernex.Game;
 using Hypernex.Sandboxing.SandboxedTypes.World;
 using Hypernex.Tools;
 
@@ -14,14 +15,19 @@ namespace Hypernex.Sandboxing.SandboxedTypes
     {
         private static VideoPlayer GetVideoPlayer(Item item)
         {
-            VideoPlayer v = item.t as VideoPlayer;
-            if (!GodotObject.IsInstanceValid(v)) return null;
-            return v;
+            if (GodotObject.IsInstanceValid(item.t))
+            {
+                if (item.t is IEntity ent)
+                    return ent.GetComponent<VideoPlayer>();
+                if (item.t is VideoPlayer)
+                    return item.t as VideoPlayer;
+            }
+            return null;
         }
 
         private static FFGodot GetFFGodot(Item item)
         {
-            VideoPlayer v = item.t as VideoPlayer;
+            VideoPlayer v = GetVideoPlayer(item);
             if (!GodotObject.IsInstanceValid(v)) return null;
             return v.video;
         }

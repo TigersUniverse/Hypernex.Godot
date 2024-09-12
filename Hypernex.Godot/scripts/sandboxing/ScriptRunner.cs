@@ -111,7 +111,8 @@ namespace Hypernex.Sandboxing
             interpreter.ForwardType("Colliders", typeof(Colliders));
             interpreter.ForwardType("HumanBodyBones", typeof(HumanBodyBones));
             interpreter.ForwardType("LocalAvatar", typeof(LocalAvatar));
-            interpreter.ForwardType("LocalWorld", typeof(LocalWorld));
+            interpreter.ForwardType("LocalWorld", typeof(LocalWorld)); // should remove this later
+            interpreter.ForwardType("World", typeof(LocalWorld));
 
             interpreter.ForwardType("Audio", typeof(Audio));
             interpreter.ForwardType("Video", typeof(Video));

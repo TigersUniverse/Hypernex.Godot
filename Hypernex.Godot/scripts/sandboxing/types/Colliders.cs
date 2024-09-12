@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Hypernex.Game;
 using Hypernex.Tools;
 using Nexbox;
 
@@ -9,8 +10,13 @@ namespace Hypernex.Sandboxing.SandboxedTypes
     {
         private static Area3D GetArea3D(Item item)
         {
-            if (GodotObject.IsInstanceValid(item.t) && item.t is Area3D a)
-                return a;
+            if (GodotObject.IsInstanceValid(item.t))
+            {
+                if (item.t is IEntity ent)
+                    return ent.GetComponent<Area3D>();
+                if (item.t is Area3D a)
+                    return a;
+            }
             return null;
         }
 

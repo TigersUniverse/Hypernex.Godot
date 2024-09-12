@@ -14,6 +14,7 @@ namespace Hypernex.Game
 {
     public partial class WorldRoot : Node
     {
+        public Node rootNode;
         public ISceneProvider safeLoader;
         public GameInstance gameInstance;
         public WorldDescriptor descriptor;
@@ -170,6 +171,7 @@ namespace Hypernex.Game
             Node node = scn.Instantiate();
             if (IsInstanceValid(node))
             {
+                root.rootNode = node;
                 root.AddChild(node);
                 root.AddObject(node);
             }
