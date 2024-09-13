@@ -74,6 +74,8 @@ namespace Hypernex.CCK.GodotVersion
         {
             foreach (HypernexPlugin hypernexPlugin in LoadedPlugins)
                 hypernexPlugin.Update();
+            foreach (HypernexPlugin hypernexPlugin in LoadedPlugins)
+                hypernexPlugin.LateUpdate();
         }
 
         public override void _ExitTree()
