@@ -13,7 +13,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
                 return null;
             foreach (Node rootNode in GameInstance.FocusedInstance.World.rootNode.GetChildren())
                 if (rootNode.Name == name)
-                    return new Item(rootNode, GameInstance.FocusedInstance.World);
+                    return new Item(rootNode, GameInstance.FocusedInstance.World.rootNode);
             return null;
         }
 

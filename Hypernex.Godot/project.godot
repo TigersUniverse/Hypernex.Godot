@@ -100,7 +100,6 @@ use={
 [rendering]
 
 textures/vram_compression/import_etc2_astc=true
-reflections/reflection_atlas/reflection_size=512
 anti_aliasing/quality/use_debanding=true
 occlusion_culling/use_occlusion_culling=true
 

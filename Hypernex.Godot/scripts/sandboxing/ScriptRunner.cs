@@ -62,7 +62,7 @@ namespace Hypernex.Sandboxing
                 interpreter.StartSandbox(o => OnLog(o));
                 ForwardWorldTypes();
                 runtime = new Runtime(this);
-                interpreter.CreateGlobal("item", new Item(GetParent(), world));
+                interpreter.CreateGlobal("item", new Item(GetParent(), world.rootNode));
                 interpreter.CreateGlobal("Runtime", runtime);
                 interpreter.RunScript(script.Script, e => OnError(e));
             }

@@ -31,6 +31,21 @@ namespace Hypernex.Game
             return components.Where(x => x.GetType().IsAssignableTo(type)).ToArray();
         }
 
+        public Node AddComponent(Node value)
+        {
+            components.Add(value);
+            value.SetMeta(IEntity.TypeName, this);
+            return value;
+        }
+
+        public override void _EnterTree()
+        {
+            foreach (var comp in components)
+            {
+                comp.SetMeta(IEntity.TypeName, this);
+            }
+        }
+
         public override void _Ready()
         {
             rb = this.GetComponent<RigidBody3D>();

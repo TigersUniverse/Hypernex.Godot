@@ -53,8 +53,6 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                     n2d.Visible = value;
                 }
                 t.ProcessMode = value ? Node.ProcessModeEnum.Inherit : Node.ProcessModeEnum.Disabled;
-                // t.SetProcess(value);
-                // t.SetPhysicsProcess(value);
             }
         }
 
@@ -65,7 +63,11 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             get => new Item(t.GetParent(), world);
             set
             {
-                if (world == value.world && GodotObject.IsInstanceValid(value.t))
+                if (value == null)
+                {
+                    t.Reparent(world);
+                }
+                else if (value != null && world == value.world && GodotObject.IsInstanceValid(value.t))
                 {
                     t.Reparent(value.t);
                 }

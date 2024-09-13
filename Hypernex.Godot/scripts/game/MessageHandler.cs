@@ -46,21 +46,11 @@ namespace Hypernex.Game
                 {
                     WorldObjectUpdate worldObjectUpdate =
                         (WorldObjectUpdate) Convert.ChangeType(msgMeta.Data, typeof(WorldObjectUpdate));
+                    GD.Print(worldObjectUpdate.Object.ObjectLocation);
                     Node node = gameInstance.World.GetByPath(worldObjectUpdate.Object.ObjectLocation);
-                    if (GodotObject.IsInstanceValid(node))
+                    if (node.TryFindComponent(out NetworkSync sync))
                     {
-                        if (node is IEntity ent)
-                        {
-                            var sync = ent.GetComponent<NetworkSync>();
-                            if (GodotObject.IsInstanceValid(sync))
-                            {
-                                sync.HandleMessage(worldObjectUpdate);
-                            }
-                        }
-                        else if (node is NetworkSync sync)
-                        {
-                            sync.HandleMessage(worldObjectUpdate);
-                        }
+                        sync.HandleMessage(worldObjectUpdate);
                     }
                     break;
                 }

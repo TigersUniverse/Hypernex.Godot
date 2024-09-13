@@ -20,12 +20,14 @@ namespace Hypernex.Game
 
         public float lerpSpeed = 10f;
         public string NetworkOwner;
-        public bool NetworkSteal;
+        public bool NetworkSteal = false;
+        public bool isReleased = false;
         public Vector3 targetPosition;
         public Quaternion targetRotation;
         public Vector3 targetScale;
         public Vector3 vel;
 
+        public bool IsOwned() => !string.IsNullOrEmpty(NetworkOwner);
         public bool IsOwnedByLocalPlayer() => APITools.CurrentUser == null || NetworkOwner == APITools.CurrentUser?.Id;
 
         public override void _Ready()
@@ -34,6 +36,66 @@ namespace Hypernex.Game
             targetPosition = parent.Position;
             targetRotation = parent.Quaternion;
             targetScale = parent.Scale;
+            if (InstanceHostOnly && world.gameInstance.isHost)
+                Claim();
+            UpdateLoop();
+        }
+        
+        public void Claim()
+        {
+            if (IsOwned() || !NetworkSteal)
+                return;
+            isReleased = false;
+            NetworkOwner = APITools.CurrentUser?.Id;
+            world.gameInstance.SendMessage(GetObjectUpdate(), Nexport.MessageChannel.Reliable);
+        }
+
+        public void Unclaim()
+        {
+            if (!IsOwnedByLocalPlayer())
+                return;
+            if (AlwaysSync)
+            {
+                NetworkSteal = true;
+                isReleased = true;
+                world.gameInstance.SendMessage(GetObjectUpdate(), Nexport.MessageChannel.Reliable);
+            }
+            else
+            {
+                NetworkOwner = string.Empty;
+                isReleased = false;
+                WorldObjectUpdate update = GetObjectUpdate();
+                update.Action = WorldObjectAction.Unclaim;
+                world.gameInstance.SendMessage(update, Nexport.MessageChannel.Reliable);
+            }
+        }
+
+        private WorldObjectAction GetAction()
+        {
+            if (IsOwnedByLocalPlayer())
+                return WorldObjectAction.Update;
+            NetworkOwner = APITools.CurrentUser?.Id;
+            NetworkSteal = CanSteal;
+            return WorldObjectAction.Claim;
+        }
+
+        private WorldObjectUpdate GetObjectUpdate()
+        {
+            return new WorldObjectUpdate()
+            {
+                Auth = GetJoinAuth(),
+                Action = GetAction(),
+                CanBeStolen = CanSteal || isReleased,
+                Object = new NetworkedObject()
+                {
+                    ObjectLocation = world.GetLocalPath(this),
+                    Position = parent.Position.ToFloat3(),
+                    Rotation = parent.Quaternion.ToFloat4(),
+                    Size = parent.Scale.ToFloat3(),
+                    IgnoreObjectLocation = false,
+                },
+                // Velocity = vel,
+            };
         }
 
         private async void UpdateLoop()
@@ -41,28 +103,17 @@ namespace Hypernex.Game
             while (IsInstanceValid(this))
             {
                 await ToSignal(GetTree().CreateTimer(0.05f), SceneTreeTimer.SignalName.Timeout);
+                if (!IsInsideTree())
+                    continue;
                 if (world.gameInstance.IsOpen && IsOwnedByLocalPlayer())
                 {
-                    world.gameInstance.SendMessage(new WorldObjectUpdate()
-                    {
-                        Auth = GetJoinAuth(),
-                        Action = WorldObjectAction.Update,
-                        CanBeStolen = CanSteal,
-                        Object = new NetworkedObject()
-                        {
-                            ObjectLocation = world.GetLocalPath(parent),
-                            Position = parent.Position.ToFloat3(),
-                            Rotation = parent.Quaternion.ToFloat4(),
-                            Size = parent.Scale.ToFloat3(),
-                            IgnoreObjectLocation = false,
-                        },
-                        // Velocity = vel,
-                    }, Nexport.MessageChannel.Unreliable);
+                    WorldObjectUpdate update = GetObjectUpdate();
+                    world.gameInstance.SendMessage(update, update.Action == WorldObjectAction.Update ? Nexport.MessageChannel.Unreliable : Nexport.MessageChannel.Reliable);
                 }
             }
         }
 
-        public JoinAuth GetJoinAuth()
+        private JoinAuth GetJoinAuth()
         {
             return new JoinAuth()
             {
@@ -77,7 +128,7 @@ namespace Hypernex.Game
             {
                 parent.Position = parent.Position.Lerp(targetPosition, (float)delta * lerpSpeed);
                 parent.Quaternion = parent.Quaternion.Slerp(targetRotation, (float)delta * lerpSpeed);
-                parent.Scale = parent.Scale.Slerp(targetScale, (float)delta * lerpSpeed);
+                parent.Scale = parent.Scale.Lerp(targetScale, (float)delta * lerpSpeed);
             }
         }
 
@@ -90,11 +141,22 @@ namespace Hypernex.Game
                     UpdateTransform(update);
                     NetworkOwner = update.Auth.UserId;
                     NetworkSteal = update.CanBeStolen;
+                    switch (update.Action)
+                    {
+                        case WorldObjectAction.Unclaim:
+                            // OnSteal
+                            if (NetworkOwner == update.Auth.UserId)
+                            {
+                                NetworkOwner = string.Empty;
+                                isReleased = false;
+                            }
+                            break;
+                    }
                 }
             });
         }
 
-        public void UpdateTransform(WorldObjectUpdate update)
+        private void UpdateTransform(WorldObjectUpdate update)
         {
             targetPosition = update.Object.Position.ToGodot3();
             targetRotation = update.Object.Rotation.ToGodotQuat();

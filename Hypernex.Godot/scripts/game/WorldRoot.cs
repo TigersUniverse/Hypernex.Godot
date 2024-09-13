@@ -75,7 +75,8 @@ namespace Hypernex.Game
                 sync.InstanceHostOnly = syncDesc.InstanceHostOnly;
                 sync.CanSteal = syncDesc.CanSteal;
                 sync.AlwaysSync = syncDesc.AlwaysSync;
-                worldObject.AddSibling(sync);
+                syncDesc.FindAddComponent(sync);
+                syncDesc.AddSibling(sync, true);
             }
             if (worldObject is WorldScript script)
             {
@@ -141,6 +142,11 @@ namespace Hypernex.Game
                 if (IsInstanceValid(obj))
                     obj.Free();
             safeLoader.Dispose();
+        }
+
+        public Node[] GetAllObjects()
+        {
+            return rootNode.FindChildren("*", owned: false).ToArray();
         }
 
         public string GetLocalPath(Node node)

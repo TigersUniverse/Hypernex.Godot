@@ -101,6 +101,8 @@ namespace Hypernex.Player
                         rb.LinearVelocity = vel;
                         rb.GravityScale = 1f;
                     }
+                    if (grabbedObject.TryFindComponent(out NetworkSync sync))
+                        sync.Unclaim();
                     grabbedObject = null;
                 }
                 return;
@@ -124,6 +126,8 @@ namespace Hypernex.Player
                         {
                             grabbedObject = grabbable;
                             grabDistance = root.view.GlobalPosition.DistanceTo(grabbedObject.parent.GlobalPosition);
+                            if (grabbedObject.TryFindComponent(out NetworkSync sync))
+                                sync.Claim();
                             if (b is RigidBody3D rb)
                                 rb.GravityScale = 0f;
                         }

@@ -15,20 +15,16 @@ namespace Hypernex.Sandboxing.SandboxedTypes
     {
         private static VideoPlayer GetVideoPlayer(Item item)
         {
-            if (GodotObject.IsInstanceValid(item.t))
-            {
-                if (item.t is IEntity ent)
-                    return ent.GetComponent<VideoPlayer>();
-                if (item.t is VideoPlayer)
-                    return item.t as VideoPlayer;
-            }
+            if (item.t.TryFindComponent(out VideoPlayer player))
+                return player;
             return null;
         }
 
         private static FFGodot GetFFGodot(Item item)
         {
             VideoPlayer v = GetVideoPlayer(item);
-            if (!GodotObject.IsInstanceValid(v)) return null;
+            if (!GodotObject.IsInstanceValid(v))
+                return null;
             return v.video;
         }
 

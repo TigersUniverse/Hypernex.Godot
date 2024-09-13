@@ -25,7 +25,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
             Node ch = PlayerRoot.Local.Avatar.FindBone(humanBodyBones.ToString());
             if (!GodotObject.IsInstanceValid(ch))
                 return null;
-            return new ReadonlyItem(ch, GameInstance.FocusedInstance.World);
+            return new ReadonlyItem(ch, GameInstance.FocusedInstance.World.rootNode);
         }
 
         public static ReadonlyItem GetAvatarObjectByPath(string path)
@@ -35,14 +35,14 @@ namespace Hypernex.Sandboxing.SandboxedTypes.World
             Node ch = PlayerRoot.Local.Avatar.FindChild(path);
             if (!GodotObject.IsInstanceValid(ch))
                 return null;
-            return new ReadonlyItem(ch, GameInstance.FocusedInstance.World);
+            return new ReadonlyItem(ch, GameInstance.FocusedInstance.World.rootNode);
         }
 
         public static Item GetPlayerRoot()
         {
             if (!GodotObject.IsInstanceValid(PlayerRoot.Local))
                 return null;
-            return new Item(PlayerRoot.Local.Controller, GameInstance.FocusedInstance.World);
+            return new Item(PlayerRoot.Local.Controller, GameInstance.FocusedInstance.World.rootNode);
         }
 
         public static bool IsAvatarItem(Item item) => item.world == PlayerRoot.Local.Avatar;

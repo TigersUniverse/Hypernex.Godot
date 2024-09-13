@@ -114,22 +114,18 @@ namespace Hypernex.Game
                 players[gameInstance].Remove(netPlayer);
                 netPlayer.QueueFree();
             }
-            /*
-            gameInstance.ScriptEvents?.OnUserLeave.Invoke(user.Id);
-            if (!gameInstance.isHost) return;
-            // Claim all NetworkSyncs that have Host Only
-            foreach (GameObject rootGameObject in gameInstance.loadedScene.GetRootGameObjects())
+            if (!gameInstance.isHost)
+                return;
+            foreach (var obj in gameInstance.World.GetAllObjects())
             {
-                Transform[] ts = rootGameObject.GetComponentsInChildren<Transform>(true);
-                foreach (Transform transform in ts)
+                if (obj.TryFindComponent(out NetworkSync sync))
                 {
-                    NetworkSync networkSync = transform.gameObject.AddComponent<NetworkSync>();
-                    if (networkSync == null) continue;
-                    if(networkSync.InstanceHostOnly)
-                        networkSync.Claim();
+                    if (sync.InstanceHostOnly)
+                    {
+                        sync.Claim();
+                    }
                 }
             }
-            */
         }
 
         internal static void CreateGameInstance(GameInstance gameInstance)
