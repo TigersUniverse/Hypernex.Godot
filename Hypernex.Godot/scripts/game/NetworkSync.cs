@@ -20,7 +20,7 @@ namespace Hypernex.Game
 
         public float lerpSpeed = 10f;
         public string NetworkOwner;
-        public bool NetworkSteal = false;
+        public bool NetworkSteal = true;
         public bool isReleased = false;
         public Vector3 targetPosition;
         public Quaternion targetRotation;
@@ -29,6 +29,11 @@ namespace Hypernex.Game
 
         public bool IsOwned() => !string.IsNullOrEmpty(NetworkOwner);
         public bool IsOwnedByLocalPlayer() => APITools.CurrentUser == null || NetworkOwner == APITools.CurrentUser?.Id;
+
+        public override void _EnterTree()
+        {
+            parent = GetParent<Node3D>();
+        }
 
         public override void _Ready()
         {
@@ -43,11 +48,11 @@ namespace Hypernex.Game
         
         public void Claim()
         {
-            if (IsOwned() || !NetworkSteal)
+            if (IsOwned() && !NetworkSteal)
                 return;
             isReleased = false;
-            NetworkOwner = APITools.CurrentUser?.Id;
             world.gameInstance.SendMessage(GetObjectUpdate(), Nexport.MessageChannel.Reliable);
+            NetworkOwner = APITools.CurrentUser?.Id;
         }
 
         public void Unclaim()
@@ -58,15 +63,16 @@ namespace Hypernex.Game
             {
                 NetworkSteal = true;
                 isReleased = true;
-                world.gameInstance.SendMessage(GetObjectUpdate(), Nexport.MessageChannel.Reliable);
+                // world.gameInstance.SendMessage(GetObjectUpdate(), Nexport.MessageChannel.Reliable);
+                // NetworkOwner = string.Empty;
             }
             else
             {
-                NetworkOwner = string.Empty;
                 isReleased = false;
                 WorldObjectUpdate update = GetObjectUpdate();
                 update.Action = WorldObjectAction.Unclaim;
                 world.gameInstance.SendMessage(update, Nexport.MessageChannel.Reliable);
+                NetworkOwner = string.Empty;
             }
         }
 
@@ -139,16 +145,19 @@ namespace Hypernex.Game
                 if (IsInstanceValid(this))
                 {
                     UpdateTransform(update);
-                    NetworkOwner = update.Auth.UserId;
+                    // NetworkOwner = update.Auth.UserId;
                     NetworkSteal = update.CanBeStolen;
                     switch (update.Action)
                     {
+                        case WorldObjectAction.Claim:
+                            NetworkOwner = update.Auth.UserId;
+                            break;
                         case WorldObjectAction.Unclaim:
                             // OnSteal
                             if (NetworkOwner == update.Auth.UserId)
                             {
                                 NetworkOwner = string.Empty;
-                                isReleased = false;
+                                isReleased = true;
                             }
                             break;
                     }

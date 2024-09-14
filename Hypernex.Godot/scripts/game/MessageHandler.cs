@@ -46,7 +46,6 @@ namespace Hypernex.Game
                 {
                     WorldObjectUpdate worldObjectUpdate =
                         (WorldObjectUpdate) Convert.ChangeType(msgMeta.Data, typeof(WorldObjectUpdate));
-                    GD.Print(worldObjectUpdate.Object.ObjectLocation);
                     Node node = gameInstance.World.GetByPath(worldObjectUpdate.Object.ObjectLocation);
                     if (node.TryFindComponent(out NetworkSync sync))
                     {

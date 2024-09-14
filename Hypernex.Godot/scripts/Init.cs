@@ -150,7 +150,7 @@ public partial class Init : Node
         {
             instance.World.Load();
             instance.World.Name = instance.instanceId;
-            worldsRoot.AddChild(instance.World);
+            worldsRoot.AddChild(instance.World, true);
             var plr = NewPlayer(true);
             if (APITools.CurrentUser != null)
                 plr.SetUser(APITools.CurrentUser.Id, instance);

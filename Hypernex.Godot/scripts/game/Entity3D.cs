@@ -23,18 +23,18 @@ namespace Hypernex.Game
 
         public Node GetComponent(Type type)
         {
-            return components.FirstOrDefault(x => x.GetType().IsAssignableTo(type));
+            return components.FirstOrDefault(x => type.IsAssignableFrom(x.GetType()));
         }
 
         public Node[] GetComponents(Type type)
         {
-            return components.Where(x => x.GetType().IsAssignableTo(type)).ToArray();
+            return components.Where(x => type.IsAssignableFrom(x.GetType())).ToArray();
         }
 
         public Node AddComponent(Node value)
         {
             components.Add(value);
-            value.SetMeta(IEntity.TypeName, this);
+            value.SetMeta(IEntity.TypeName, value.GetPathTo(this));
             return value;
         }
 
@@ -42,7 +42,7 @@ namespace Hypernex.Game
         {
             foreach (var comp in components)
             {
-                comp.SetMeta(IEntity.TypeName, this);
+                comp.SetMeta(IEntity.TypeName, comp.GetPathTo(this));
             }
         }
 

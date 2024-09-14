@@ -71,12 +71,16 @@ namespace Hypernex.Game
             if (worldObject is NetworkSyncDescriptor syncDesc)
             {
                 NetworkSync sync = new NetworkSync();
+                sync.Name = nameof(NetworkSync);
                 sync.world = this;
                 sync.InstanceHostOnly = syncDesc.InstanceHostOnly;
                 sync.CanSteal = syncDesc.CanSteal;
                 sync.AlwaysSync = syncDesc.AlwaysSync;
+                if (syncDesc.TryFindComponent(out RigidBody3D rb))
+                    rb.AddChild(sync, true);
+                else
+                    syncDesc.AddSibling(sync, true);
                 syncDesc.FindAddComponent(sync);
-                syncDesc.AddSibling(sync, true);
             }
             if (worldObject is WorldScript script)
             {
@@ -84,7 +88,7 @@ namespace Hypernex.Game
                 runner.Name = script.Name + "_Runner";
                 runner.world = this;
                 runner.scriptRef = script;
-                script.AddSibling(runner);
+                script.AddSibling(runner, true);
                 Runners.Add(runner);
             }
             if (worldObject is Mirror mirror)
@@ -213,8 +217,9 @@ namespace Hypernex.Game
             Node node = scn.Instantiate();
             if (IsInstanceValid(node))
             {
+                node.Name = "WorldRoot";
+                root.AddChild(node, true);
                 root.rootNode = node;
-                root.AddChild(node);
                 root.AddObject(node);
             }
             return root;
