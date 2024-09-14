@@ -30,11 +30,6 @@ namespace Hypernex.Game
         public bool IsOwned() => !string.IsNullOrEmpty(NetworkOwner);
         public bool IsOwnedByLocalPlayer() => APITools.CurrentUser == null || NetworkOwner == APITools.CurrentUser?.Id;
 
-        public override void _EnterTree()
-        {
-            parent = GetParent<Node3D>();
-        }
-
         public override void _Ready()
         {
             parent = GetParent<Node3D>();
@@ -130,7 +125,7 @@ namespace Hypernex.Game
 
         public override void _Process(double delta)
         {
-            if (!IsOwnedByLocalPlayer())
+            if (!IsOwnedByLocalPlayer() && IsOwned())
             {
                 parent.Position = parent.Position.Lerp(targetPosition, (float)delta * lerpSpeed);
                 parent.Quaternion = parent.Quaternion.Slerp(targetRotation, (float)delta * lerpSpeed);
