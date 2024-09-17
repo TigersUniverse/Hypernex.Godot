@@ -68,6 +68,7 @@ public partial class IKSystem : Node
     public IKData rightHandData;
     public IKData leftFootData;
     public IKData rightFootData;
+    public Transform3D humanBindPose;
 
     [Export]
     public BoneAttachment3D head;
@@ -143,6 +144,26 @@ public partial class IKSystem : Node
         return humanoid.GlobalBasis.Scale.Z;
     }
 
+    public void SetPose(BoneAttachment3D bone, IKData data)
+    {
+        var xform = data.target.Transform;
+        var scl = data.target.Scale;
+        data.target.Transform *= humanoid.GetBoneRest(bone.BoneIdx).AffineInverse();
+        data.target.Scale = scl;
+        data.ik.ResolveIK();
+        data.target.Transform = xform;
+    }
+
+    public void CalcIk()
+    {
+        SetPose(leftHand, leftHandData);
+        SetPose(rightHand, rightHandData);
+        leftFootData.ik.ResolveIK();
+        rightFootData.ik.ResolveIK();
+        // SetPose(leftFoot, leftFootData);
+        // SetPose(rightFoot, rightFootData);
+    }
+
     private void LateUpdate(double delta)
     {
         if (!IsInstanceValid(humanoid))
@@ -181,7 +202,7 @@ public partial class IKSystem : Node
                 Vector2 pos = EvaluateLoop(ref leftLoopState, ref leftTimer, loopSize, speed, 0f, true);
                 float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight) * scaleLength;
                 float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
-                float x = footDistance * 0.5f * scale;
+                float x = -footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
                 float t = 0f;
@@ -205,7 +226,7 @@ public partial class IKSystem : Node
                 Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0.5f, true);
                 float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight) * scaleLength;
                 float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
-                float x = -footDistance * 0.5f * scale;
+                float x = footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
                 float t = 0f;
@@ -249,6 +270,7 @@ public partial class IKSystem : Node
         }
         if (IsInstanceValid(humanoid) /*&& humanoid.avatar && humanoid.avatar.isHuman*/)
         {
+            humanBindPose = humanoid.Transform;
             /*
             head = humanoid.GetBoneTransform(HumanBodyBones.Head);
             hips = humanoid.GetBoneTransform(HumanBodyBones.Hips);
@@ -266,8 +288,8 @@ public partial class IKSystem : Node
             float scale = 1f / GetScale();
             float handPoleDist = -1f;
 
-            Vector3 right = -humanoid.GlobalBasis.X.Normalized();
-            Vector3 forward = humanoid.GlobalBasis.Z.Normalized();
+            Vector3 right = humanoid.GlobalBasis.X.Normalized();
+            Vector3 forward = -humanoid.GlobalBasis.Z.Normalized();
             Vector3 up = humanoid.GlobalBasis.Y.Normalized();
 
             // hips and head
