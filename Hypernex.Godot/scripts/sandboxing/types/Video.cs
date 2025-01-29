@@ -20,7 +20,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             return null;
         }
 
-        private static FFGodot GetFFGodot(Item item)
+        private static FFPlayGodot GetFFGodot(Item item)
         {
             VideoPlayer v = GetVideoPlayer(item);
             if (!GodotObject.IsInstanceValid(v))
@@ -30,7 +30,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public static bool IsValid(Item item) => GetFFGodot(item) != null;
         
-        public static bool IsPlaying(Item item) => !GetFFGodot(item).IsPaused && !GetFFGodot(item).IsFinished;
+        public static bool IsPlaying(Item item) => !GetFFGodot(item).IsPaused && !GetFFGodot(item).IsPlaying;
         public static bool IsMuted(Item item) => throw new NotImplementedException();
         public static bool IsLooping(Item item) => GetVideoPlayer(item).loop;
         public static void Play(Item item) => GetFFGodot(item).Resume();
@@ -53,16 +53,16 @@ namespace Hypernex.Sandboxing.SandboxedTypes
             throw new NotImplementedException();
         }
         
-        public static float GetVolume(Item item) => Mathf.DbToLinear(GetFFGodot(item).source.VolumeDb); //Mathf.Remap(GetFFGodot(item).source.VolumeDb, -80f, 0f, 0f, 1f);
+        public static float GetVolume(Item item) => Mathf.DbToLinear(GetFFGodot(item).audioPlayer.audioSource.VolumeDb); //Mathf.Remap(GetFFGodot(item).source.VolumeDb, -80f, 0f, 0f, 1f);
 
-        public static void SetVolume(Item item, float value) => GetFFGodot(item).source.VolumeDb = Mathf.LinearToDb(Mathf.Clamp(value, 0f, 1f)); //Mathf.Remap(Mathf.Clamp(value, 0f, 1f), 0f, 1f, -80f, 0f);
+        public static void SetVolume(Item item, float value) => GetFFGodot(item).audioPlayer.audioSource.VolumeDb = Mathf.LinearToDb(Mathf.Clamp(value, 0f, 1f)); //Mathf.Remap(Mathf.Clamp(value, 0f, 1f), 0f, 1f, -80f, 0f);
         
         public static float GetPosition(Item item) => (float)GetFFGodot(item).PlaybackTime;
         public static void SetPosition(Item item, float value) => GetFFGodot(item).Seek(value);
 
         public static float GetLength(Item item)
         {
-            return (float)GetFFGodot(item).Length;
+            return (float)GetFFGodot(item).GetLength();
         }
 
         public static void LoadUrl(Item item, string url)
@@ -94,12 +94,12 @@ namespace Hypernex.Sandboxing.SandboxedTypes
         public static void LoadFromCobalt(Item item, CobaltDownload cobaltDownload)
         {
             VideoPlayer videoPlayer = GetVideoPlayer(item);
-            FFGodot ff = GetFFGodot(item);
+            FFPlayGodot ff = GetFFGodot(item);
             if (!GodotObject.IsInstanceValid(videoPlayer))
                 return;
             if (cobaltDownload.isStream)
             {
-                ff.CanSeek = false;
+                // ff.CanSeek = false;
                 ff.Play(cobaltDownload.PathToFile, cobaltDownload.PathToFile);
             }
             else
@@ -107,7 +107,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
                 if (!File.Exists(cobaltDownload.PathToFile))
                     return;
                 string filePath = cobaltDownload.PathToFile;
-                ff.CanSeek = true;
+                // ff.CanSeek = true;
                 ff.Play(filePath, filePath);
             }
         }

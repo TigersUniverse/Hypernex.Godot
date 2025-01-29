@@ -1,3 +1,4 @@
+using FFmpeg.AutoGen.Bindings.DynamicallyLoaded;
 using Godot;
 using Hypernex;
 using Hypernex.CCK;
@@ -58,6 +59,13 @@ public partial class Init : Node
             return;
         resolverSet = true;
         NativeLibrary.SetDllImportResolver(typeof(Init).Assembly, Resolver);
+        string dir = OS.GetExecutablePath().GetBaseDir();
+        if (OS.HasFeature("editor"))
+        {
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+        }
+        DynamicallyLoadedBindings.LibrariesPath = dir;
+        DynamicallyLoadedBindings.Initialize();
     }
 
     public override void _Ready()
@@ -117,7 +125,7 @@ public partial class Init : Node
         Logger.CurrentLogger.Log($"Loaded {pluginsLoaded} Plugins!");
         AddChild(new PluginLoader() { Name = "PluginLoader" });
 
-        AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
+        // AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
 
         SetupAndRunGame();
 
@@ -268,8 +276,13 @@ public partial class Init : Node
                 break;
             case "linux":
             case "android":
-                if (libraryName.Contains(".so"))
-                    libHandle = NativeLibrary.Load(Path.Combine(dir, libraryName));
+                if (libraryName.Contains(".so") || true)
+                {
+                    // string path = Directory.GetFiles(dir).FirstOrDefault(x => Path.GetFileName(x).Contains(libraryName));
+                    if (!NativeLibrary.TryLoad(Path.Combine(dir, libraryName), out libHandle))
+                        libHandle = IntPtr.Zero;
+                    // libHandle = NativeLibrary.Load(path);
+                }
                 else
                     libHandle = NativeLibrary.Load(Path.Combine(dir, $"lib{libraryName}.so"));
                 break;

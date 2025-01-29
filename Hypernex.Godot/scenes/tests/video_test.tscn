@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://jlpobcw81vsn"]
+[gd_scene load_steps=6 format=3 uid="uid://jlpobcw81vsn"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/VideoTest.cs" id="1_tlyc4"]
+[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="2_xgmfo"]
+[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="3_f4ogg"]
+[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="4_g05c4"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_8aond"]
 
 [node name="VideoTest" type="Control"]
 layout_mode = 3
@@ -10,7 +15,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="." node_paths=PackedStringArray("audio")]
+[node name="TextureRect" type="TextureRect" parent="." node_paths=PackedStringArray("audio", "ff", "ffTex", "ffAud")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,8 +25,29 @@ grow_vertical = 2
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("1_tlyc4")
+url = "/home/brian/Downloads/crack.mp4"
 audio = NodePath("AudioStreamPlayer3D")
+ff = NodePath("FFPlayGodot")
+ffTex = NodePath("FFPlayGodot/FFTexturePlayer")
+ffAud = NodePath("FFPlayGodot/FFAudioPlayer")
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="TextureRect"]
 
 [node name="Camera3D" type="Camera3D" parent="TextureRect"]
+
+[node name="FFPlayGodot" type="Node" parent="TextureRect" node_paths=PackedStringArray("texturePlayer", "audioPlayer")]
+script = ExtResource("2_xgmfo")
+texturePlayer = NodePath("FFTexturePlayer")
+audioPlayer = NodePath("FFAudioPlayer")
+
+[node name="FFTexturePlayer" type="Node" parent="TextureRect/FFPlayGodot" node_paths=PackedStringArray("renderMesh")]
+script = ExtResource("3_f4ogg")
+renderMesh = NodePath("../../MeshInstance3D")
+
+[node name="FFAudioPlayer" type="Node" parent="TextureRect/FFPlayGodot" node_paths=PackedStringArray("audioSource")]
+script = ExtResource("4_g05c4")
+audioSource = NodePath("../../AudioStreamPlayer3D")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TextureRect"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+mesh = SubResource("QuadMesh_8aond")

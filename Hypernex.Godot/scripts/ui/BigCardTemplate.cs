@@ -36,13 +36,13 @@ namespace Hypernex.UI
         [Export]
         public TextureRect foreground;
         [Export]
-        public FFGodot videoForeground;
+        public FFPlayGodot videoForeground;
         [Export]
         public AspectRatioContainer backgroundContainer;
         [Export]
         public TextureRect background;
         [Export]
-        public FFGodot videoBackground;
+        public FFPlayGodot videoBackground;
         [Export]
         public PackedScene cardUI;
 
@@ -55,15 +55,15 @@ namespace Hypernex.UI
 
         public override void _EnterTree()
         {
-            videoForeground.Finished += FGLoop;
-            videoBackground.Finished += BGLoop;
+            videoForeground.OnEndReached += FGLoop;
+            videoBackground.OnEndReached += BGLoop;
             usersLabel.MetaClicked += OnClick;
         }
 
         public override void _ExitTree()
         {
-            videoForeground.Finished -= FGLoop;
-            videoBackground.Finished -= BGLoop;
+            videoForeground.OnEndReached -= FGLoop;
+            videoBackground.OnEndReached -= BGLoop;
             usersLabel.MetaClicked -= OnClick;
         }
 

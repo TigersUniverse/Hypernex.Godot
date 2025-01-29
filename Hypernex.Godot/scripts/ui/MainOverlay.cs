@@ -35,7 +35,9 @@ namespace Hypernex.UI
         [Export]
         public Texture2D defaultPfp;
         [Export]
-        public FFGodot pfpVideo;
+        public FFPlayGodot pfpVideo;
+        [Export]
+        public TextureRect pfpVideoTex;
         public BigCardTemplate currentBigCard;
 
         public override void _EnterTree()
@@ -48,7 +50,7 @@ namespace Hypernex.UI
             bar.TabChanged += ChangedTabs2;
             tabs.TabChanged += ChangedTabs;
             tabs.SetTabHidden(currentInstanceIdx, true);
-            pfpVideo.Finished += PfpLoop;
+            pfpVideo.OnEndReached += PfpLoop;
         }
 
         public override void _ExitTree()
@@ -60,7 +62,7 @@ namespace Hypernex.UI
             GameInstance.OnGameInstanceLoaded -= GameInstanceLoaded;
             bar.TabChanged -= ChangedTabs2;
             tabs.TabChanged -= ChangedTabs;
-            pfpVideo.Finished -= PfpLoop;
+            pfpVideo.OnEndReached -= PfpLoop;
         }
 
         public override void _Process(double delta)
@@ -87,7 +89,7 @@ namespace Hypernex.UI
             currentBigCard = null;
             profileName.Text = $"Hello, {APITools.CurrentUser.GetUsersName()}";
             profilePhoto.Show();
-            pfpVideo.renderMesh.Hide();
+            pfpVideoTex.Hide();
             profilePhoto.Texture = defaultPfp;
             DownloadTools.DownloadBytes(APITools.CurrentUser.Bio.PfpURL, d =>
             {
@@ -98,7 +100,7 @@ namespace Hypernex.UI
                 {
                     ImageTools.LoadFFmpeg(pfpVideo, d);
                     profilePhoto.Hide();
-                    pfpVideo.renderMesh.Show();
+                    pfpVideoTex.Show();
                 }
             });
         }
