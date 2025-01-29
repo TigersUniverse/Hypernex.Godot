@@ -349,19 +349,31 @@ public partial class Init : Node
         };
     }
 
-    public void SetupAndRunGame()
+    public void OnLogin(User user)
     {
-        APITools.OnUserLogin += user =>
+        if (user != null)
         {
             ConfigManager.SelectedConfigUser = ConfigManager.LoadedConfig.GetConfigUserFromUserId(user.Id);
             ConfigManager.SaveConfigToFile();
-            ui.Show();
-            login.root.Hide();
-            overlay.root.Show();
-            overlay.ShowHome();
+        }
+        ui.Show();
+        login.root.Hide();
+        overlay.root.Show();
+        overlay.ShowHome();
+        if (user != null)
+        {
             APITools.CreateUserSocket(SocketManager.InitSocket);
             GetWindow().Title = $"Hypernex ({user.GetUsersName()} - {APITools.APIObject.Settings.TargetDomain})";
-        };
+        }
+        else
+        {
+            GetWindow().Title = $"Hypernex (LAN)";
+        }
+    }
+
+    public void SetupAndRunGame()
+    {
+        APITools.OnUserLogin += OnLogin;
         APITools.OnLogout += () =>
         {
             APITools.DisposeUserSocket();

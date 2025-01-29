@@ -78,6 +78,11 @@ namespace Hypernex.UI
 
         private void OnVisible()
         {
+            if (APITools.CurrentUser == null)
+            {
+                UpdateWith(Array.Empty<string>());
+                return;
+            }
             var friends = APITools.CurrentUser.Friends;
             UpdateWith(friends.ToArray());
         }

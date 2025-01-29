@@ -68,6 +68,11 @@ namespace Hypernex.UI
 
         private void AccountSelected(long index)
         {
+            if (index == 0)
+            {
+                LoginNoUser();
+                return;
+            }
             ConfigUser user = ConfigManager.LoadedConfig.SavedAccounts[(int)index - 1];
             HypernexSettings settings = new HypernexSettings(user.UserId, user.TokenContent)
             {
@@ -140,6 +145,11 @@ namespace Hypernex.UI
                     twoFactorEdit.Clear();
                 });
             });
+        }
+
+        public void LoginNoUser()
+        {
+            Init.Instance.OnLogin(null);
         }
 
         public void Exit()
