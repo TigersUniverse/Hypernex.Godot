@@ -272,22 +272,13 @@ public partial class Init : Node
         switch (OS.GetName().ToLower())
         {
             case "windows":
-                if (libraryName.Contains(".dll"))
-                    libHandle = NativeLibrary.Load(Path.Combine(dir, libraryName));
-                else
-                    libHandle = NativeLibrary.Load(Path.Combine(dir, $"{libraryName}.dll"));
+                if (!NativeLibrary.TryLoad(Path.Combine(dir, libraryName), out libHandle))
+                    libHandle = IntPtr.Zero;
                 break;
             case "linux":
             case "android":
-                if (libraryName.Contains(".so") || true)
-                {
-                    // string path = Directory.GetFiles(dir).FirstOrDefault(x => Path.GetFileName(x).Contains(libraryName));
-                    if (!NativeLibrary.TryLoad(Path.Combine(dir, libraryName), out libHandle))
-                        libHandle = IntPtr.Zero;
-                    // libHandle = NativeLibrary.Load(path);
-                }
-                else
-                    libHandle = NativeLibrary.Load(Path.Combine(dir, $"lib{libraryName}.so"));
+                if (!NativeLibrary.TryLoad(Path.Combine(dir, libraryName), out libHandle))
+                    libHandle = IntPtr.Zero;
                 break;
         }
         return libHandle;
