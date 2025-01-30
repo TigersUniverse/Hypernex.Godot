@@ -148,7 +148,7 @@ namespace Hypernex.Game
             {
                 if (IsLocal && !Init.IsVRLoaded)
                 {
-                    view.Position = new Vector3(0f, Avatar.ikSystem.floorDistance + Avatar.ikSystem.hipsDistance * 0.75f, 0f);
+                    // view.Position = new Vector3(0f, Avatar.ikSystem.floorDistance + Avatar.ikSystem.hipsDistance * 0.75f, 0f);
                     Transform3D headFinal = view.GlobalTransform;
                     var eyesNode = Avatar.descriptor.GetEyes();
                     if (IsInstanceValid(eyesNode))

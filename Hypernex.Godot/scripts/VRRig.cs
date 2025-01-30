@@ -216,7 +216,7 @@ public partial class VRRig : Node3D
             if (IsInstanceValid(PlayerRoot.Local.Avatar))
             {
                 // The 1.75 is the player's real world height, placeholder for now.
-                XRServer.WorldScale = (PlayerRoot.Local.Avatar.ikSystem.floorDistance + PlayerRoot.Local.Avatar.ikSystem.hipsDistance * 0.75f) / 1.75f;
+                // XRServer.WorldScale = (PlayerRoot.Local.Avatar.ikSystem.floorDistance + PlayerRoot.Local.Avatar.ikSystem.hipsDistance * 0.75f) / 1.75f;
                 Transform3D floor = head.GlobalTransform;
                 floor.Origin += Vector3.Down * head.Position.Y;
                 // TODO: eye offsets

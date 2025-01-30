@@ -13,7 +13,7 @@ namespace Hypernex.Game
     {
         public ISceneProvider safeLoader;
         public AvatarDescriptor descriptor;
-        public IKSystem ikSystem;
+        public IKSystem2 ikSystem;
         public Node3D target;
         public List<Node> Objects = new List<Node>();
         public List<ScriptRunner> Runners = new List<ScriptRunner>();
@@ -67,30 +67,29 @@ namespace Hypernex.Game
         {
             if (IsInstanceValid(ikSystem))
                 ikSystem.QueueFree();
-            ikSystem = new IKSystem();
+            ikSystem = new IKSystem2();
             // ikSystem.forwardNode = target;
             ikSystem.humanoid = descriptor.GetSkeleton();
-            ikSystem.SnapBackStrength = 0f;
-            ikSystem.minStepHeight = 0f;
-            ikSystem.maxStepHeight = 0.4f;
-            ikSystem.minStepLength = -0.4f;
-            ikSystem.maxStepLength = 0.4f;
-            CreateBoneTree();
-            ikSystem.head = FindBone("Head");
-            ikSystem.hips = FindBone("Hips");
-            ikSystem.leftHand = FindBone("LeftHand");
-            ikSystem.rightHand = FindBone("RightHand");
-            ikSystem.leftUpperLeg = FindBone("LeftUpperLeg");
-            ikSystem.rightUpperLeg = FindBone("RightUpperLeg");
-            ikSystem.leftFoot = FindBone("LeftFoot");
-            ikSystem.rightFoot = FindBone("RightFoot");
+            // ikSystem.SnapBackStrength = 0f;
+            // ikSystem.minStepHeight = 0f;
+            // ikSystem.maxStepHeight = 0.4f;
+            // ikSystem.minStepLength = -0.4f;
+            // ikSystem.maxStepLength = 0.4f;
+            ikSystem.footAnimCurve = new Curve();
+            ikSystem.footAnimCurve.AddPoint(new Vector2(0f, 0f));
+            ikSystem.footAnimCurve.AddPoint(new Vector2(0.5f, 1f));
+            ikSystem.footAnimCurve.AddPoint(new Vector2(1f, 0f));
+            // CreateBoneTree();
+            ikSystem.head = "Head";
+            ikSystem.hips = "Hips";
+            ikSystem.leftHand = "LeftHand";
+            ikSystem.rightHand = "RightHand";
+            ikSystem.leftUpperLeg = "LeftUpperLeg";
+            ikSystem.rightUpperLeg = "RightUpperLeg";
+            ikSystem.leftFoot = "LeftFoot";
+            ikSystem.rightFoot = "RightFoot";
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             AddChild(ikSystem);
-        }
-
-        private void CalcIk()
-        {
-            ikSystem.CalcIk();
         }
 
         public void ProcessIkFBT(bool useHead, Transform3D head, Transform3D floor, Transform3D leftHand, Transform3D rightHand, Transform3D hips, Transform3D leftFoot, Transform3D rightFoot)
@@ -110,7 +109,7 @@ namespace Hypernex.Game
                     Vector3 headScl = ikSystem.headTarget.Scale;
                     ikSystem.headTarget.GlobalTransform = head.RotatedLocal(Vector3.Up, Mathf.Pi);
                     ikSystem.headTarget.Scale = headScl;
-                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    // ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
                 }
                 else
                 {
@@ -118,7 +117,7 @@ namespace Hypernex.Game
                     root.GlobalPosition = target.GlobalPosition;
                     root.GlobalRotation = target.GlobalRotation + new Vector3(0f, Mathf.Pi, 0f);
                     root.Scale = scale;
-                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    // ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
                 }
 
                 Vector3 leftScl = ikSystem.leftHandData.target.Scale;
@@ -129,10 +128,10 @@ namespace Hypernex.Game
                 ikSystem.rightHandData.target.GlobalTransform = rightHand.RotatedLocal(Vector3.Up, Mathf.Pi).RotatedLocal(Vector3.Right, Mathf.Pi * 0.5f);//.RotatedLocal(Vector3.Up, Mathf.Pi * 0.5f);
                 ikSystem.rightHandData.target.Scale = rightScl;
 
-                Vector3 scl = ikSystem.hips.Scale;
-                ikSystem.hips.GlobalPosition = hips.Origin;
-                ikSystem.hips.GlobalBasis = hips.Basis;
-                ikSystem.hips.Scale = scl;
+                Vector3 scl = ikSystem.GetBoneTransform(ikSystem.hips).Basis.Scale;
+                // ikSystem.hips.GlobalPosition = hips.Origin;
+                // ikSystem.hips.GlobalBasis = hips.Basis;
+                // ikSystem.hips.Scale = scl;
 
                 scl = ikSystem.leftFootData.target.Scale;
                 ikSystem.leftFootData.target.GlobalPosition = leftFoot.Origin;
@@ -143,8 +142,6 @@ namespace Hypernex.Game
                 ikSystem.rightFootData.target.GlobalPosition = rightFoot.Origin;
                 ikSystem.rightFootData.target.GlobalBasis = rightFoot.Basis;
                 ikSystem.rightFootData.target.Scale = scl;
-
-                CalcIk();
             }
         }
 
@@ -169,7 +166,7 @@ namespace Hypernex.Game
                     Vector3 headScl = ikSystem.headTarget.Scale;
                     ikSystem.headTarget.GlobalTransform = head;//.RotatedLocal(Vector3.Up, Mathf.Pi);// * ikSystem.GetRestPose(ikSystem.head).AffineInverse();
                     ikSystem.headTarget.Scale = headScl;
-                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    // ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
                 }
                 else
                 {
@@ -177,12 +174,11 @@ namespace Hypernex.Game
                     root.GlobalPosition = target.GlobalPosition;
                     root.GlobalRotation = target.GlobalRotation;// + new Vector3(0f, Mathf.Pi, 0f);
                     root.Scale = scale;
-                    ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
+                    // ikSystem.hips.GlobalPosition = ikSystem.headTarget.GlobalPosition + (Vector3.Down * ikSystem.hipsDistance);
                 }
 
                 if (!vr)
                 {
-                    CalcIk();
                     return;
                 }
 
@@ -193,8 +189,6 @@ namespace Hypernex.Game
                 Vector3 rightScl = ikSystem.rightHandData.target.Scale;
                 ikSystem.rightHandData.target.GlobalTransform = rightHand;//.RotatedLocal(Vector3.Up, Mathf.Pi).RotatedLocal(Vector3.Right, Mathf.Pi * 0.5f);//.RotatedLocal(Vector3.Up, Mathf.Pi * 0.5f);
                 ikSystem.rightHandData.target.Scale = rightScl;
-
-                CalcIk();
             }
         }
 

@@ -18,7 +18,7 @@ public partial class IKSystem : Node
     [Serializable]
     public struct IKData
     {
-        public FastIKFabric ik;
+        public FastIKFabric2 ik;
         public Node3D target;
         public Node3D pole;
     }
@@ -71,23 +71,23 @@ public partial class IKSystem : Node
     public Transform3D humanBindPose;
 
     [Export]
-    public BoneAttachment3D head;
+    public string head;
     public Node3D headTarget;
     public Vector3 direction;
     [Export]
-    public BoneAttachment3D hips;
+    public string hips;
     [Export]
-    public BoneAttachment3D leftHand;
+    public string leftHand;
     [Export]
-    public BoneAttachment3D rightHand;
+    public string rightHand;
     [Export]
-    public BoneAttachment3D leftUpperLeg;
+    public string leftUpperLeg;
     [Export]
-    public BoneAttachment3D rightUpperLeg;
+    public string rightUpperLeg;
     [Export]
-    public BoneAttachment3D leftFoot;
+    public string leftFoot;
     [Export]
-    public BoneAttachment3D rightFoot;
+    public string rightFoot;
 
     public float footDistance;
     public float hipsDistance;
@@ -138,30 +138,20 @@ public partial class IKSystem : Node
     {
         return t.Basis.Inverse() * v;
     }
+    
+    public Transform3D GetBoneTransform(string bone)
+    {
+        return humanoid.GlobalTransform * humanoid.GetBoneGlobalPose(humanoid.FindBone(bone));
+    }
+
+    public Vector3 GetBonePosition(string bone)
+    {
+        return GetBoneTransform(bone).Origin;
+    }
 
     public float GetScale()
     {
         return humanoid.GlobalBasis.Scale.Z;
-    }
-
-    public void SetPose(BoneAttachment3D bone, IKData data)
-    {
-        var xform = data.target.Transform;
-        var scl = data.target.Scale;
-        data.target.Transform *= humanoid.GetBoneRest(bone.BoneIdx).AffineInverse();
-        data.target.Scale = scl;
-        data.ik.ResolveIK();
-        data.target.Transform = xform;
-    }
-
-    public void CalcIk()
-    {
-        SetPose(leftHand, leftHandData);
-        SetPose(rightHand, rightHandData);
-        leftFootData.ik.ResolveIK();
-        rightFootData.ik.ResolveIK();
-        // SetPose(leftFoot, leftFootData);
-        // SetPose(rightFoot, rightFootData);
     }
 
     private void LateUpdate(double delta)
@@ -169,13 +159,14 @@ public partial class IKSystem : Node
         if (!IsInstanceValid(humanoid))
             return;
         if (IsInstanceValid(leftHandData.ik))
-            leftHandData.ik.Enabled = handIk;
+            leftHandData.ik.Active = handIk;
         if (IsInstanceValid(rightHandData.ik))
-            rightHandData.ik.Enabled = handIk;
+            rightHandData.ik.Active = handIk;
         if (IsInstanceValid(leftFootData.ik))
-            leftFootData.ik.Enabled = footIk;
+            leftFootData.ik.Active = footIk;
         if (IsInstanceValid(rightFootData.ik))
-            rightFootData.ik.Enabled = footIk;
+            rightFootData.ik.Active = footIk;
+        /*
         if (IsInstanceValid(hips) && IsInstanceValid(head) && IsInstanceValid(headTarget))
         {
             // hips.Position = hips.GetParentNode3D().ToLocal(headTarget.GlobalPosition) - hips.GetParentNode3D().ToLocal(direction);
@@ -185,8 +176,9 @@ public partial class IKSystem : Node
             head.GlobalBasis = headTarget.GlobalBasis;
             head.Scale = scl;
         }
+        */
 
-        Vector3 vel = hips.GlobalPosition - hipsPos;
+        Vector3 vel = GetBonePosition(hips) - hipsPos;
 
         if (moveFeet)
         {
@@ -243,9 +235,9 @@ public partial class IKSystem : Node
             }
         }
 
-        if (IsInstanceValid(hips))
+        // if (IsInstanceValid(hips))
         {
-            hipsPos = hips.GlobalPosition;
+            hipsPos = GetBonePosition(hips);
             // if (vel.Length() > 0f)
             {
                 Vector3 newvel = vel;
@@ -280,11 +272,11 @@ public partial class IKSystem : Node
             rightFoot = humanoid.GetBoneTransform(HumanBodyBones.RightFoot);
             direction = humanoid.GetBoneTransform(HumanBodyBones.Head).position - humanoid.GetBoneTransform(HumanBodyBones.Hips).position;
             */
-            direction = head.GlobalPosition - hips.GlobalPosition;
+            direction = GetBonePosition(head) - GetBonePosition(hips);
             float scl = direction.Length() / GetScale();
-            footDistance = leftFoot.GlobalPosition.DistanceTo(rightFoot.GlobalPosition);
-            hipsDistance = hips.GlobalPosition.DistanceTo(head.GlobalPosition);
-            floorDistance = hips.GlobalPosition.DistanceTo(humanoid.GlobalPosition);
+            footDistance = GetBonePosition(leftFoot).DistanceTo(GetBonePosition(rightFoot));
+            hipsDistance = GetBonePosition(hips).DistanceTo(GetBonePosition(head));
+            floorDistance = GetBonePosition(hips).DistanceTo(humanoid.GlobalPosition);
             float scale = 1f / GetScale();
             float handPoleDist = -1f;
 
@@ -296,92 +288,92 @@ public partial class IKSystem : Node
             {
                 headTarget = new Node3D() { Name = "Head_Target" };
                 humanoid.AddChild(headTarget);
-                headTarget.GlobalTransform = head.GlobalTransform;
-                hipsPos = hips.GlobalPosition;
+                headTarget.GlobalTransform = GetBoneTransform(head);
+                hipsPos = GetBonePosition(hips);
             }
 
             // left hand
             {
                 leftHandData.target = new Node3D() { Name = "LeftHand_Target" };
                 humanoid.AddChild(leftHandData.target);
-                leftHandData.target.GlobalTransform = leftHand.GlobalTransform;
+                leftHandData.target.GlobalTransform = GetBoneTransform(leftHand);
                 leftHandData.pole = new Node3D() { Name = "LeftHand_Pole" };
-                head.AddChild(leftHandData.pole);
-                leftHandData.pole.GlobalPosition = head.GlobalPosition - right * scl - forward * scl + up * handPoleDist * scl;
+                // head.AddChild(leftHandData.pole);
 
-                FastIKFabric ik = new FastIKFabric();
-                // leftHand.AddChild(ik);
-                ik.Enabled = false;
+                FastIKFabric2 ik = new FastIKFabric2();
+                ik.AddChild(leftHandData.pole);
+                ik.Active = false;
+                ik.TargetBone = leftHand;
                 ik.Target = leftHandData.target;
                 ik.Pole = leftHandData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                // ik.Init();
-                leftHand.AddChild(ik);
+                humanoid.AddChild(ik);
                 leftHandData.ik = ik;
+                leftHandData.pole.GlobalPosition = GetBonePosition(head) - right * scl - forward * scl + up * handPoleDist * scl;
             }
             // right hand
             {
                 rightHandData.target = new Node3D() { Name = "RightHand_Target" };
                 humanoid.AddChild(rightHandData.target);
-                rightHandData.target.GlobalTransform = rightHand.GlobalTransform;
+                rightHandData.target.GlobalTransform = GetBoneTransform(rightHand);
                 rightHandData.pole = new Node3D() { Name = "RightHand_Pole" };
-                head.AddChild(rightHandData.pole);
-                rightHandData.pole.GlobalPosition = head.GlobalPosition + right * scl - forward * scl + up * handPoleDist * scl;
+                // head.AddChild(rightHandData.pole);
 
-                FastIKFabric ik = new FastIKFabric();
-                // rightHand.AddChild(ik);
-                ik.Enabled = false;
+                FastIKFabric2 ik = new FastIKFabric2();
+                ik.AddChild(rightHandData.pole);
+                ik.Active = false;
+                ik.TargetBone = rightHand;
                 ik.Target = rightHandData.target;
                 ik.Pole = rightHandData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                // ik.Init();
-                rightHand.AddChild(ik);
+                humanoid.AddChild(ik);
                 rightHandData.ik = ik;
+                rightHandData.pole.GlobalPosition = GetBonePosition(head) + right * scl - forward * scl + up * handPoleDist * scl;
             }
 
             // left foot
             {
                 leftFootData.target = new Node3D() { Name = "LeftFoot_Target" };
                 humanoid.AddChild(leftFootData.target);
-                leftFootData.target.GlobalTransform = leftFoot.GlobalTransform;
+                leftFootData.target.GlobalTransform = GetBoneTransform(leftFoot);
                 leftFootData.pole = new Node3D() { Name = "LeftFoot_Pole" };
-                hips.AddChild(leftFootData.pole);
-                leftFootData.pole.GlobalPosition = leftFoot.GlobalPosition - right * 0f * scl + forward * 0.5f * scl + up * 0.5f * scl;
+                // hips.AddChild(leftFootData.pole);
 
-                FastIKFabric ik = new FastIKFabric();
-                // leftFoot.AddChild(ik);
-                ik.Enabled = false;
+                FastIKFabric2 ik = new FastIKFabric2();
+                ik.AddChild(leftFootData.pole);
+                ik.Active = false;
+                ik.TargetBone = leftFoot;
                 ik.Target = leftFootData.target;
                 ik.Pole = leftFootData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                // ik.Init();
-                leftFoot.AddChild(ik);
+                humanoid.AddChild(ik);
                 leftFootData.ik = ik;
-                leftFootPos = leftFoot.GlobalPosition;
+                leftFootPos = GetBonePosition(leftFoot);
+                leftFootData.pole.GlobalPosition = GetBonePosition(leftFoot) - right * 0f * scl + forward * 0.5f * scl + up * 0.5f * scl;
             }
             // right foot
             {
                 rightFootData.target = new Node3D() { Name = "RightFoot_Target" };
                 humanoid.AddChild(rightFootData.target);
-                rightFootData.target.GlobalTransform = rightFoot.GlobalTransform;
+                rightFootData.target.GlobalTransform = GetBoneTransform(rightFoot);
                 rightFootData.pole = new Node3D() { Name = "RightFoot_Pole" };
-                hips.AddChild(rightFootData.pole);
-                rightFootData.pole.GlobalPosition = rightFoot.GlobalPosition + right * 0f * scl + forward * 0.5f * scl + up * 0.5f * scl;
+                // hips.AddChild(rightFootData.pole);
 
-                FastIKFabric ik = new FastIKFabric();
-                // rightFoot.AddChild(ik);
-                ik.Enabled = false;
+                FastIKFabric2 ik = new FastIKFabric2();
+                ik.AddChild(rightFootData.pole);
+                ik.Active = false;
+                ik.TargetBone = rightFoot;
                 ik.Target = rightFootData.target;
                 ik.Pole = rightFootData.pole;
                 ik.ChainLength = 2;
                 ik.SnapBackStrength = SnapBackStrength;
-                // ik.Init();
-                rightFoot.AddChild(ik);
+                humanoid.AddChild(ik);
                 rightFootData.ik = ik;
-                rightFootPos = rightFoot.GlobalPosition;
+                rightFootPos = GetBonePosition(rightFoot);
+                rightFootData.pole.GlobalPosition = GetBonePosition(rightFoot) + right * 0f * scl + forward * 0.5f * scl + up * 0.5f * scl;
             }
 
             // head.OverridePose = true;
@@ -390,6 +382,13 @@ public partial class IKSystem : Node
             // rightHand.OverridePose = true;
             // leftFoot.OverridePose = true;
             // rightFoot.OverridePose = true;
+
+            // head.OverridePose = false;
+            // hips.OverridePose = false;
+            // leftHand.OverridePose = false;
+            // rightHand.OverridePose = false;
+            // leftFoot.OverridePose = false;
+            // rightFoot.OverridePose = false;
         }
     }
 
