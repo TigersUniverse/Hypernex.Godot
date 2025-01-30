@@ -1,3 +1,4 @@
+using FFmpeg.AutoGen.Bindings.DynamicallyLoaded;
 using Godot;
 using Hypernex;
 using Hypernex.CCK;
@@ -5,6 +6,7 @@ using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Configuration;
 using Hypernex.Game;
+using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
 using Hypernex.UI;
@@ -58,6 +60,13 @@ public partial class Init : Node
             return;
         resolverSet = true;
         NativeLibrary.SetDllImportResolver(typeof(Init).Assembly, Resolver);
+        string dir = OS.GetExecutablePath().GetBaseDir();
+        if (OS.HasFeature("editor"))
+        {
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
+        }
+        DynamicallyLoadedBindings.LibrariesPath = dir;
+        DynamicallyLoadedBindings.Initialize();
     }
 
     public override void _Ready()
@@ -117,7 +126,9 @@ public partial class Init : Node
         Logger.CurrentLogger.Log($"Loaded {pluginsLoaded} Plugins!");
         AddChild(new PluginLoader() { Name = "PluginLoader" });
 
-        AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
+        // AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
+
+        UpdateYtDl();
 
         SetupAndRunGame();
 
@@ -207,7 +218,7 @@ public partial class Init : Node
         string dir = Directory.GetCurrentDirectory();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(dir, "addons");
+            dir = Path.Combine(dir, "export_data", OS.GetName().ToLower());
         }
         switch (OS.GetName().ToLower())
         {
@@ -228,7 +239,7 @@ public partial class Init : Node
         string dir = OS.GetExecutablePath().GetBaseDir();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
         }
         string libHandle = string.Empty;
         switch (OS.GetName().ToLower())
@@ -255,7 +266,7 @@ public partial class Init : Node
         string dir = OS.GetExecutablePath().GetBaseDir();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
         }
         IntPtr libHandle = IntPtr.Zero;
         switch (OS.GetName().ToLower())
@@ -268,35 +279,18 @@ public partial class Init : Node
                 break;
             case "linux":
             case "android":
-                if (libraryName.Contains(".so"))
-                    libHandle = NativeLibrary.Load(Path.Combine(dir, libraryName));
+                if (libraryName.Contains(".so") || true)
+                {
+                    // string path = Directory.GetFiles(dir).FirstOrDefault(x => Path.GetFileName(x).Contains(libraryName));
+                    if (!NativeLibrary.TryLoad(Path.Combine(dir, libraryName), out libHandle))
+                        libHandle = IntPtr.Zero;
+                    // libHandle = NativeLibrary.Load(path);
+                }
                 else
                     libHandle = NativeLibrary.Load(Path.Combine(dir, $"lib{libraryName}.so"));
                 break;
         }
         return libHandle;
-    }
-
-    private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-    {
-        if (libraryName != "discord_game_sdk")
-        {
-            return IntPtr.Zero;
-        }
-        string dir = Directory.GetCurrentDirectory();
-        if (OS.HasFeature("editor"))
-        {
-            dir = Path.Combine(dir, "addons", "DiscordGameSDK");
-        }
-        switch (OS.GetName().ToLower())
-        {
-            case "windows":
-                return NativeLibrary.Load(Path.Combine(dir, "discord_game_sdk.dll"));
-            case "linux":
-                return NativeLibrary.Load(Path.Combine(dir, "discord_game_sdk.so"));
-            default:
-                return IntPtr.Zero;
-        }
     }
 
     public void InitXR()
@@ -336,19 +330,48 @@ public partial class Init : Node
         };
     }
 
-    public void SetupAndRunGame()
+    public void OnLogin(User user)
     {
-        APITools.OnUserLogin += user =>
+        if (user != null)
         {
             ConfigManager.SelectedConfigUser = ConfigManager.LoadedConfig.GetConfigUserFromUserId(user.Id);
             ConfigManager.SaveConfigToFile();
-            ui.Show();
-            login.root.Hide();
-            overlay.root.Show();
-            overlay.ShowHome();
+        }
+        ui.Show();
+        login.root.Hide();
+        overlay.root.Show();
+        overlay.ShowHome();
+        if (user != null)
+        {
             APITools.CreateUserSocket(SocketManager.InitSocket);
             GetWindow().Title = $"Hypernex ({user.GetUsersName()} - {APITools.APIObject.Settings.TargetDomain})";
-        };
+        }
+        else
+        {
+            GetWindow().Title = $"Hypernex (LAN)";
+        }
+    }
+
+    public void UpdateYtDl()
+    {
+        YoutubeDLSharp.Utils.DownloadYtDlp(OS.GetUserDataDir());
+        var ytdlPath = Path.Combine(OS.GetUserDataDir(), "yt-dlp");
+        if (OS.GetName() == "Windows")
+            ytdlPath = Path.Combine(OS.GetUserDataDir(), "yt-dlp.exe");
+        else
+        {
+            var flags = Godot.FileAccess.GetUnixPermissions(ytdlPath);
+            Godot.FileAccess.SetUnixPermissions(ytdlPath, flags | Godot.FileAccess.UnixPermissionFlags.ExecuteOwner);
+        }
+        Streaming.ytdl.YoutubeDLPath = ytdlPath;
+        Streaming.ytdl.OutputFolder = Path.Combine(OS.GetUserDataDir(), "Downloads");
+        if (!Directory.Exists(Streaming.ytdl.OutputFolder))
+            Directory.CreateDirectory(Streaming.ytdl.OutputFolder);
+    }
+
+    public void SetupAndRunGame()
+    {
+        APITools.OnUserLogin += OnLogin;
         APITools.OnLogout += () =>
         {
             APITools.DisposeUserSocket();

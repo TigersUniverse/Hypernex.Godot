@@ -34,7 +34,7 @@ project/assembly_name="Hypernex.Godot"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/cck/plugin.cfg", "res://addons/onscreenkeyboard/plugin.cfg")
+enabled=PackedStringArray("res://addons/build_copy/plugin.cfg", "res://addons/cck/plugin.cfg", "res://addons/onscreenkeyboard/plugin.cfg")
 
 [filesystem]
 

@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://bc42bxyk4uvjk"]
+[gd_scene load_steps=8 format=3 uid="uid://bc42bxyk4uvjk"]
 
 [ext_resource type="Script" path="res://scripts/ui/BigCardTemplate.cs" id="1_3gxw0"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="2_2xvhd"]
+[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="3_ij3x7"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="3_p0uxf"]
-[ext_resource type="Script" path="res://addons/FFplay/FFGodot.cs" id="3_uxu61"]
+[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="4_eqq08"]
+[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="5_mksux"]
 
 [sub_resource type="Theme" id="Theme_cbfv0"]
 RichTextLabel/colors/default_color = Color(1, 1, 1, 1)
@@ -26,10 +28,10 @@ controlsContainer = NodePath("VBoxContainer/Controls/HBoxContainer")
 usersContainer = NodePath("VBoxContainer/Users/HBoxContainer")
 foregroundContainer = NodePath("VBoxContainer/HBoxContainer/Image")
 foreground = NodePath("VBoxContainer/HBoxContainer/Image/Image/TextureRect")
-videoForeground = NodePath("VBoxContainer/HBoxContainer/Image/Image/Video/FFplay")
+videoForeground = NodePath("VBoxContainer/HBoxContainer/Image/Image/Video/FFPlay")
 backgroundContainer = NodePath("Background")
 background = NodePath("Background/Image/TextureRect")
-videoBackground = NodePath("Background/Image/Video/FFplay")
+videoBackground = NodePath("Background/Image/Video/FFPlay")
 cardUI = ExtResource("2_2xvhd")
 metadata/_edit_lock_ = true
 
@@ -67,9 +69,17 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 
-[node name="FFplay" type="Node" parent="Background/Image/Video" node_paths=PackedStringArray("renderMesh")]
-script = ExtResource("3_uxu61")
-renderMesh = NodePath("..")
+[node name="FFPlay" type="Node" parent="Background/Image/Video" node_paths=PackedStringArray("texturePlayer", "audioPlayer")]
+script = ExtResource("3_ij3x7")
+texturePlayer = NodePath("FFTexturePlayer")
+audioPlayer = NodePath("FFAudioPlayer")
+
+[node name="FFTexturePlayer" type="Node" parent="Background/Image/Video/FFPlay" node_paths=PackedStringArray("renderRect")]
+script = ExtResource("4_eqq08")
+renderRect = NodePath("../..")
+
+[node name="FFAudioPlayer" type="Node" parent="Background/Image/Video/FFPlay"]
+script = ExtResource("5_mksux")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -111,9 +121,17 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 
-[node name="FFplay" type="Node" parent="VBoxContainer/HBoxContainer/Image/Image/Video" node_paths=PackedStringArray("renderMesh")]
-script = ExtResource("3_uxu61")
-renderMesh = NodePath("..")
+[node name="FFPlay" type="Node" parent="VBoxContainer/HBoxContainer/Image/Image/Video" node_paths=PackedStringArray("texturePlayer", "audioPlayer")]
+script = ExtResource("3_ij3x7")
+texturePlayer = NodePath("FFTexturePlayer")
+audioPlayer = NodePath("FFAudioPlayer")
+
+[node name="FFTexturePlayer" type="Node" parent="VBoxContainer/HBoxContainer/Image/Image/Video/FFPlay" node_paths=PackedStringArray("renderRect")]
+script = ExtResource("4_eqq08")
+renderRect = NodePath("../..")
+
+[node name="FFAudioPlayer" type="Node" parent="VBoxContainer/HBoxContainer/Image/Image/Video/FFPlay"]
+script = ExtResource("5_mksux")
 
 [node name="Label" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2

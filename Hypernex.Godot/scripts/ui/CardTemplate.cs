@@ -41,9 +41,9 @@ namespace Hypernex.UI
         [Export]
         public RichTextLabel label;
         [Export]
-        public FFGodot videoIcon;
+        public FFPlayGodot videoIcon;
         [Export]
-        public FFGodot videoBackground;
+        public FFPlayGodot videoBackground;
         [Export]
         public Button button;
         [Export]
@@ -62,8 +62,8 @@ namespace Hypernex.UI
 
         public override void _EnterTree()
         {
-            videoIcon.Finished += IconVidDone;
-            videoBackground.Finished += VidDone;
+            videoIcon.OnEndReached += IconVidDone;
+            videoBackground.OnEndReached += VidDone;
             if (button != null)
                 button.Pressed += Clicked;
             if (menu != null)
@@ -76,8 +76,8 @@ namespace Hypernex.UI
         {
             videoIcon.Pause();
             videoBackground.Pause();
-            videoIcon.Finished -= IconVidDone;
-            videoBackground.Finished -= VidDone;
+            videoIcon.OnEndReached -= IconVidDone;
+            videoBackground.OnEndReached -= VidDone;
             if (button != null)
                 button.Pressed -= Clicked;
             if (menu != null)

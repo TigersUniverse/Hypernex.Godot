@@ -2,7 +2,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
-using Godot;
+using FFmpeg.AutoGen.Abstractions;
 
 namespace FFmpeg.Godot.Helpers
 {
@@ -22,6 +22,8 @@ namespace FFmpeg.Godot.Helpers
 
         public FFmpegCtx(Stream stream, uint bufferSize = 16_000_000)
         {
+            if (stream == null)
+                return;
             _stream = stream;
             bufferPtr = (byte*)ffmpeg.av_malloc(bufferSize);
             read = ReadPacketCallback;
@@ -31,37 +33,46 @@ namespace FFmpeg.Godot.Helpers
             _pIOContext = ffmpeg.avio_alloc_context(bufferPtr, (int)bufferSize, 0, GCHandle.ToIntPtr(streamHandle).ToPointer(), read, null, seek);
 
             _pFormatContext = ffmpeg.avformat_alloc_context();
+            _pFormatContext->flags |= ffmpeg.AVFMT_FLAG_SHORTEST;// | ffmpeg.AVFMT_FLAG_SORT_DTS | ffmpeg.AVFMT_FLAG_DISCARD_CORRUPT;
+            _pFormatContext->max_interleave_delta = 100_000_000;
             _pFormatContext->pb = _pIOContext;
-            _pFormatContext->flags |= ffmpeg.AVFMT_FLAG_CUSTOM_IO | ffmpeg.AVFMT_NOFILE;
+            _pFormatContext->flags |= ffmpeg.AVFMT_FLAG_CUSTOM_IO | ffmpeg.AVIO_FLAG_NONBLOCK;
             var pFormatContext = _pFormatContext;
             var url = "some_dummy_filename";
             ffmpeg.avformat_open_input(&pFormatContext, url, null, null).ThrowExceptionIfError();
             ffmpeg.avformat_find_stream_info(_pFormatContext, null).ThrowExceptionIfError();
 
-            _videoIndex = ffmpeg.av_find_best_stream(_pFormatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, null, 0).ThrowExceptionIfError();
-            // UnityEngine.Debug.Log(_videoIndex);
-
-            // UnityEngine.Debug.Log($"{AVRationalToString(_pFormatContext->streams[_videoIndex]->avg_frame_rate)} {AVRationalToString(_pFormatContext->streams[_videoIndex]->r_frame_rate)} {AVRationalToString(_pFormatContext->streams[_videoIndex]->time_base)}");
+            _videoIndex = ffmpeg.av_find_best_stream(_pFormatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, null, 0);
 
             _pPacket = ffmpeg.av_packet_alloc();
             IsValid = true;
         }
 
-        public FFmpegCtx(string url/*, uint bufferSize = 4000*/)
+        public FFmpegCtx(string url)
         {
-            // bufferPtr = (byte*)ffmpeg.av_malloc(bufferSize);
-            // _pIOContext = ffmpeg.avio_alloc_context(bufferPtr, (int)bufferSize, 0, null, null, null, null);
+            if (string.IsNullOrWhiteSpace(url))
+                return;
             _pFormatContext = ffmpeg.avformat_alloc_context();
-            // _pFormatContext->pb = _pIOContext;
-            // _pFormatContext->flags |= ffmpeg.AVFMT_FLAG_NONBLOCK;
+            _pFormatContext->flags |= ffmpeg.AVFMT_FLAG_SHORTEST;// | ffmpeg.AVFMT_FLAG_SORT_DTS | ffmpeg.AVFMT_FLAG_DISCARD_CORRUPT;
+            _pFormatContext->max_interleave_delta = 100_000_000;
+
+            _pFormatContext->avio_flags = ffmpeg.AVIO_FLAG_READ | ffmpeg.AVIO_FLAG_NONBLOCK;
+
             var pFormatContext = _pFormatContext;
             ffmpeg.avformat_open_input(&pFormatContext, url, null, null).ThrowExceptionIfError();
             ffmpeg.avformat_find_stream_info(_pFormatContext, null).ThrowExceptionIfError();
 
-            _videoIndex = ffmpeg.av_find_best_stream(_pFormatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, null, 0).ThrowExceptionIfError();
+            _videoIndex = ffmpeg.av_find_best_stream(_pFormatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, null, 0);
 
             _pPacket = ffmpeg.av_packet_alloc();
             IsValid = true;
+        }
+
+        public bool HasStream(AVMediaType type)
+        {
+            if (!IsValid)
+                return false;
+            return ffmpeg.av_find_best_stream(_pFormatContext, type, -1, -1, null, 0) >= 0;
         }
 
         public static string AVRationalToString(AVRational av)
@@ -69,10 +80,13 @@ namespace FFmpeg.Godot.Helpers
             return $"{av.num}/{av.den}";
         }
 
-        public double GetLength()
+        public double GetLength(VideoStreamDecoder decoder)
         {
-            double time_base = (double)_pFormatContext->streams[_videoIndex]->time_base.num / _pFormatContext->streams[_videoIndex]->time_base.den;
-            return _pFormatContext->streams[_videoIndex]->duration * time_base;
+            int _streamIndex = decoder._streamIndex;
+            if (_streamIndex < 0 || _streamIndex > _pFormatContext->nb_streams)
+                return 0d;
+            double time_base = (double)_pFormatContext->streams[_streamIndex]->time_base.num / _pFormatContext->streams[_streamIndex]->time_base.den;
+            return _pFormatContext->streams[_streamIndex]->duration * time_base;
         }
 
         public bool TryGetFps(out double fps)
@@ -89,8 +103,6 @@ namespace FFmpeg.Godot.Helpers
         public bool TryGetFps(VideoStreamDecoder decoder, out double fps)
         {
             fps = default;
-            // int _streamIndex = _pPacket->stream_index;
-            // _streamIndex = _videoIndex;
             int _streamIndex = decoder._streamIndex;
             if (_streamIndex < 0 || _streamIndex > _pFormatContext->nb_streams)
                 return false;
@@ -119,14 +131,13 @@ namespace FFmpeg.Godot.Helpers
             return true;
         }
 
-        public bool TryGetTimeBase(out double timebase)
+        public bool TryGetTimeBase(AVMediaType type, out AVRational timebase)
         {
             timebase = default;
-            int _streamIndex = _pPacket->stream_index;
-            _streamIndex = _videoIndex;
+            int _streamIndex = ffmpeg.av_find_best_stream(_pFormatContext, type, -1, -1, null, 0).ThrowExceptionIfError();
             if (_streamIndex < 0 || _streamIndex > _pFormatContext->nb_streams)
                 return false;
-            timebase = (double)_pFormatContext->streams[_streamIndex]->time_base.num / _pFormatContext->streams[_streamIndex]->time_base.den;
+            timebase = _pFormatContext->streams[_streamIndex]->time_base;
             return true;
         }
 
@@ -191,17 +202,12 @@ namespace FFmpeg.Godot.Helpers
             {
                 return ret;
             }
-            // if (buf_size == 0)
-                // return 0;
             var span = new Span<byte>(buf, buf_size);
             if (stream == null || !stream.CanRead)
             {
                 return ret;
             }
-            // UnityEngine.Debug.Log(stream);
-            // UnityEngine.Debug.Log(stream.GetType().FullName);
             int count = stream.Read(span);
-            // UnityEngine.Debug.Assert(count > 0);
             return count == 0 ? ret : count;
         }
 
@@ -229,12 +235,6 @@ namespace FFmpeg.Godot.Helpers
                 packet = default;
                 return false;
             }
-            /*if (EndReached)
-            {
-                frame = default;
-                // frame = *_pFrame;
-                return false;
-            }*/
             int error;
             do
             {
@@ -257,12 +257,8 @@ namespace FFmpeg.Godot.Helpers
         {
             if (!IsValid)
                 return;
-            // AVRational base_q = ffmpeg.av_get_time_base_q();
-            // long target = ffmpeg.av_rescale_q(offset, base_q, _ctx._pFormatContext->streams[_streamIndex]->time_base);
-            // ffmpeg.avformat_seek_file(_pFormatContext, -1, long.MinValue, offset, long.MaxValue, ffmpeg.AVSEEK_FLAG_ANY).ThrowExceptionIfError();
             int flags = ffmpeg.AVSEEK_FLAG_BACKWARD;
             ffmpeg.av_seek_frame(_pFormatContext, index, offset, flags).ThrowExceptionIfError();
-            // ffmpeg.avformat_seek_file(_pFormatContext, index, 0, offset, offset, flags).ThrowExceptionIfError();
         }
 
         public void Seek(VideoStreamDecoder decoder, double offset)
@@ -270,7 +266,6 @@ namespace FFmpeg.Godot.Helpers
             if (!IsValid)
                 return;
             int _streamIndex = decoder._streamIndex;
-            // if (TryGetPts(out double pts))
             AVRational base_q = ffmpeg.av_get_time_base_q();
             base_q = _pFormatContext->streams[_streamIndex]->time_base;
             double pts = (double)base_q.num / base_q.den;
@@ -281,6 +276,8 @@ namespace FFmpeg.Godot.Helpers
 
         public void Dispose()
         {
+            if (!IsValid)
+                return;
             IsValid = false;
             var pPacket = _pPacket;
             ffmpeg.av_packet_free(&pPacket);

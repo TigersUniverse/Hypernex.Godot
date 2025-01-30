@@ -1,6 +1,10 @@
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
+using FFmpeg.AutoGen.Bindings.DynamicallyLoaded;
 using FFmpeg.Godot;
 using Godot;
 using Hypernex.CCK;
@@ -15,27 +19,54 @@ namespace Hypernex.Game.Tests
         public string url;
         [Export]
         public AudioStreamPlayer3D audio;
+        [Export]
+        public FFPlayGodot ff;
+        [Export]
+        public FFTexturePlayer ffTex;
+        [Export]
+        public FFAudioPlayer ffAud;
 
-        public override void _Ready()
+        public override async void _Ready()
         {
-            Init.resolverSet = false;
+            string dir = OS.GetExecutablePath().GetBaseDir();
+            if (OS.HasFeature("editor"))
+            {
+                dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
+            }
+            DynamicallyLoadedBindings.LibrariesPath = dir;
+            DynamicallyLoadedBindings.Initialize();
+
+            // Init.resolverSet = false;
             // byte[] res = await HttpUtils.HttpGetAsync(this, url);
             if (IsInstanceValid(this))
             {
                 // byte[] res = FileAccess.GetFileAsBytes(url);
-                FFGodot ff = new FFGodot();
-                ff.CanSeek = !ImageTools.IsVideoStream(new System.Uri(url));
-                ff.renderMesh = this;
-                ff.source = audio;
-                AddChild(ff);
-                ff.Play(url, url);
+                // FFPlayGodot ff = new FFPlayGodot();
+                // FFTexturePlayer ffTex = new FFTexturePlayer();
+                // FFAudioPlayer ffAud = new FFAudioPlayer();
+                // ff.texturePlayer = ffTex;
+                // ff.audioPlayer = ffAud;
+                // ff.AddChild(ffTex);
+                // ff.AddChild(ffAud);
+                ffTex.OnDisplay = OnDisplay;
+                // ffAud.audioSource = audio;
+                // AddChild(ff);
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+                ff.Play(url);
                 // var ff = ImageTools.LoadFFmpeg(res, this, audio);
-                ff.Finished += () =>
+                ff.OnEndReached += () =>
                 {
-                    ff.Seek(0);
+                    // ff.Seek(0);
                 };
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
                 ff.Seek(0);
             }
+        }
+
+        private void OnDisplay(ImageTexture texture)
+        {
+            // GD.Print(texture);
+            Texture = texture;
         }
     }
 }

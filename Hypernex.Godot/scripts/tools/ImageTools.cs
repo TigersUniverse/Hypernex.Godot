@@ -43,23 +43,32 @@ namespace Hypernex.Tools
             return false;
         }
 
-        public static FFGodot LoadFFmpeg(byte[] buffer, TextureRect texture, AudioStreamPlayer3D sound)
+        public static FFPlayGodot LoadFFmpeg(byte[] buffer, TextureRect texture, AudioStreamPlayer3D sound)
         {
             string hash = Convert.ToBase64String(MD5.HashData(buffer));
             string path = DownloadTools.GetFilePath($"media_{hash.Replace("=", null).Replace("/", null)}.cache");
             if (!File.Exists(path))
                 File.WriteAllBytes(path, buffer);
-            FFGodot ff = new FFGodot();
-            if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
-                ff._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
-            ff.renderMesh = texture;
-            ff.source = sound;
+            FFPlayGodot ff = new FFPlayGodot();
+            FFTexturePlayer ffTex = new FFTexturePlayer();
+            FFAudioPlayer ffAud = new FFAudioPlayer();
+            ff.texturePlayer = ffTex;
+            ff.audioPlayer = ffAud;
+            ff.AddChild(ffTex);
+            ff.AddChild(ffAud);
+            // if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
+                // ff._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
+            ffTex.OnDisplay = (tex) =>
+            {
+                texture.Texture = tex;
+            };
+            ffAud.audioSource = sound;
             texture.AddChild(ff);
             ff.Play(path, path);
             return ff;
         }
 
-        public static void LoadFFmpeg(FFGodot ff, byte[] buffer)
+        public static void LoadFFmpeg(FFPlayGodot ff, byte[] buffer)
         {
             new Thread(() =>
             {
@@ -70,7 +79,7 @@ namespace Hypernex.Tools
                 string path = DownloadTools.GetFilePath($"media_{hash}.cache");
                 if (!File.Exists(path))
                     File.WriteAllBytes(path, buffer);
-                ff.Log = _ => { };
+                // ff.Log = _ => { };
                 QuickInvoke.InvokeActionOnMainThread(() =>
                 {
                     if (GodotObject.IsInstanceValid(ff))

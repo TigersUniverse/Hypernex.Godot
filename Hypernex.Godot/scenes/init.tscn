@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://s7eucmua8sgd"]
+[gd_scene load_steps=26 format=3 uid="uid://s7eucmua8sgd"]
 
 [ext_resource type="Script" path="res://scripts/Init.cs" id="1_07r2y"]
 [ext_resource type="Script" path="res://scripts/ui/LoginScreen.cs" id="2_qliqn"]
@@ -16,8 +16,10 @@
 [ext_resource type="Texture2D" uid="uid://botywtoyu7mum" path="res://textures/tigers_im_not_calling_it_that.png" id="10_0l1xh"]
 [ext_resource type="Texture2D" uid="uid://pr14mfjw31m7" path="res://textures/defaults/defaultpfp.jpg" id="10_8rf5e"]
 [ext_resource type="PackedScene" uid="uid://bc42bxyk4uvjk" path="res://scenes/big_card.tscn" id="11_6bljf"]
-[ext_resource type="Script" path="res://addons/FFplay/FFGodot.cs" id="12_860td"]
+[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="12_sw8qs"]
+[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="13_143xf"]
 [ext_resource type="Script" path="res://scripts/ui/LoadingOverlay.cs" id="14_j4y3h"]
+[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="14_o3kqo"]
 [ext_resource type="PackedScene" uid="uid://j14hews4kqtu" path="res://scenes/cck_uploader.tscn" id="14_tnrj2"]
 [ext_resource type="Script" path="res://scripts/ui/AvatarsController.cs" id="15_xnq34"]
 [ext_resource type="Script" path="res://scripts/ui/SettingsController.cs" id="16_7yuv7"]
@@ -176,7 +178,7 @@ theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 metadata/_edit_lock_ = true
 
-[node name="Overlay" type="Node" parent="UI/MainOverlay" node_paths=PackedStringArray("root", "bar", "tabs", "cckButton", "cckWindow", "logoutButton", "exitButton", "profileName", "profilePhoto", "pfpVideo")]
+[node name="Overlay" type="Node" parent="UI/MainOverlay" node_paths=PackedStringArray("root", "bar", "tabs", "cckButton", "cckWindow", "logoutButton", "exitButton", "profileName", "profilePhoto", "pfpVideo", "pfpVideoTex")]
 script = ExtResource("3_yxb3m")
 root = NodePath("..")
 bar = NodePath("../MainOverlay/VBox/TopBar/TabBar")
@@ -190,7 +192,8 @@ bigCardUI = ExtResource("11_6bljf")
 profileName = NodePath("../MainOverlay/VBox/TopBar/ProfileName")
 profilePhoto = NodePath("../MainOverlay/VBox/TopBar/ProfilePicture")
 defaultPfp = ExtResource("10_8rf5e")
-pfpVideo = NodePath("../MainOverlay/VBox/TopBar/ProfilePictureVid/FFGodot")
+pfpVideo = NodePath("../MainOverlay/VBox/TopBar/ProfilePictureVid/FFPlay")
+pfpVideoTex = NodePath("../MainOverlay/VBox/TopBar/ProfilePictureVid")
 
 [node name="MainOverlay" type="PanelContainer" parent="UI/MainOverlay"]
 layout_mode = 2
@@ -230,9 +233,17 @@ expand_mode = 2
 layout_mode = 2
 expand_mode = 2
 
-[node name="FFGodot" type="Node" parent="UI/MainOverlay/MainOverlay/VBox/TopBar/ProfilePictureVid" node_paths=PackedStringArray("renderMesh")]
-script = ExtResource("12_860td")
-renderMesh = NodePath("..")
+[node name="FFPlay" type="Node" parent="UI/MainOverlay/MainOverlay/VBox/TopBar/ProfilePictureVid" node_paths=PackedStringArray("texturePlayer", "audioPlayer")]
+script = ExtResource("12_sw8qs")
+texturePlayer = NodePath("FFTexturePlayer")
+audioPlayer = NodePath("FFAudioPlayer")
+
+[node name="FFTexturePlayer" type="Node" parent="UI/MainOverlay/MainOverlay/VBox/TopBar/ProfilePictureVid/FFPlay" node_paths=PackedStringArray("renderRect")]
+script = ExtResource("13_143xf")
+renderRect = NodePath("../..")
+
+[node name="FFAudioPlayer" type="Node" parent="UI/MainOverlay/MainOverlay/VBox/TopBar/ProfilePictureVid/FFPlay"]
+script = ExtResource("14_o3kqo")
 
 [node name="Margin" type="MarginContainer" parent="UI/MainOverlay/MainOverlay/VBox"]
 layout_mode = 2

@@ -107,7 +107,7 @@ namespace Hypernex.Tools
 
         public static void DisposeUserSocket()
         {
-            APIObject.CloseUserSocket();
+            APIObject?.CloseUserSocket();
             UserSocket = null;
         }
 

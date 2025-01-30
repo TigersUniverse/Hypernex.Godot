@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://ct7xyaxn1p1cf"]
+[gd_scene load_steps=7 format=3 uid="uid://ct7xyaxn1p1cf"]
 
 [ext_resource type="Script" path="res://scripts/ui/CardTemplate.cs" id="1_41cr0"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="2_raub8"]
-[ext_resource type="Script" path="res://addons/FFplay/FFGodot.cs" id="3_d31ve"]
+[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="3_ahwr6"]
 [ext_resource type="Texture2D" uid="uid://pr14mfjw31m7" path="res://textures/defaults/defaultpfp.jpg" id="3_pb736"]
+[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="5_6p43k"]
+[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="5_ob1px"]
 
 [node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoIcon", "videoBackground", "menu")]
 custom_minimum_size = Vector2(250, 100)
@@ -16,8 +18,8 @@ scaleWithScreen = true
 icon = NodePath("PFP")
 background = NodePath("BG")
 label = NodePath("PanelContainer/Name")
-videoIcon = NodePath("PFPVid/FFplay")
-videoBackground = NodePath("BGVid/FFplay")
+videoIcon = NodePath("PFPVid/FFPlay")
+videoBackground = NodePath("BGVid/FFPlay")
 menu = NodePath("MenuButton")
 
 [node name="BG" type="TextureRect" parent="."]
@@ -39,9 +41,17 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 
-[node name="FFplay" type="Node" parent="BGVid" node_paths=PackedStringArray("renderMesh")]
-script = ExtResource("3_d31ve")
-renderMesh = NodePath("..")
+[node name="FFPlay" type="Node" parent="BGVid" node_paths=PackedStringArray("texturePlayer", "audioPlayer")]
+script = ExtResource("3_ahwr6")
+texturePlayer = NodePath("FFTexturePlayer")
+audioPlayer = NodePath("FFAudioPlayer")
+
+[node name="FFTexturePlayer" type="Node" parent="BGVid/FFPlay" node_paths=PackedStringArray("renderRect")]
+script = ExtResource("5_6p43k")
+renderRect = NodePath("../..")
+
+[node name="FFAudioPlayer" type="Node" parent="BGVid/FFPlay"]
+script = ExtResource("5_ob1px")
 
 [node name="PFP" type="TextureRect" parent="."]
 clip_contents = true
@@ -65,9 +75,17 @@ offset_right = 50.0
 grow_vertical = 0
 expand_mode = 1
 
-[node name="FFplay" type="Node" parent="PFPVid" node_paths=PackedStringArray("renderMesh")]
-script = ExtResource("3_d31ve")
-renderMesh = NodePath("..")
+[node name="FFPlay" type="Node" parent="PFPVid" node_paths=PackedStringArray("texturePlayer", "audioPlayer")]
+script = ExtResource("3_ahwr6")
+texturePlayer = NodePath("FFTexturePlayer")
+audioPlayer = NodePath("FFAudioPlayer")
+
+[node name="FFTexturePlayer" type="Node" parent="PFPVid/FFPlay" node_paths=PackedStringArray("renderRect")]
+script = ExtResource("5_6p43k")
+renderRect = NodePath("../..")
+
+[node name="FFAudioPlayer" type="Node" parent="PFPVid/FFPlay"]
+script = ExtResource("5_ob1px")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1

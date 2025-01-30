@@ -15,17 +15,30 @@ namespace Hypernex.CCK.GodotVersion.Classes
         [Export]
         public bool loop { get; set; } = false;
 
-        public FFGodot video;
+        public FFPlayGodot video;
+        public FFTexturePlayer texture;
+        public FFAudioPlayer audio;
 
         public override void _EnterTree()
         {
-            video = new FFGodot();
-            if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
-                video._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
-            video.renderMesh = GetNode<TextureRect>(textureRect);
-            video.source = GetNode<AudioStreamPlayer3D>(audioPlayer3d);
-            video.Finished += OnFin;
+            video = new FFPlayGodot();
+            texture = new FFTexturePlayer();
+            audio = new FFAudioPlayer();
+            video.texturePlayer = texture;
+            video.audioPlayer = audio;
+            video.AddChild(texture);
+            video.AddChild(audio);
+            // if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
+                // video._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
+            texture.OnDisplay = OnDisplay;
+            audio.audioSource = GetNode<AudioStreamPlayer3D>(audioPlayer3d);
+            video.OnEndReached += OnFin;
             AddChild(video);
+        }
+
+        private void OnDisplay(ImageTexture tex)
+        {
+            GetNode<TextureRect>(textureRect).Texture = tex;
         }
 
         private void OnFin()
@@ -38,7 +51,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public override void _ExitTree()
         {
-            video.Finished -= OnFin;
+            video.OnEndReached -= OnFin;
             video.QueueFree();
         }
     }

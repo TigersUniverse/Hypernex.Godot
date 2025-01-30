@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using FFmpeg.AutoGen.Abstractions;
 using Godot;
 
 namespace FFmpeg.Godot.Helpers
@@ -40,13 +41,13 @@ namespace FFmpeg.Godot.Helpers
                     // UnityEngine.Debug.Log($"HW at index {i} ({codecHWConfig->device_type}) {codecHWConfig->methods}");
                     if (codecHWConfig == null)
                     {
-                        GD.PushError("No HW decoder found.");
+                        GD.PrintErr("No HW decoder found.");
                         HWDeviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
                         break;
                     }
                     else if ((codecHWConfig->methods & 1) == 0 || codecHWConfig->device_type != HWDeviceType)
                     {
-                        GD.PushWarning($"HW at index {i} ({codecHWConfig->device_type}) not support/selected.");
+                        GD.Print($"HW at index {i} ({codecHWConfig->device_type}) not support/selected.");
                         continue;
                     }
                     else
@@ -112,7 +113,7 @@ namespace FFmpeg.Godot.Helpers
 
             for (p = (int*)fmt; *p != -1; p++)
             {
-                // if (*p == (int)HWPixelFormat)
+                if (*p == (int)HWPixelFormat)
                     return (AVPixelFormat)(*p);
             }
 
@@ -153,9 +154,17 @@ namespace FFmpeg.Godot.Helpers
             }
             ffmpeg.av_frame_unref(_pFrame);
             ffmpeg.av_frame_unref(_receivedFrame);
-            ffmpeg.avcodec_send_packet(_pCodecContext, _ctx._pPacket).ThrowExceptionIfError();
-            int error = ffmpeg.avcodec_receive_frame(_pCodecContext, _pFrame);
-            if (error == ffmpeg.AVERROR(ffmpeg.EAGAIN))
+            int error;
+            int error2;
+            do
+            {
+                error = ffmpeg.avcodec_send_packet(_pCodecContext, _ctx._pPacket);
+                error.ThrowExceptionIfError();
+                error2 = ffmpeg.avcodec_receive_frame(_pCodecContext, _pFrame);
+            }
+            while (error == ffmpeg.AVERROR(ffmpeg.EAGAIN));
+            error.ThrowExceptionIfError();
+            if (error2 == ffmpeg.AVERROR(ffmpeg.EAGAIN))
             {
                 frame = new AVFrame()
                 {
@@ -163,7 +172,7 @@ namespace FFmpeg.Godot.Helpers
                 };
                 return 1;
             }
-            error.ThrowExceptionIfError();
+            error2.ThrowExceptionIfError();
 
             if (_pCodecContext->hw_device_ctx != null)
             {
