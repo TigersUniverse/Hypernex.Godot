@@ -63,7 +63,7 @@ public partial class Init : Node
         string dir = OS.GetExecutablePath().GetBaseDir();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
         }
         DynamicallyLoadedBindings.LibrariesPath = dir;
         DynamicallyLoadedBindings.Initialize();
@@ -218,7 +218,7 @@ public partial class Init : Node
         string dir = Directory.GetCurrentDirectory();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(dir, "addons");
+            dir = Path.Combine(dir, "export_data", OS.GetName().ToLower());
         }
         switch (OS.GetName().ToLower())
         {
@@ -239,7 +239,7 @@ public partial class Init : Node
         string dir = OS.GetExecutablePath().GetBaseDir();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
         }
         string libHandle = string.Empty;
         switch (OS.GetName().ToLower())
@@ -266,7 +266,7 @@ public partial class Init : Node
         string dir = OS.GetExecutablePath().GetBaseDir();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+            dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
         }
         IntPtr libHandle = IntPtr.Zero;
         switch (OS.GetName().ToLower())
@@ -291,28 +291,6 @@ public partial class Init : Node
                 break;
         }
         return libHandle;
-    }
-
-    private static IntPtr DiscordResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-    {
-        if (libraryName != "discord_game_sdk")
-        {
-            return IntPtr.Zero;
-        }
-        string dir = Directory.GetCurrentDirectory();
-        if (OS.HasFeature("editor"))
-        {
-            dir = Path.Combine(dir, "addons", "DiscordGameSDK");
-        }
-        switch (OS.GetName().ToLower())
-        {
-            case "windows":
-                return NativeLibrary.Load(Path.Combine(dir, "discord_game_sdk.dll"));
-            case "linux":
-                return NativeLibrary.Load(Path.Combine(dir, "discord_game_sdk.so"));
-            default:
-                return IntPtr.Zero;
-        }
     }
 
     public void InitXR()

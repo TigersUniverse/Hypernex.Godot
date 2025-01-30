@@ -83,7 +83,7 @@ public partial class VoiceChat : Node
         string dir = Directory.GetCurrentDirectory();
         if (OS.HasFeature("editor"))
         {
-            dir = Path.Combine(dir, "addons");
+            dir = Path.Combine(dir, "export_data", OS.GetName().ToLower());
         }
         switch (OS.GetName().ToLower())
         {

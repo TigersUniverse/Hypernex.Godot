@@ -31,7 +31,7 @@ namespace Hypernex.Game.Tests
             string dir = OS.GetExecutablePath().GetBaseDir();
             if (OS.HasFeature("editor"))
             {
-                dir = Path.Combine(Directory.GetCurrentDirectory(), "addons", "natives");
+                dir = Path.Combine(Directory.GetCurrentDirectory(), "export_data", OS.GetName().ToLower());
             }
             DynamicallyLoadedBindings.LibrariesPath = dir;
             DynamicallyLoadedBindings.Initialize();
