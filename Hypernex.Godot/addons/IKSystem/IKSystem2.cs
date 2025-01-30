@@ -72,6 +72,7 @@ public partial class IKSystem2 : Node
     [Export]
     public string rightFoot = "RightFoot";
 
+    public float hipsDistance;
     public float footDistance;
     public float leftFootRest;
     public float rightFootRest;
@@ -125,6 +126,15 @@ public partial class IKSystem2 : Node
     private static Vector3 DirectionToLocal(Transform3D t, Vector3 v)
     {
         return t.Basis.Inverse() * v;
+    }
+
+    public void SetHipsPosition(Vector3 pos)
+    {
+        int idx = humanoid.FindBone(hips);
+        var localPos = humanoid.GlobalTransform.AffineInverse() * pos;
+        var xform = humanoid.GetBoneGlobalPose(idx);
+        xform.Origin = localPos;
+        humanoid.SetBoneGlobalPose(idx, xform);
     }
     
     public Transform3D GetBoneTransform(string bone)
@@ -228,12 +238,12 @@ public partial class IKSystem2 : Node
 
     public Vector3 PlaceLeftFoot(Vector3 vel)
     {
-        return BaseToWorld(SnapBy2(WorldToBase(humanoid.GlobalPosition), minStepDistance)) - humanoid.GlobalBasis.X.Normalized() * footDistance * 0.5f + vel;
+        return BaseToWorld(SnapBy2(WorldToBase(humanoid.GlobalPosition), minStepDistance)) + humanoid.GlobalBasis.X.Normalized() * footDistance * 0.5f + vel;
     }
 
     public Vector3 PlaceRightFoot(Vector3 vel)
     {
-        return BaseToWorld(SnapBy2(WorldToBase(humanoid.GlobalPosition), minStepDistance)) + humanoid.GlobalBasis.X.Normalized() * footDistance * 0.5f + vel;
+        return BaseToWorld(SnapBy2(WorldToBase(humanoid.GlobalPosition), minStepDistance)) - humanoid.GlobalBasis.X.Normalized() * footDistance * 0.5f + vel;
     }
 
     public static Vector2 SnapBy2(Vector2 input, float interval)
@@ -295,14 +305,15 @@ public partial class IKSystem2 : Node
             humanBindPose = humanoid.Transform;
             direction = GetBonePosition(head) - GetBonePosition(hips);
             float scl = direction.Length() / GetScale();
+            hipsDistance = GetBonePosition(hips).DistanceTo(GetBonePosition(head));
             footDistance = GetBonePosition(leftFoot).DistanceTo(GetBonePosition(rightFoot));
             leftFootRest = GetBonePosition(hips).DistanceTo(GetBonePosition(leftFoot));
             rightFootRest = GetBonePosition(hips).DistanceTo(GetBonePosition(rightFoot));
             float scale = 1f / GetScale();
             float handPoleDist = -1f;
 
-            Vector3 right = humanoid.GlobalBasis.X.Normalized();
-            Vector3 forward = -humanoid.GlobalBasis.Z.Normalized();
+            Vector3 right = -humanoid.GlobalBasis.X.Normalized();
+            Vector3 forward = humanoid.GlobalBasis.Z.Normalized();
             Vector3 up = humanoid.GlobalBasis.Y.Normalized();
 
             // hips and head
