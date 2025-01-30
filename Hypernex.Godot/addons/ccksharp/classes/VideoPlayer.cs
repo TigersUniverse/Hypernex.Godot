@@ -26,15 +26,19 @@ namespace Hypernex.CCK.GodotVersion.Classes
             audio = new FFAudioPlayer();
             video.texturePlayer = texture;
             video.audioPlayer = audio;
+            video.AddChild(texture);
+            video.AddChild(audio);
             // if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
                 // video._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
-            texture.OnDisplay = (tex) =>
-            {
-                GetNode<TextureRect>(textureRect).Texture = tex;
-            };
+            texture.OnDisplay = OnDisplay;
             audio.audioSource = GetNode<AudioStreamPlayer3D>(audioPlayer3d);
             video.OnEndReached += OnFin;
             AddChild(video);
+        }
+
+        private void OnDisplay(ImageTexture tex)
+        {
+            GetNode<TextureRect>(textureRect).Texture = tex;
         }
 
         private void OnFin()

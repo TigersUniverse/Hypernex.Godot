@@ -67,6 +67,13 @@ namespace Hypernex.Sandboxing.SandboxedTypes
 
         public static void LoadUrl(Item item, string url)
         {
+            VideoPlayer videoPlayer = GetVideoPlayer(item);
+            Streaming.DownloadInternal(url, (Streaming.StreamDownload opts) =>
+            {
+                videoPlayer.video.Play(opts.pathToFile);
+            }, default);
+            return;
+
             GetMedia getMedia = new GetMedia();
             getMedia.url = url;
             getMedia.vQuality = VideoQuality.q720;

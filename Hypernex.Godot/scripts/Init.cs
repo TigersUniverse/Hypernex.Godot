@@ -6,6 +6,7 @@ using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
 using Hypernex.Configuration;
 using Hypernex.Game;
+using Hypernex.Sandboxing.SandboxedTypes;
 using Hypernex.Tools;
 using Hypernex.Tools.Godot;
 using Hypernex.UI;
@@ -126,6 +127,8 @@ public partial class Init : Node
         AddChild(new PluginLoader() { Name = "PluginLoader" });
 
         // AddChild(new DiscordGDTools() { Name = "DiscordGDTools" });
+
+        UpdateYtDl();
 
         SetupAndRunGame();
 
@@ -369,6 +372,23 @@ public partial class Init : Node
         {
             GetWindow().Title = $"Hypernex (LAN)";
         }
+    }
+
+    public void UpdateYtDl()
+    {
+        YoutubeDLSharp.Utils.DownloadYtDlp(OS.GetUserDataDir());
+        var ytdlPath = Path.Combine(OS.GetUserDataDir(), "yt-dlp");
+        if (OS.GetName() == "Windows")
+            ytdlPath = Path.Combine(OS.GetUserDataDir(), "yt-dlp.exe");
+        else
+        {
+            var flags = Godot.FileAccess.GetUnixPermissions(ytdlPath);
+            Godot.FileAccess.SetUnixPermissions(ytdlPath, flags | Godot.FileAccess.UnixPermissionFlags.ExecuteOwner);
+        }
+        Streaming.ytdl.YoutubeDLPath = ytdlPath;
+        Streaming.ytdl.OutputFolder = Path.Combine(OS.GetUserDataDir(), "Downloads");
+        if (!Directory.Exists(Streaming.ytdl.OutputFolder))
+            Directory.CreateDirectory(Streaming.ytdl.OutputFolder);
     }
 
     public void SetupAndRunGame()
