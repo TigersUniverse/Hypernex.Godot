@@ -159,7 +159,6 @@ namespace FFmpeg.Godot.Helpers
             do
             {
                 error = ffmpeg.avcodec_send_packet(_pCodecContext, _ctx._pPacket);
-                error.ThrowExceptionIfError();
                 error2 = ffmpeg.avcodec_receive_frame(_pCodecContext, _pFrame);
             }
             while (error == ffmpeg.AVERROR(ffmpeg.EAGAIN));
