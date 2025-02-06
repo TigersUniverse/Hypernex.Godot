@@ -5,7 +5,6 @@ using Godot;
 using Hypernex.CCK;
 using Hypernex.CCK.GodotVersion;
 using Hypernex.CCK.GodotVersion.Classes;
-using Hypernex.CCK.GodotVersion.Converters;
 using Hypernex.Player;
 using Hypernex.Sandboxing;
 using Hypernex.Tools;

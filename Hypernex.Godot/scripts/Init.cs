@@ -305,8 +305,22 @@ public partial class Init : Node
             }
         }
     }
-    
+
     public void SetupSceneProviders()
+    {
+        SetupLegacySceneProviders();
+        GltfSceneLoader.Init();
+        /*WorldProvider = () =>
+        {
+            return new GltfSceneLoader();
+        };*/
+        AvatarProvider = () =>
+        {
+            return new GltfSceneLoader();
+        };
+    }
+
+    public void SetupLegacySceneProviders()
     {
         WorldProvider = () =>
         {

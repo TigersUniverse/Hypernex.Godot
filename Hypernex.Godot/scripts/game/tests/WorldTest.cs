@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Godot;
@@ -28,6 +29,27 @@ namespace Hypernex.Game.Tests
 
         public override async void _Ready()
         {
+            GltfSceneLoader.Init();
+            GltfSceneLoader gltf = new GltfSceneLoader();
+            PackedScene scn = new PackedScene();
+            foreach (var item in FindChildren("*", owned: true))
+            {
+                item.Owner = this;
+            }
+            GD.PrintErr(scn.Pack(this));
+            new Thread(() =>
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Restart();
+                gltf.SaveToFile("user://test.gltf", scn);
+                sw.Stop();
+                GD.Print($"Save {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
+                scn = gltf.LoadFromFile("user://test.gltf");
+                sw.Stop();
+                GD.Print($"Load {sw.ElapsedMilliseconds}ms");
+                CallDeferred(MethodName.AddChild, scn.Instantiate());
+            }).Start();
             return;
             GDLogger logger = new GDLogger();
             logger.SetLogger();

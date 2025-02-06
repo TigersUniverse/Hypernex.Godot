@@ -32,7 +32,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
         
         public static bool IsPlaying(Item item) => !GetFFGodot(item).IsPaused && !GetFFGodot(item).IsPlaying;
         public static bool IsMuted(Item item) => throw new NotImplementedException();
-        public static bool IsLooping(Item item) => GetVideoPlayer(item).loop;
+        public static bool IsLooping(Item item) => GetVideoPlayer(item).Loop;
         public static void Play(Item item) => GetFFGodot(item).Resume();
         public static void Pause(Item item) => GetFFGodot(item)?.Pause();
         public static void Stop(Item item) => GetFFGodot(item)?.Pause();
@@ -44,7 +44,7 @@ namespace Hypernex.Sandboxing.SandboxedTypes
         
         public static void SetLoop(Item item, bool value)
         {
-            GetVideoPlayer(item).loop = value;
+            GetVideoPlayer(item).Loop = value;
         }
         
         public static float GetPitch(Item item) => throw new NotImplementedException();

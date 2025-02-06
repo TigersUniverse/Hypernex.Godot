@@ -127,7 +127,7 @@ namespace Hypernex.CCK.GodotVersion
             switch (id)
             {
                 case 0: // import
-                    openFile.FileMode = FileDialog.FileModeEnum.OpenDir;
+                    openFile.FileMode = FileDialog.FileModeEnum.OpenFiles;
                     openFile.ClearFilters();
                     openFile.Popup();
                     break;

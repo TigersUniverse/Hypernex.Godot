@@ -1,6 +1,6 @@
 @tool
 class_name AvatarDescriptor
-extends Node
+extends Node3D
 
 @export var Skeleton: Skeleton3D
 @export var Eyes: Marker3D

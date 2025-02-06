@@ -231,7 +231,7 @@ layout_mode = 2
 text = "Upload Avatar"
 
 [connection signal="visibility_changed" from="ScrollContainer/TabContainer/World" to="ScrollContainer/TabContainer/World/FileUploader" method="RefreshWorlds"]
-[connection signal="UploadEnd" from="ScrollContainer/TabContainer/World/FileUploader" to="ScrollContainer/TabContainer/World/Upload" method="set_disabled" binds= [true]]
+[connection signal="UploadEnd" from="ScrollContainer/TabContainer/World/FileUploader" to="ScrollContainer/TabContainer/World/Upload" method="set_disabled" binds= [false]]
 [connection signal="UploadStart" from="ScrollContainer/TabContainer/World/FileUploader" to="ScrollContainer/TabContainer/World/Upload" method="set_disabled" binds= [true]]
 [connection signal="canceled" from="ScrollContainer/TabContainer/World/FileDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="ClearSelectedWorld"]
 [connection signal="file_selected" from="ScrollContainer/TabContainer/World/FileDialog" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldSelected"]
@@ -243,8 +243,8 @@ text = "Upload Avatar"
 [connection signal="item_selected" from="ScrollContainer/TabContainer/World/SelectWorldMeta" to="ScrollContainer/TabContainer/World/FileUploader" method="WorldMetaSelected"]
 [connection signal="pressed" from="ScrollContainer/TabContainer/World/Upload" to="ScrollContainer/TabContainer/World/FileUploader" method="UploadSelectedWorld"]
 [connection signal="visibility_changed" from="ScrollContainer/TabContainer/Avatar" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="RefreshWorlds"]
-[connection signal="UploadEnd" from="ScrollContainer/TabContainer/Avatar/FileUploader" to="ScrollContainer/TabContainer/Avatar/Upload" method="set_disabled" binds= [true]]
-[connection signal="UploadStart" from="ScrollContainer/TabContainer/Avatar/FileUploader" to="ScrollContainer/TabContainer/Avatar/Upload" method="set_disabled" binds= [false]]
+[connection signal="UploadEnd" from="ScrollContainer/TabContainer/Avatar/FileUploader" to="ScrollContainer/TabContainer/Avatar/Upload" method="set_disabled" binds= [false]]
+[connection signal="UploadStart" from="ScrollContainer/TabContainer/Avatar/FileUploader" to="ScrollContainer/TabContainer/Avatar/Upload" method="set_disabled" binds= [true]]
 [connection signal="canceled" from="ScrollContainer/TabContainer/Avatar/FileDialog" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="ClearSelectedWorld"]
 [connection signal="file_selected" from="ScrollContainer/TabContainer/Avatar/FileDialog" to="ScrollContainer/TabContainer/Avatar/FileUploader" method="WorldSelected"]
 [connection signal="pressed" from="ScrollContainer/TabContainer/Avatar/AvatarSelectFile" to="ScrollContainer/TabContainer/Avatar/FileDialog" method="show"]

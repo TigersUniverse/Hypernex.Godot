@@ -4,16 +4,18 @@ using Godot;
 
 namespace Hypernex.CCK.GodotVersion.Classes
 {
-    public partial class VideoPlayer : Node, ISandboxClass
+    [Tool]
+    [GlobalClass]
+    public partial class VideoPlayer : Node3D, ISandboxClass
     {
         public const string TypeName = "VideoPlayer";
 
         [Export]
-        public NodePath textureRect { get; set; }
+        public NodePath VideoPlayback { get; set; }
         [Export]
-        public NodePath audioPlayer3d { get; set; }
-        [Export]
-        public bool loop { get; set; } = false;
+        public NodePath AudioPlayback { get; set; }
+
+        public bool Loop { get; set; } = false;
 
         public FFPlayGodot video;
         public FFTexturePlayer texture;
@@ -21,6 +23,8 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public override void _EnterTree()
         {
+            if (Engine.IsEditorHint())
+                return;
             video = new FFPlayGodot();
             texture = new FFTexturePlayer();
             audio = new FFAudioPlayer();
@@ -30,20 +34,39 @@ namespace Hypernex.CCK.GodotVersion.Classes
             video.AddChild(audio);
             // if (OS.GetName().Equals("Android", StringComparison.OrdinalIgnoreCase))
                 // video._hwType = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC;
-            texture.OnDisplay = OnDisplay;
-            audio.audioSource = GetNode<AudioStreamPlayer3D>(audioPlayer3d);
+            texture.OnDisplay += OnDisplay;
+            audio.audioSource = GetNodeOrNull<AudioStreamPlayer3D>(AudioPlayback);
             video.OnEndReached += OnFin;
             AddChild(video);
         }
 
         private void OnDisplay(ImageTexture tex)
         {
-            GetNode<TextureRect>(textureRect).Texture = tex;
+            var texRect = GetNodeOrNull<TextureRect>(VideoPlayback);
+            var meshInst = GetNodeOrNull<MeshInstance3D>(VideoPlayback);
+            if (IsInstanceValid(texRect))
+            {
+                texRect.Texture = tex;
+            }
+            else if (IsInstanceValid(meshInst))
+            {
+                switch (meshInst.MaterialOverride)
+                {
+                    case BaseMaterial3D mat3d:
+                        mat3d.AlbedoTexture = tex;
+                        if (mat3d.EmissionEnabled)
+                            mat3d.EmissionTexture = tex;
+                        break;
+                    case ShaderMaterial shaderMat:
+                        // TODO
+                        break;
+                }
+            }
         }
 
         private void OnFin()
         {
-            if (loop)
+            if (Loop)
             {
                 video.Seek(0d);
             }
@@ -51,6 +74,8 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public override void _ExitTree()
         {
+            if (Engine.IsEditorHint())
+                return;
             video.OnEndReached -= OnFin;
             video.QueueFree();
         }

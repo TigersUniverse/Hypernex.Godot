@@ -73,10 +73,10 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public override void _ExitTree()
         {
-            keyboard.QueueFree();
-            area.QueueFree();
-            shape.QueueFree();
-            quad.QueueFree();
+            keyboard?.QueueFree();
+            area?.QueueFree();
+            shape?.QueueFree();
+            quad?.QueueFree();
         }
 
         public void KeyPressed(Variant key)

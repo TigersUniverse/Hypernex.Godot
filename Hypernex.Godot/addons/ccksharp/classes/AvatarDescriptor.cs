@@ -3,7 +3,9 @@ using Godot;
 
 namespace Hypernex.CCK.GodotVersion.Classes
 {
-    public partial class AvatarDescriptor : Node, ISandboxClass
+    [Tool]
+    [GlobalClass]
+    public partial class AvatarDescriptor : Node3D, ISandboxClass
     {
         public const string TypeName = "AvatarDescriptor";
 

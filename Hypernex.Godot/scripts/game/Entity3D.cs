@@ -21,6 +21,14 @@ namespace Hypernex.Game
             }
         }
 
+        string IEntity.Name
+        {
+            get => Name;
+            set => Name = value;
+        }
+
+        public IEntity ParentEnt => GetParent() is IEntity ent ? ent : null;
+
         public Node GetComponent(Type type)
         {
             return components.FirstOrDefault(x => type.IsAssignableFrom(x.GetType()));
@@ -38,6 +46,11 @@ namespace Hypernex.Game
             return value;
         }
 
+        public IEntity[] GetChildEnts()
+        {
+            return GetChildren().Where(x => x is IEntity).Select(x => x as IEntity).ToArray();
+        }
+
         public override void _EnterTree()
         {
             foreach (var comp in components)
@@ -49,8 +62,11 @@ namespace Hypernex.Game
         public override void _Ready()
         {
             rb = this.GetComponent<RigidBody3D>();
-            rb.TopLevel = true;
-            rb.GlobalTransform = GlobalTransform;
+            if (IsInstanceValid(rb))
+            {
+                rb.TopLevel = true;
+                rb.GlobalTransform = GlobalTransform;
+            }
         }
 
         public override void _PhysicsProcess(double delta)

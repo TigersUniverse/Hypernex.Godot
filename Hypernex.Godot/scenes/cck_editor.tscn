@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/cck/EditMode.cs" id="1_m3rwt"]
 [ext_resource type="Script" path="res://scripts/cck/SceneEditor.cs" id="2_frvxk"]
-[ext_resource type="Script" path="res://scripts/cck/EditorEntity.cs" id="3_2rt6i"]
+[ext_resource type="Script" path="res://scripts/game/Entity3D.cs" id="3_16yv6"]
 
 [sub_resource type="Theme" id="Theme_75xxj"]
 default_font_size = 12
@@ -83,11 +83,11 @@ theme_override_constants/separation = 0
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Controller" type="Node" parent="VBoxContainer/HBoxContainer/VBoxContainer/Scene" node_paths=PackedStringArray("tree", "rootEntity", "contextMenu")]
+[node name="Controller" type="Node" parent="VBoxContainer/HBoxContainer/VBoxContainer/Scene" node_paths=PackedStringArray("tree", "contextMenu", "rootEntity")]
 script = ExtResource("2_frvxk")
 tree = NodePath("../Tree")
-rootEntity = NodePath("../../../3DView/SubViewport/Root")
 contextMenu = NodePath("../PopupMenu")
+rootEntity = NodePath("../../../3DView/SubViewport/Root")
 
 [node name="Tree" type="Tree" parent="VBoxContainer/HBoxContainer/VBoxContainer/Scene"]
 layout_mode = 2
@@ -120,11 +120,11 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="VBoxContainer/HBoxContainer/3DView"]
 handle_input_locally = false
-size = Vector2i(2, 2)
+size = Vector2i(768, 695)
 render_target_update_mode = 4
 
 [node name="Root" type="Node3D" parent="VBoxContainer/HBoxContainer/3DView/SubViewport"]
-script = ExtResource("3_2rt6i")
+script = ExtResource("3_16yv6")
 
 [node name="Inspector" type="PanelContainer" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
