@@ -74,11 +74,16 @@ namespace FFmpeg.Godot
                 audioPlayer.Init(audioTimings.decoder.SampleRate, audioTimings.decoder.Channels, audioTimings.decoder.SampleFormat);
             if (videoTimings.IsInputValid)
             {
-                timeOffset = timeAsDouble - videoTimings.StartTime;
+                timeOffset = timeAsDouble;
+                videoOffset = videoTimings.StartTime;
                 IsStream = Mathf.Abs(videoTimings.StartTime) > 5d;
             }
-            else
+            // else
                 timeOffset = timeAsDouble;
+            if (audioTimings.IsInputValid)
+            {
+                audioOffset = audioTimings.StartTime;
+            }
             if (!videoTimings.IsInputValid && !audioTimings.IsInputValid)
             {
                 IsPaused = true;

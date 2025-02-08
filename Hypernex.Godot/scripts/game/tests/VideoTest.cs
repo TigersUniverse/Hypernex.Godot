@@ -26,8 +26,15 @@ namespace Hypernex.Game.Tests
         [Export]
         public FFAudioPlayer ffAud;
 
+        [Export]
+        public HSlider slider;
+
         public override async void _Ready()
         {
+            new GDLogger().SetLogger();
+            Init.UpdateYtDl();
+
+            /*
             string dir = OS.GetExecutablePath().GetBaseDir();
             if (OS.HasFeature("editor"))
             {
@@ -35,37 +42,34 @@ namespace Hypernex.Game.Tests
             }
             DynamicallyLoadedBindings.LibrariesPath = dir;
             DynamicallyLoadedBindings.Initialize();
+            */
 
-            // Init.resolverSet = false;
-            // byte[] res = await HttpUtils.HttpGetAsync(this, url);
-            if (IsInstanceValid(this))
+            ffTex.OnDisplay += OnDisplay;
+            slider.ValueChanged += Seek;
+
+            var video = await Streaming.ytdl.RunVideoDownload(url, "bestvideo[height<=?1080]/best");
+            var audio = await Streaming.ytdl.RunAudioDownload(url);
+            ff.Play(video.Data, audio.Data);
+            ff.OnEndReached += () =>
             {
-                // byte[] res = FileAccess.GetFileAsBytes(url);
-                // FFPlayGodot ff = new FFPlayGodot();
-                // FFTexturePlayer ffTex = new FFTexturePlayer();
-                // FFAudioPlayer ffAud = new FFAudioPlayer();
-                // ff.texturePlayer = ffTex;
-                // ff.audioPlayer = ffAud;
-                // ff.AddChild(ffTex);
-                // ff.AddChild(ffAud);
-                ffTex.OnDisplay = OnDisplay;
-                // ffAud.audioSource = audio;
-                // AddChild(ff);
-                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-                ff.Play(url);
-                // var ff = ImageTools.LoadFFmpeg(res, this, audio);
-                ff.OnEndReached += () =>
-                {
-                    // ff.Seek(0);
-                };
-                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
                 ff.Seek(0);
-            }
+            };
+            ff.Seek(0);
+            slider.MaxValue = ff.GetLength();
+        }
+
+        public override void _Process(double delta)
+        {
+            slider.SetValueNoSignal(ff.PlaybackTime);
+        }
+
+        private void Seek(double value)
+        {
+            ff.Seek(value);
         }
 
         private void OnDisplay(ImageTexture texture)
         {
-            // GD.Print(texture);
             Texture = texture;
         }
     }

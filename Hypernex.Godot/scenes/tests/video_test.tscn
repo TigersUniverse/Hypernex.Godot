@@ -15,7 +15,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="." node_paths=PackedStringArray("audio", "ff", "ffTex", "ffAud")]
+[node name="TextureRect" type="TextureRect" parent="." node_paths=PackedStringArray("audio", "ff", "ffTex", "ffAud", "slider")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,11 +25,11 @@ grow_vertical = 2
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("1_tlyc4")
-url = "/home/brian/Downloads/crack.mp4"
 audio = NodePath("AudioStreamPlayer3D")
 ff = NodePath("FFPlayGodot")
 ffTex = NodePath("FFPlayGodot/FFTexturePlayer")
 ffAud = NodePath("FFPlayGodot/FFAudioPlayer")
+slider = NodePath("HSlider")
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="TextureRect"]
 
@@ -51,3 +51,14 @@ audioSource = NodePath("../../AudioStreamPlayer3D")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="TextureRect"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 mesh = SubResource("QuadMesh_8aond")
+
+[node name="HSlider" type="HSlider" parent="TextureRect"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+step = 0.0

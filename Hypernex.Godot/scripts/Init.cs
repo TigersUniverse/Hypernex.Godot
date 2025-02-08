@@ -343,7 +343,7 @@ public partial class Init : Node
         }
     }
 
-    public void UpdateYtDl()
+    public static void UpdateYtDl()
     {
         YoutubeDLSharp.Utils.DownloadYtDlp(OS.GetUserDataDir());
         var ytdlPath = Path.Combine(OS.GetUserDataDir(), "yt-dlp");
