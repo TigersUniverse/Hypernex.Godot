@@ -3,7 +3,9 @@ using Godot;
 
 namespace Hypernex.CCK.GodotVersion.Classes
 {
-    public partial class GrabbableDescriptor : Node, ISandboxClass
+    [Tool]
+    [GlobalClass]
+    public partial class GrabbableDescriptor : Node3D, ISandboxClass
     {
         public const string TypeName = "GrabbableDescriptor";
 
@@ -26,12 +28,16 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public override void _EnterTree()
         {
+            if (Engine.IsEditorHint())
+                return;
             parent = GetParent<CollisionObject3D>();
             parent.SetMeta(TypeName, this);
         }
 
         public override void _ExitTree()
         {
+            if (Engine.IsEditorHint())
+                return;
             if (IsInstanceValid(parent))
                 parent.RemoveMeta(TypeName);
             parent = null;

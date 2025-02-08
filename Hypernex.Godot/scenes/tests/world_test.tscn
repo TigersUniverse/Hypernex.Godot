@@ -1,7 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=16 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
+[ext_resource type="Script" path="res://addons/ccksharp/classes/GrabbableDescriptor.cs" id="3_llqxc"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
 [ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
 [ext_resource type="Script" path="res://addons/cck/classes/reverb_zone.gd" id="5_a4oh0"]
@@ -56,14 +57,18 @@ load = true
 
 [node name="World" type="Node3D" parent="Test"]
 
-[node name="WorldMesh" type="MeshInstance3D" parent="Test/World"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Test/World"]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
-mesh = ExtResource("3_j1wr1")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Test/World/WorldMesh"]
+[node name="GrabbableDescriptor" type="Node3D" parent="Test/World/StaticBody3D"]
+script = ExtResource("3_llqxc")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Test/World/WorldMesh/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Test/World/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_1l7cg")
+
+[node name="WorldMesh" type="MeshInstance3D" parent="Test/World/StaticBody3D"]
+mesh = ExtResource("3_j1wr1")
+skeleton = NodePath("../..")
 
 [node name="WorldDescriptor" type="Node3D" parent="Test/World"]
 script = ExtResource("3_xf3ip")

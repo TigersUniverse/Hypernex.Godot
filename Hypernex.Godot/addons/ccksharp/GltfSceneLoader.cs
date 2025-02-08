@@ -133,15 +133,18 @@ namespace Hypernex.CCK.GodotVersion
         public static GltfAvatarExt AvatarExt;
         public static GltfVideoExt VideoExt;
         public static GltfAudioExt AudioExt;
+        public static GltfGrabbableExt GrabbableExt;
 
         public static void Init()
         {
             AvatarExt ??= new GltfAvatarExt();
             VideoExt ??= new GltfVideoExt();
             AudioExt ??= new GltfAudioExt();
+            GrabbableExt ??= new GltfGrabbableExt();
             GltfDocument.RegisterGltfDocumentExtension(AvatarExt);
             GltfDocument.RegisterGltfDocumentExtension(VideoExt);
             GltfDocument.RegisterGltfDocumentExtension(AudioExt);
+            GltfDocument.RegisterGltfDocumentExtension(GrabbableExt);
         }
 
         public static void DeInit()
@@ -149,6 +152,7 @@ namespace Hypernex.CCK.GodotVersion
             GltfDocument.UnregisterGltfDocumentExtension(AvatarExt);
             GltfDocument.UnregisterGltfDocumentExtension(VideoExt);
             GltfDocument.UnregisterGltfDocumentExtension(AudioExt);
+            GltfDocument.UnregisterGltfDocumentExtension(GrabbableExt);
         }
 
         public void Dispose()
