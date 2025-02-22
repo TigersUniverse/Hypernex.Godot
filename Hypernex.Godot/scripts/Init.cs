@@ -112,7 +112,7 @@ public partial class Init : Node
         AddChild(worldsRoot);
         DownloadTools.DownloadsPath = Path.Combine(OS.GetUserDataDir(), "Downloads");
 
-        SetupSceneProviders();
+        SetupCCKSceneProviders();
 
         int pluginsLoaded;
         try
@@ -172,8 +172,32 @@ public partial class Init : Node
         }
     }
 
-    public static List<string> GetValidClasses()
+    public static Dictionary<string, List<string>> GetValidClasses()
     {
+        var text = Godot.FileAccess.GetFileAsString("res://allowed_classes.csv");
+        Logger.CurrentLogger.Log(text.Length);
+        // using var file = Godot.FileAccess.Open("res://allowed_classes.csv", Godot.FileAccess.ModeFlags.Read);
+        var dict = text
+            .Replace("\r", string.Empty)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(x => !x.StartsWith('#'))
+            .Select(x => x.ToLower().Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .ToDictionary(x => x[0], x => x[1..^1].ToList());
+        var copyDict = dict.ToDictionary(x => x.Key, x => x.Value.ToList());
+        foreach (var kvp in dict)
+        {
+            string parType;
+            do
+            {
+                parType = ClassDB.GetParentClass(kvp.Key);
+                if (copyDict.TryGetValue(parType, out var val))
+                {
+                    kvp.Value.AddRange(val);
+                }
+            }
+            while (!string.IsNullOrEmpty(parType));
+        }
+        return dict;
         List<string> list = new List<string>(ClassDB.GetClassList().Where(x => ClassDB.IsParentClass(x, nameof(Node)) || ClassDB.IsParentClass(x, nameof(Resource))).Select(x => x.ToLower()));
         // Viewport/Window classes
         list.Remove(nameof(StatusIndicator).ToLower());
@@ -198,7 +222,7 @@ public partial class Init : Node
         list.Remove(nameof(XRController3D).ToLower());
         list.Remove(nameof(XRBodyModifier3D).ToLower());
         list.Remove(nameof(XRFaceModifier3D).ToLower());
-        return list;
+        // return list;
     }
 
     public static PlayerRoot NewPlayer(bool isLocal)
@@ -306,26 +330,33 @@ public partial class Init : Node
         }
     }
 
-    public void SetupSceneProviders()
+    public void SetupGltfSceneProviders()
     {
-        SetupLegacySceneProviders();
         GltfSceneLoader.Init();
-        /*WorldProvider = () =>
+        WorldProvider = () =>
         {
             return new GltfSceneLoader();
-        };*/
+        };
         AvatarProvider = () =>
         {
             return new GltfSceneLoader();
         };
     }
 
-    public void SetupLegacySceneProviders()
+    public void SetupCCKSceneProviders()
     {
         WorldProvider = () =>
         {
             SafeLoader loader = new SafeLoader();
-            loader.allowedClasses = GetValidClasses();
+            try
+            {
+                loader.allowedClasses = GetValidClasses();
+            }
+            catch (Exception e)
+            {
+                Logger.CurrentLogger.Critical(e);
+                throw;
+            }
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());

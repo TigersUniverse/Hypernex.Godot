@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://blqal6vcg8rus"]
+[gd_scene load_steps=17 format=3 uid="uid://blqal6vcg8rus"]
 
 [ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
@@ -37,6 +37,8 @@ static func _static_init():
 radius = 0.1
 
 [sub_resource type="AudioEffectReverb" id="AudioEffectReverb_6mgta"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_1gedd"]
 
 [node name="WorldTest" type="Node"]
 
@@ -140,3 +142,7 @@ metadata/typename = "UICanvas"
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_1gedd")

@@ -27,14 +27,12 @@ namespace Hypernex.CCK.GodotVersion
             public Dictionary<string, Resource> LoadedSubResources = new Dictionary<string, Resource>();
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
-            public List<string> allowedClasses = new List<string>();
-            public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
             public Resource cachedRes;
-            public string zippath;
+            public SafeLoader loader;
 
-            public ParsedTres(string path)
+            public ParsedTres(SafeLoader path)
             {
-                zippath = path;
+                loader = path;
             }
 
             public Variant ConvertPropertyString(string prop)
@@ -60,9 +58,11 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedSubResources[id];
 
                     var sub = SubResources[id];
-                    if (ClassDB.IsParentClass(sub.Type, nameof(Script)) || !allowedClasses.Contains(sub.Type.ToLower()))
+                    if (!loader.IsResourceClassAllowed(sub.Type))
                         return new Variant();
-                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, allowedClasses, validScripts);
+                    Resource res = loader.CreateResource(sub.Type, sub.Properties);
+                    if (!GodotObject.IsInstanceValid(cachedRes))
+                        return new Variant();
                     foreach (var kvp in sub.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -101,7 +101,7 @@ namespace Hypernex.CCK.GodotVersion
                     }
                     return dict;
                 }
-                return SafeLoader.ConvertPropertyString(prop);
+                return loader.ConvertPropertyString(prop);
             }
 
             public Variant ConvertProperty(Variant prop)
@@ -129,13 +129,13 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
 
-            public Resource ToResource(List<string> classes, Dictionary<string, Script> scripts)
+            public Resource ToResource()
             {
-                allowedClasses = classes;
-                validScripts = scripts;
                 if (!GodotObject.IsInstanceValid(cachedRes))
                 {
-                    cachedRes = CreateResource(zippath, Type, Properties, classes, scripts);
+                    cachedRes = loader.CreateResource(Type, Properties);
+                    if (!GodotObject.IsInstanceValid(cachedRes))
+                        return null;
                     foreach (var kvp in Properties)
                     {
                         if (kvp.Key.Equals("script", StringComparison.OrdinalIgnoreCase))
@@ -176,13 +176,11 @@ namespace Hypernex.CCK.GodotVersion
             public Dictionary<string, Resource> LoadedSubResources = new Dictionary<string, Resource>();
             public Dictionary<string, Resource> LoadedExtResources = new Dictionary<string, Resource>();
 
-            public List<string> allowedClasses = new List<string>();
-            public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
-            public string zippath;
+            public SafeLoader loader;
 
-            public ParsedTscn(string path)
+            public ParsedTscn(SafeLoader path)
             {
-                zippath = path;
+                loader = path;
             }
 
             public Variant ConvertPropertyString(string prop)
@@ -208,7 +206,9 @@ namespace Hypernex.CCK.GodotVersion
                         return LoadedSubResources[id];
 
                     var sub = SubResources[id];
-                    Resource res = CreateResource(zippath, sub.Type, sub.Properties, allowedClasses, validScripts);
+                    Resource res = loader.CreateResource(sub.Type, sub.Properties);
+                    if (!GodotObject.IsInstanceValid(res))
+                        return new Variant();
                     foreach (var kvp in sub.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
@@ -240,7 +240,7 @@ namespace Hypernex.CCK.GodotVersion
                     }
                     return dict;
                 }
-                return SafeLoader.ConvertPropertyString(prop);
+                return loader.ConvertPropertyString(prop);
             }
 
             public Variant ConvertProperty(Variant prop)
@@ -268,10 +268,8 @@ namespace Hypernex.CCK.GodotVersion
                 }
             }
 
-            public PackedScene ToPackedScene(List<string> classes, Dictionary<string, Script> scripts)
+            public PackedScene ToPackedScene()
             {
-                allowedClasses = classes;
-                validScripts = scripts;
                 Stopwatch sw = new Stopwatch();
                 Log($"Begin compile");
                 sw.Start();
@@ -327,7 +325,7 @@ namespace Hypernex.CCK.GodotVersion
                         }
                         continue;
                     }
-                    if (ClassDB.IsParentClass(parNode.Type, nameof(Resource)) || string.IsNullOrWhiteSpace(parNode.Type) || !classes.Contains(parNode.Type.ToLower()))
+                    if (!loader.IsNodeClassAllowed(parNode.Type))
                         parNode.Type = nameof(Node);
                     Node node = null;
                     foreach (var kvp in parNode.Properties)
@@ -335,7 +333,7 @@ namespace Hypernex.CCK.GodotVersion
                         Script scr = null;
                         if (kvp.Key.Equals("metadata/typename", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (!scripts.TryGetValue(ConvertProperty(kvp.Value).AsString().Trim('"'), out scr))
+                            if (!loader.TryGetAllowedScript(ConvertProperty(kvp.Value).AsString().Trim('"'), out scr))
                                 continue;
                         }
                         else
@@ -365,7 +363,7 @@ namespace Hypernex.CCK.GodotVersion
                 }
                 Node root = nodes.FirstOrDefault(x => x.Key == ".").Value;
                 Node lastParent = root;
-                List<string> paths = new List<string>(nodes.Keys/*nodes.Keys.OrderBy(x => new NodePath(x).GetNameCount())*/);
+                List<string> paths = new List<string>(nodes.Keys);
                 int k = 0;
                 int maxk = 200;
                 int prevCount = paths.Count;
@@ -458,9 +456,11 @@ namespace Hypernex.CCK.GodotVersion
             return null;
         }
 
-        public static Resource CreateResource(string path, string type, Dictionary<string, Variant> properties, List<string> classes, Dictionary<string, Script> scripts)
+        #region Creation Parsing
+
+        public Resource CreateResource(string type, Dictionary<string, Variant> properties)
         {
-            if (ClassDB.IsParentClass(type, nameof(Script)) || ClassDB.IsParentClass(type, nameof(PackedScene)) || ClassDB.IsParentClass(type, nameof(Node)) || !classes.Contains(type.ToLower()))
+            if (!IsResourceClassAllowed(type))
                 return null;
             Resource res = null;
             foreach (var kvp in properties)
@@ -468,7 +468,7 @@ namespace Hypernex.CCK.GodotVersion
                 Script scr = null;
                 if (kvp.Key.Equals("metadata/typename", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!scripts.TryGetValue(ConvertPropertyString(kvp.Value.AsString()).AsString().Trim('"'), out scr))
+                    if (!TryGetAllowedScript(ConvertPropertyString(kvp.Value.AsString()).AsString().Trim('"'), out scr))
                         continue;
                 }
                 else
@@ -484,24 +484,27 @@ namespace Hypernex.CCK.GodotVersion
                 res = ClassDB.Instantiate(type).As<Resource>();
             if (!GodotObject.IsInstanceValid(res))
                 return null;
-            loadedResources[path].Add(res);
-            /*
-            foreach (var kvp in properties)
-            {
-                if (kvp.Key == Resource.PropertyName.ResourcePath)
-                    continue;
-                res.Set(kvp.Key, kvp.Value);
-            }
-            */
+            loadedResources[zippath].Add(res);
             return res;
         }
+
+        public Variant ConvertPropertyString(string prop)
+        {
+            // prevent objects from loading
+            if (prop.Trim().Contains("Object(", StringComparison.OrdinalIgnoreCase))
+                return new Variant();
+            Variant va = Marshalls.Base64ToVariant(prop, allowObjects: false);
+            return va;
+        }
+
+        #endregion
 
         public ZipReader reader;
         public ParsedTscn world;
         public PackedScene scene;
         public string zippath;
         public Dictionary<string, Resource> cachedResources = new Dictionary<string, Resource>();
-        public List<string> allowedClasses = new List<string>(); // MUST BE LOWERCASE!!
+        public Dictionary<string, List<string>> allowedClasses = new Dictionary<string, List<string>>(); // MUST BE LOWERCASE!!
         public Dictionary<string, Script> validScripts = new Dictionary<string, Script>();
         public static Dictionary<string, List<Resource>> loadedResources = new Dictionary<string, List<Resource>>();
         public static Action<string> Log = GD.Print;
@@ -530,7 +533,26 @@ namespace Hypernex.CCK.GodotVersion
 
         public SafeLoader()
         {
-            allowedClasses.AddRange(ClassDB.GetClassList().Select(x => x.ToLower()));
+        }
+
+        public bool IsResourceClassAllowed(string className)
+        {
+            return !ClassDB.IsParentClass(className, nameof(Script)) && !ClassDB.IsParentClass(className, nameof(PackedScene)) && !ClassDB.IsParentClass(className, nameof(Node)) && allowedClasses.ContainsKey(className.ToLower());
+        }
+
+        public bool IsNodeClassAllowed(string className)
+        {
+            return !ClassDB.IsParentClass(className, nameof(Script)) && !ClassDB.IsParentClass(className, nameof(Resource)) && allowedClasses.ContainsKey(className.ToLower());
+        }
+
+        public bool TryGetAllowedScript(string className, out Script scr)
+        {
+            return validScripts.TryGetValue(className, out scr);
+        }
+
+        public bool IsPropertyAllowed(string className, string propName)
+        {
+            return allowedClasses.TryGetValue(className.ToLower(), out List<string> list) && list.Contains(propName.ToLower());
         }
 
         public PackedScene LoadFromFile(string filePath)
@@ -539,6 +561,8 @@ namespace Hypernex.CCK.GodotVersion
             ReadZip(filePath);
             return scene;
         }
+
+        #region High-Level Parsing
 
         public void ReadZip(string path)
         {
@@ -564,13 +588,13 @@ namespace Hypernex.CCK.GodotVersion
                 if (reader.FileExists("world.txt"))
                 {
                     string worldPath = Encoding.UTF8.GetString(reader.ReadFile("world.txt"));
-                    world = ParseBin(path, reader.ReadFile(worldPath));
+                    world = ParseBinScene(reader.ReadFile(worldPath));
                     foreach (var resKvp in world.ExtResources)
                     {
                         Resource res = LoadFile(resKvp.Value);
                         world.LoadedExtResources.Add(resKvp.Key, res);
                     }
-                    scene = world.ToPackedScene(allowedClasses, validScripts);
+                    scene = world.ToPackedScene();
                 }
                 else
                 {
@@ -597,13 +621,13 @@ namespace Hypernex.CCK.GodotVersion
             bool exists = reader.FileExists(resPath);
             if (resPath.GetExtension().Equals("scn", StringComparison.OrdinalIgnoreCase) || (!exists && reader.FileExists(resPath.ReplaceN(resPath.GetExtension(), "scn"))))
             {
-                ParsedTscn tscn = ParseBin(zippath, reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "scn")));
+                ParsedTscn tscn = ParseBinScene(reader.ReadFile(resPath.ReplaceN(resPath.GetExtension(), "scn")));
                 foreach (var resKvp in tscn.ExtResources)
                 {
                     Resource res2 = LoadFile(resKvp.Value);
                     tscn.LoadedExtResources.Add(resKvp.Key, res2);
                 }
-                res = tscn.ToPackedScene(allowedClasses, validScripts);
+                res = tscn.ToPackedScene();
             }
             else if (reader.FileExists(resPath))
                 res = ReadData(path, reader.ReadFile(resPath));
@@ -613,19 +637,20 @@ namespace Hypernex.CCK.GodotVersion
             return res;
         }
 
-        public ParsedTres ParseBinRes(string path, byte[] data)
+        public ParsedTres ParseBinRes(byte[] data)
         {
             Stopwatch sw = new Stopwatch();
             Log("Begin parse");
             sw.Start();
-            ParsedTres tscn = new ParsedTres(zippath);
+            ParsedTres tscn = new ParsedTres(this);
 
             var dict = GD.BytesToVar(data).AsGodotDictionary();
             var rootDict = dict["resource"].AsGodotDictionary();
             tscn.Type = rootDict["type"].AsString();
             foreach (var kvp in rootDict["props"].AsGodotDictionary())
             {
-                tscn.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                if (IsPropertyAllowed(tscn.Type, kvp.Key.AsString()))
+                    tscn.Properties.Add(kvp.Key.AsString(), kvp.Value);
             }
             if (dict.ContainsKey("ext_resources"))
                 foreach (var tresDict in dict["ext_resources"].AsGodotArray<Godot.Collections.Dictionary>())
@@ -636,11 +661,12 @@ namespace Hypernex.CCK.GodotVersion
                 foreach (var tresDict in dict["sub_resources"].AsGodotArray<Godot.Collections.Dictionary>())
                 {
                     ParsedSubTres tres = new ParsedSubTres();
+                    tres.Type = tresDict["type"].AsString();
                     foreach (var kvp in tresDict["props"].AsGodotDictionary())
                     {
-                        tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                        if (IsPropertyAllowed(tres.Type, kvp.Key.AsString()))
+                            tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
                     }
-                    tres.Type = tresDict["type"].AsString();
                     tscn.SubResources.TryAdd(tresDict["id"].AsString(), tres);
                 }
 
@@ -729,13 +755,13 @@ namespace Hypernex.CCK.GodotVersion
                 }
                 default:
                 {
-                    var tscn = ParseBinRes(path, data);
+                    var tscn = ParseBinRes(data);
                     foreach (var resKvp in tscn.ExtResources)
                     {
                         Resource res2 = LoadFile(resKvp.Value);
                         tscn.LoadedExtResources.Add(resKvp.Key, res2);
                     }
-                    return tscn.ToResource(allowedClasses, validScripts);
+                    return tscn.ToResource();
                 }
             }
             img.GenerateMipmaps();
@@ -747,21 +773,12 @@ namespace Hypernex.CCK.GodotVersion
             return tex;
         }
 
-        public static Variant ConvertPropertyString(string prop)
-        {
-            // prevent objects from loading
-            if (prop.Trim().Contains("Object(", StringComparison.OrdinalIgnoreCase))
-                return new Variant();
-            Variant va = Marshalls.Base64ToVariant(prop);
-            return va;
-        }
-
-        public static ParsedTscn ParseBin(string zippath, byte[] data)
+        public ParsedTscn ParseBinScene(byte[] data)
         {
             Stopwatch sw = new Stopwatch();
             Log("Begin parse");
             sw.Start();
-            ParsedTscn tscn = new ParsedTscn(zippath);
+            ParsedTscn tscn = new ParsedTscn(this);
 
             var dict = GD.BytesToVar(data).AsGodotDictionary();
             if (dict.ContainsKey("ext_resources"))
@@ -773,22 +790,26 @@ namespace Hypernex.CCK.GodotVersion
                 foreach (var tresDict in dict["sub_resources"].AsGodotArray<Godot.Collections.Dictionary>())
                 {
                     ParsedSubTres tres = new ParsedSubTres();
+                    tres.Type = tresDict["type"].AsString();
                     foreach (var kvp in tresDict["props"].AsGodotDictionary())
                     {
-                        tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                        if (IsPropertyAllowed(tres.Type, kvp.Key.AsString()))
+                            tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
                     }
-                    tres.Type = tresDict["type"].AsString();
                     tscn.SubResources.TryAdd(tresDict["id"].AsString(), tres);
                 }
             if (dict.ContainsKey("nodes"))
                 foreach (var nodeDict in dict["nodes"].AsGodotArray<Godot.Collections.Dictionary>())
                 {
                     ParsedNode node = new ParsedNode();
-                    foreach (var kvp in nodeDict["props"].AsGodotDictionary())
-                        node.Properties.Add(kvp.Key.AsString(), kvp.Value);
-                    node.Name = nodeDict["name"].AsString();
                     if (nodeDict.ContainsKey("type"))
                         node.Type = nodeDict["type"].AsString();
+                    foreach (var kvp in nodeDict["props"].AsGodotDictionary())
+                    {
+                        if (IsPropertyAllowed(node.Type, kvp.Key.AsString()))
+                            node.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                    }
+                    node.Name = nodeDict["name"].AsString();
                     if (nodeDict.ContainsKey("parent"))
                         node.Parent = nodeDict["parent"].AsString();
                     if (nodeDict.ContainsKey("instance"))
@@ -801,96 +822,12 @@ namespace Hypernex.CCK.GodotVersion
             return tscn;
         }
 
+        #endregion
+
+        #region Array and Dictionary Utility
+
         [ThreadStatic]
         public static List<char> charArr = new List<char>();
-
-        public static bool ParseProperty(string data, int offset, out string key, out string value, out int newOffset)
-        {
-            key = string.Empty;
-            value = string.Empty;
-            newOffset = offset;
-            
-            int eqIdx = -1;
-            for (int i = offset; i < data.Length; i++)
-            {
-                if (data[i] == '[')
-                {
-                    return false;
-                }
-                if (data[i] == '=')
-                {
-                    eqIdx = i;
-                    break;
-                }
-            }
-            if (eqIdx == -1)
-            {
-                return false;
-            }
-            key = data.Substr(offset, eqIdx - 1 - offset).Replace("\n", null);
-            
-            int escapes = 0;
-            bool isQuote = false;
-            int escapesArray = 0;
-            int escapesDict = 0;
-
-            // List<char> charArr = new List<char>();
-            charArr.Clear();
-
-            for (int i = eqIdx + 2; i < data.Length; i++)
-            {
-                newOffset = i;
-
-                // check for end
-                if (escapes == 0 && escapesArray == 0 && escapesDict == 0 && data[i] == '\n')
-                {
-                    break;
-                }
-
-                if (isQuote || data[i] != '\n')
-                {
-                    charArr.Add(data[i]);
-                }
-
-                // check for string
-                if (data[i] == '"')
-                {
-                    if (isQuote)
-                        escapes--;
-                    else
-                        escapes++;
-                    isQuote = !isQuote;
-                }
-
-                // check for arrays
-                {
-                    if (data[i] == '[')
-                    {
-                        escapesArray++;
-                    }
-                    if (data[i] == ']')
-                    {
-                        escapesArray--;
-                    }
-                }
-
-                // check for dictionaries
-                {
-                    if (data[i] == '{')
-                    {
-                        escapesDict++;
-                    }
-                    if (data[i] == '}')
-                    {
-                        escapesDict--;
-                    }
-                }
-            }
-
-            // value = new string(charArr.ToArray());
-            value = new string(charArr.ToArray());
-            return true;
-        }
 
         public static Dictionary<string, string> ParseDictionaryItems(string data)
         {
@@ -900,7 +837,6 @@ namespace Hypernex.CCK.GodotVersion
             int escapesDict = 0;
             bool hasDict = false;
 
-            // List<char> charArr = new List<char>();
             charArr.Clear();
             Dictionary<string, string> splits = new Dictionary<string, string>();
             string key = string.Empty;
@@ -1063,69 +999,6 @@ namespace Hypernex.CCK.GodotVersion
             return splits;
         }
 
-        public static Dictionary<string, string> ParseTag(string data, int offset, out string tag, out int newOffset)
-        {
-            int idx = data.Find('[', offset);
-            tag = string.Empty;
-            newOffset = offset;
-            if (idx == -1)
-                return new Dictionary<string, string>();
-            Dictionary<string, string> attribs = new Dictionary<string, string>();
-            int escapes = 0;
-            bool isQuote = false;
-            int state = 0; // 0 = tag, 1 = key, 2 = value
-            string key = string.Empty;
-            string val = string.Empty;
-            for (int i = idx + 1; i < data.Length; i++)
-            {
-                // check for end
-                if (escapes == 0 && data[i] == ']')
-                {
-                    if (state == 2)
-                        attribs.Add(key, val);
-                    newOffset = i + 1;
-                    break;
-                }
-
-                switch (state)
-                {
-                    case 0:
-                        if (data[i] == ' ')
-                            state = 1; // key state
-                        else
-                            tag += data[i];
-                        break;
-                    case 1:
-                        if (data[i] == '=')
-                            state = 2; // value state
-                        else if (data[i] != '"')
-                            key += data[i];
-                        break;
-                    case 2:
-                        if (escapes == 0 && data[i] == ' ')
-                        {
-                            state = 1; // key state
-                            attribs.Add(key, val);
-                            key = string.Empty;
-                            val = string.Empty;
-                        }
-                        else if (data[i] != '"')
-                            val += data[i];
-                        break;
-                }
-
-                // check for string
-                if (data[i] == '"')
-                {
-                    if (isQuote)
-                        escapes--;
-                    else
-                        escapes++;
-                    isQuote = !isQuote;
-                }
-            }
-
-            return attribs;
-        }
+        #endregion
     }
 }

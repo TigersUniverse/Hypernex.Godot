@@ -9,12 +9,14 @@ var zone_gizmo_plugin := ZoneGizmo.new()
 
 func _enter_tree():
 	add_tool_menu_item("Export World", export_world_quick)
+	add_tool_menu_item("Export Class CSV", export_class_csv)
 	cck_dock = load("res://addons/cck/cck_dock.tscn").instantiate()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_UR, cck_dock)
 	# add_node_3d_gizmo_plugin(zone_gizmo_plugin)
 
 func _exit_tree():
 	remove_tool_menu_item("Export World")
+	remove_tool_menu_item("Export Class CSV")
 	remove_control_from_docks(cck_dock)
 	# remove_node_3d_gizmo_plugin(zone_gizmo_plugin)
 
@@ -143,6 +145,21 @@ static func export_scn(writer: ZIPPacker, path: String) -> void:
 
 static func export_world_quick() -> void:
 	OS.alert(export_world("my_world", "hnw"))
+
+static func export_class_csv() -> void:
+	var file := FileAccess.open("user://all_classes.csv", FileAccess.WRITE)
+	for cl in ClassDB.get_class_list():
+		if not ClassDB.is_parent_class(cl, "Node") and not ClassDB.is_parent_class(cl, "Resource"):
+			continue
+		file.store_string(cl)
+		file.store_string(",")
+		for prop in ClassDB.class_get_property_list(cl, true):
+			if prop["usage"] & PROPERTY_USAGE_STORAGE == 0:
+				continue
+			file.store_string(prop["name"])
+			file.store_string(",")
+		file.store_string("\n")
+	file.close()
 
 static func export_world(name: String, ext: String) -> String:
 	var root := EditorInterface.get_edited_scene_root()

@@ -11,8 +11,6 @@ namespace Hypernex.CCK.GodotVersion.Classes
         public const string TypeName = "WorldDescriptor";
 
         [Export]
-        public Vector3 StartPosition { get; set; }
-        [Export]
         public NodePath[] StartPositions { get; set; }
         [Export]
         public Godot.Collections.Array<WorldAsset> Assets { get; set; }
