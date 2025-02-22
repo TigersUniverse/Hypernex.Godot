@@ -172,24 +172,33 @@ public partial class Init : Node
         }
     }
 
-    public static Dictionary<string, List<string>> GetValidClasses()
+    public static Dictionary<string, List<string>> GetValidClasses(Dictionary<string, Script> scripts)
     {
         var text = Godot.FileAccess.GetFileAsString("res://allowed_classes.csv");
-        Logger.CurrentLogger.Log(text.Length);
-        // using var file = Godot.FileAccess.Open("res://allowed_classes.csv", Godot.FileAccess.ModeFlags.Read);
         var dict = text
             .Replace("\r", string.Empty)
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(x => !x.StartsWith('#'))
-            .Select(x => x.ToLower().Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            .ToDictionary(x => x[0], x => x[1..^1].ToList());
+            .Select(x => x.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .ToDictionary(x => x[0], x => x.Skip(1).ToList());
         var copyDict = dict.ToDictionary(x => x.Key, x => x.Value.ToList());
         foreach (var kvp in dict)
         {
-            string parType;
+            string parType = kvp.Key;
+            if (!ClassDB.ClassExists(parType))
+            {
+                if (scripts.TryGetValue(parType, out Script scr))
+                {
+                    parType = scr.GetInstanceBaseType();
+                    if (copyDict.TryGetValue(parType, out var val))
+                    {
+                        kvp.Value.AddRange(val);
+                    }
+                }
+            }
             do
             {
-                parType = ClassDB.GetParentClass(kvp.Key);
+                parType = ClassDB.GetParentClass(parType);
                 if (copyDict.TryGetValue(parType, out var val))
                 {
                     kvp.Value.AddRange(val);
@@ -348,15 +357,6 @@ public partial class Init : Node
         WorldProvider = () =>
         {
             SafeLoader loader = new SafeLoader();
-            try
-            {
-                loader.allowedClasses = GetValidClasses();
-            }
-            catch (Exception e)
-            {
-                Logger.CurrentLogger.Critical(e);
-                throw;
-            }
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
             loader.validScripts.Add(WorldScript.TypeName, SafeLoader.LoadScript<WorldScript>());
             loader.validScripts.Add(ReverbZone.TypeName, SafeLoader.LoadScript<ReverbZone>());
@@ -364,13 +364,22 @@ public partial class Init : Node
             loader.validScripts.Add(VideoPlayer.TypeName, SafeLoader.LoadScript<VideoPlayer>());
             loader.validScripts.Add(WorldAsset.TypeName, SafeLoader.LoadScript<WorldAsset>());
             loader.validScripts.Add(Mirror.TypeName, SafeLoader.LoadScript<Mirror>());
+            try
+            {
+                loader.allowedClasses = GetValidClasses(loader.validScripts);
+            }
+            catch (Exception e)
+            {
+                Logger.CurrentLogger.Critical(e);
+                throw;
+            }
             return loader;
         };
         AvatarProvider = () =>
         {
             SafeLoader loader = new SafeLoader();
-            loader.allowedClasses = GetValidClasses();
             loader.validScripts.Add(AvatarDescriptor.TypeName, SafeLoader.LoadScript<AvatarDescriptor>());
+            loader.allowedClasses = GetValidClasses(loader.validScripts);
             return loader;
         };
     }

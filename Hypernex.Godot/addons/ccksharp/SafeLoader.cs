@@ -69,6 +69,8 @@ namespace Hypernex.CCK.GodotVersion
                             continue;
                         if (kvp.Key == Resource.PropertyName.ResourcePath)
                             continue;
+                        if (!loader.IsPropertyAllowed(res, kvp.Key))
+                            continue;
                         if (sub.Type == nameof(Resource))
                         {
                             res.SetMeta(kvp.Key, ConvertProperty(kvp.Value));
@@ -142,6 +144,8 @@ namespace Hypernex.CCK.GodotVersion
                             continue;
                         if (kvp.Key == Resource.PropertyName.ResourcePath)
                             continue;
+                        if (!loader.IsPropertyAllowed(cachedRes, kvp.Key))
+                            continue;
                         cachedRes.Set(kvp.Key, ConvertProperty(kvp.Value));
                     }
                 }
@@ -214,6 +218,8 @@ namespace Hypernex.CCK.GodotVersion
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
                             continue;
                         if (kvp.Key == Resource.PropertyName.ResourcePath)
+                            continue;
+                        if (!loader.IsPropertyAllowed(res, kvp.Key))
                             continue;
                         res.Set(kvp.Key, ConvertProperty(kvp.Value));
                     }
@@ -293,6 +299,8 @@ namespace Hypernex.CCK.GodotVersion
                                 continue;
                             if (kvp.Key.StartsWith("name", StringComparison.OrdinalIgnoreCase))
                                 continue;
+                            if (!loader.IsPropertyAllowed(node2, kvp.Key))
+                                continue;
                             node2.Set(kvp.Key, ConvertProperty(kvp.Value));
                         }
                         node2.Name = parNode.Name;
@@ -317,6 +325,8 @@ namespace Hypernex.CCK.GodotVersion
                                 foreach (var kvp in parNode.Properties)
                                 {
                                     if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
+                                        continue;
+                                    if (!loader.IsPropertyAllowed(node2, kvp.Key))
                                         continue;
                                     node2.Set(kvp.Key, ConvertProperty(kvp.Value));
                                 }
@@ -351,6 +361,8 @@ namespace Hypernex.CCK.GodotVersion
                     foreach (var kvp in parNode.Properties)
                     {
                         if (kvp.Key.StartsWith("script", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        if (!loader.IsPropertyAllowed(node, kvp.Key))
                             continue;
                         node.Set(kvp.Key, ConvertProperty(kvp.Value));
                     }
@@ -537,12 +549,12 @@ namespace Hypernex.CCK.GodotVersion
 
         public bool IsResourceClassAllowed(string className)
         {
-            return !ClassDB.IsParentClass(className, nameof(Script)) && !ClassDB.IsParentClass(className, nameof(PackedScene)) && !ClassDB.IsParentClass(className, nameof(Node)) && allowedClasses.ContainsKey(className.ToLower());
+            return !ClassDB.IsParentClass(className, nameof(Script)) && !ClassDB.IsParentClass(className, nameof(PackedScene)) && !ClassDB.IsParentClass(className, nameof(Node)) && allowedClasses.ContainsKey(className);
         }
 
         public bool IsNodeClassAllowed(string className)
         {
-            return !ClassDB.IsParentClass(className, nameof(Script)) && !ClassDB.IsParentClass(className, nameof(Resource)) && allowedClasses.ContainsKey(className.ToLower());
+            return !ClassDB.IsParentClass(className, nameof(Script)) && !ClassDB.IsParentClass(className, nameof(Resource)) && allowedClasses.ContainsKey(className);
         }
 
         public bool TryGetAllowedScript(string className, out Script scr)
@@ -550,9 +562,23 @@ namespace Hypernex.CCK.GodotVersion
             return validScripts.TryGetValue(className, out scr);
         }
 
-        public bool IsPropertyAllowed(string className, string propName)
+        public bool IsPropertyAllowed(GodotObject obj, string propName)
         {
-            return allowedClasses.TryGetValue(className.ToLower(), out List<string> list) && list.Contains(propName.ToLower());
+            string className = obj.GetClass();
+            if (obj.GetScript().VariantType != Variant.Type.Nil)
+                className = obj.GetType().Name;
+            if (allowedClasses.TryGetValue(className, out List<string> list))
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].Equals(propName))
+                        return true;
+                    if (list[i].EndsWith('*') && propName.StartsWith(list[i].Replace("*", string.Empty)))
+                        return true;
+                }
+            }
+            // LogError(className + ':' + propName);
+            return false;
         }
 
         public PackedScene LoadFromFile(string filePath)
@@ -649,8 +675,7 @@ namespace Hypernex.CCK.GodotVersion
             tscn.Type = rootDict["type"].AsString();
             foreach (var kvp in rootDict["props"].AsGodotDictionary())
             {
-                if (IsPropertyAllowed(tscn.Type, kvp.Key.AsString()))
-                    tscn.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                tscn.Properties.Add(kvp.Key.AsString(), kvp.Value);
             }
             if (dict.ContainsKey("ext_resources"))
                 foreach (var tresDict in dict["ext_resources"].AsGodotArray<Godot.Collections.Dictionary>())
@@ -664,8 +689,7 @@ namespace Hypernex.CCK.GodotVersion
                     tres.Type = tresDict["type"].AsString();
                     foreach (var kvp in tresDict["props"].AsGodotDictionary())
                     {
-                        if (IsPropertyAllowed(tres.Type, kvp.Key.AsString()))
-                            tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                        tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
                     }
                     tscn.SubResources.TryAdd(tresDict["id"].AsString(), tres);
                 }
@@ -793,8 +817,7 @@ namespace Hypernex.CCK.GodotVersion
                     tres.Type = tresDict["type"].AsString();
                     foreach (var kvp in tresDict["props"].AsGodotDictionary())
                     {
-                        if (IsPropertyAllowed(tres.Type, kvp.Key.AsString()))
-                            tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                        tres.Properties.Add(kvp.Key.AsString(), kvp.Value);
                     }
                     tscn.SubResources.TryAdd(tresDict["id"].AsString(), tres);
                 }
@@ -806,8 +829,7 @@ namespace Hypernex.CCK.GodotVersion
                         node.Type = nodeDict["type"].AsString();
                     foreach (var kvp in nodeDict["props"].AsGodotDictionary())
                     {
-                        if (IsPropertyAllowed(node.Type, kvp.Key.AsString()))
-                            node.Properties.Add(kvp.Key.AsString(), kvp.Value);
+                        node.Properties.Add(kvp.Key.AsString(), kvp.Value);
                     }
                     node.Name = nodeDict["name"].AsString();
                     if (nodeDict.ContainsKey("parent"))

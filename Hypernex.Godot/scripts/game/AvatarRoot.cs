@@ -29,7 +29,7 @@ namespace Hypernex.Game
         {
             if (Objects.Contains(worldObject))
                 return;
-            if (worldObject is AvatarDescriptor desc)
+            if (worldObject is AvatarDescriptor desc && IsInstanceValid(desc.GetSkeleton()))
             {
                 descriptor = desc;
                 if (IsInstanceValid(desc.GetEyes()))

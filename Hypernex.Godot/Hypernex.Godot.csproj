@@ -1,7 +1,6 @@
 <Project Sdk="Godot.NET.Sdk/4.3.0">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -14,7 +13,6 @@
     <Compile Include="addons\FFplay\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="addons\Nexport\Nexport.csproj" />
     <ProjectReference Include="addons\VoiceChat\VoiceChat.csproj" />
     <ProjectReference Include="addons\Flite\Flite.csproj" />
   </ItemGroup>
@@ -27,6 +25,9 @@
     </Reference>
     <Reference Include="Nexbox">
       <HintPath>addons\Nexbox\Nexbox.dll</HintPath>
+    </Reference>
+    <Reference Include="Nexport">
+      <HintPath>addons\Nexport\Nexport.dll</HintPath>
     </Reference>
     <Reference Include="Hypernex.Networking">
       <HintPath>addons\Hypernex.Networking\Hypernex.Networking.dll</HintPath>
@@ -49,5 +50,7 @@
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
     <PackageReference Include="YoutubeDLSharp" Version="1.1.1" />
+    <PackageReference Include="MessagePack" Version="3.1.2" />
+    <PackageReference Include="ZstdSharp.Port" Version="0.8.4" />
   </ItemGroup>
 </Project>

@@ -154,8 +154,8 @@ static func export_class_csv() -> void:
 		file.store_string(cl)
 		file.store_string(",")
 		for prop in ClassDB.class_get_property_list(cl, true):
-			if prop["usage"] & PROPERTY_USAGE_STORAGE == 0:
-				continue
+			# if prop["usage"] & PROPERTY_USAGE_STORAGE == 0:
+				# continue
 			file.store_string(prop["name"])
 			file.store_string(",")
 		file.store_string("\n")
