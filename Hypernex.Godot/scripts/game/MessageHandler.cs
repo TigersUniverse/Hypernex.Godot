@@ -56,7 +56,7 @@ namespace Hypernex.Game
                 case "Hypernex.Networking.Messages.RespondAuth":
                 {
                     RespondAuth respondAuth = (RespondAuth) Convert.ChangeType(msgMeta.Data, typeof(RespondAuth));
-                    GameInstance instance = GameInstance.FocusedInstance;
+                    GameInstance instance = gameInstance;
                     if (instance == null)
                         break;
                     if (instance.gameServerId == respondAuth.GameServerId &&

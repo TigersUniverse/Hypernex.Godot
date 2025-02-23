@@ -527,10 +527,10 @@ namespace Hypernex.CCK.GodotVersion
             scene = null;
             if (loadedResources.TryGetValue(zippath, out var resources))
             {
-                foreach (var res in resources)
+                // foreach (var res in resources)
                 {
-                    if (res is Mesh || res is Texture || res is Shader || res is Material || res is Image)
-                        RenderingServer.FreeRid(res.GetRid());
+                    // if (res is Mesh || res is Texture || res is Shader || res is Material || res is Image)
+                        // RenderingServer.FreeRid(res.GetRid());
                 }
                 resources.Clear();
                 loadedResources.Remove(zippath);

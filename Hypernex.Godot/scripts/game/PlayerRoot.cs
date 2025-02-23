@@ -274,12 +274,14 @@ namespace Hypernex.Game
                 QuickInvoke.InvokeActionOnMainThread(() =>
                 {
                     if (IsInstanceValid(Avatar))
-                        Avatar.QueueFree();
-                    Avatar = avi;
-                    if (IsInstanceValid(Avatar))
                     {
-                        AddChild(Avatar);
-                        Avatar.AttachTo(Controller);
+                        Avatar.QueueFree();
+                    }
+                    Avatar = avi;
+                    if (IsInstanceValid(avi))
+                    {
+                        AddChild(avi);
+                        avi.AttachTo(Controller);
                     }
                 });
             }).Start();

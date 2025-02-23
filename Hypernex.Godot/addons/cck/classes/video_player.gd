@@ -2,9 +2,8 @@
 class_name VideoPlayer
 extends Node
 
-@export var textureRect: TextureRect
-@export var audioPlayer3d: AudioStreamPlayer3D
-@export var loop: bool = false
+@export var VideoPlayback: NodePath
+@export var AudioPlayback: AudioStreamPlayer3D
 
 func _notification(what) -> void:
 	if what == NOTIFICATION_EDITOR_PRE_SAVE:

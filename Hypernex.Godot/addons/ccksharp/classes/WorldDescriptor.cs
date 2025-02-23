@@ -17,7 +17,7 @@ namespace Hypernex.CCK.GodotVersion.Classes
 
         public Node3D GetRandomSpawn() => GetNode<Node3D>(StartPositions[GD.Randi() % StartPositions.Length]);
 
-        public Resource GetAssetByName(string n) => Assets?.FirstOrDefault(x => x.GetMeta("name").AsString() == n);
+        public Resource GetAssetByName(string n) => Assets?.FirstOrDefault(x => x.Get("name").AsString() == n);
 
         public WorldAsset[] GetWorldAssets()
         {

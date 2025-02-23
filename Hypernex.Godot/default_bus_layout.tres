@@ -1,4 +1,7 @@
-[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://rqwnssql5wc5"]
+[gd_resource type="AudioBusLayout" load_steps=5 format=3 uid="uid://rqwnssql5wc5"]
+
+[sub_resource type="AudioEffectHardLimiter" id="AudioEffectHardLimiter_y07cl"]
+resource_name = "HardLimiter"
 
 [sub_resource type="AudioEffectCapture" id="AudioEffectCapture_22agc"]
 resource_name = "Capture"
@@ -12,6 +15,8 @@ fft_size = 0
 resource_name = "Compressor"
 
 [resource]
+bus/0/effect/0/effect = SubResource("AudioEffectHardLimiter_y07cl")
+bus/0/effect/0/enabled = true
 bus/1/name = &"Voice"
 bus/1/solo = false
 bus/1/mute = false
