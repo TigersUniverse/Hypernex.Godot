@@ -291,7 +291,7 @@ namespace Hypernex.Game
         public static AvatarRoot LoadFromFile(string path)
         {
             AvatarRoot root = new AvatarRoot();
-            ISceneProvider loader = Init.AvatarProvider();
+            ISceneProvider loader = Init.AvatarProvider(path);
             root.safeLoader = loader;
             PackedScene scn = null;
             try

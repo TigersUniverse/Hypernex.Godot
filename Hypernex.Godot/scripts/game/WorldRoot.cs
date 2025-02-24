@@ -182,7 +182,7 @@ namespace Hypernex.Game
         public static WorldRoot LoadFromFile(string path)
         {
             WorldRoot root = new WorldRoot();
-            ISceneProvider loader = Init.WorldProvider();
+            ISceneProvider loader = Init.WorldProvider(path);
             root.safeLoader = loader;
             PackedScene scn = null;
             if (IsInstanceValid(Init.Instance))

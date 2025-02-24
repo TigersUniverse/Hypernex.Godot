@@ -581,6 +581,14 @@ namespace Hypernex.CCK.GodotVersion
             return false;
         }
 
+        public static bool CanLoad(string filePath)
+        {
+            var reader = new ZipReader();
+            Error err = reader.Open(filePath);
+            reader.Close();
+            return err == Error.Ok;
+        }
+
         public PackedScene LoadFromFile(string filePath)
         {
             scene = null;

@@ -51,8 +51,8 @@ public partial class Init : Node
 
     public static bool resolverSet = false;
 
-    public static Func<ISceneProvider> WorldProvider;
-    public static Func<ISceneProvider> AvatarProvider;
+    public static readonly Dictionary<Func<string, bool>, Func<ISceneProvider>> WorldProviders = new Dictionary<Func<string, bool>, Func<ISceneProvider>>();
+    public static readonly Dictionary<Func<string, bool>, Func<ISceneProvider>> AvatarProviders = new Dictionary<Func<string, bool>, Func<ISceneProvider>>();
 
     static Init()
     {
@@ -234,6 +234,16 @@ public partial class Init : Node
         // return list;
     }
 
+    public static ISceneProvider WorldProvider(string path)
+    {
+        return WorldProviders.FirstOrDefault(x => x.Key(path)).Value?.Invoke();
+    }
+
+    public static ISceneProvider AvatarProvider(string path)
+    {
+        return AvatarProviders.FirstOrDefault(x => x.Key(path)).Value?.Invoke();
+    }
+
     public static PlayerRoot NewPlayer(bool isLocal)
     {
         if (isLocal)
@@ -339,22 +349,9 @@ public partial class Init : Node
         }
     }
 
-    public void SetupGltfSceneProviders()
-    {
-        GltfSceneLoader.Init();
-        WorldProvider = () =>
-        {
-            return new GltfSceneLoader();
-        };
-        AvatarProvider = () =>
-        {
-            return new GltfSceneLoader();
-        };
-    }
-
     public void SetupCCKSceneProviders()
     {
-        WorldProvider = () =>
+        WorldProviders.TryAdd(SafeLoader.CanLoad, () =>
         {
             SafeLoader loader = new SafeLoader();
             loader.validScripts.Add(WorldDescriptor.TypeName, SafeLoader.LoadScript<WorldDescriptor>());
@@ -374,14 +371,14 @@ public partial class Init : Node
                 throw;
             }
             return loader;
-        };
-        AvatarProvider = () =>
+        });
+        AvatarProviders.TryAdd(SafeLoader.CanLoad, () =>
         {
             SafeLoader loader = new SafeLoader();
             loader.validScripts.Add(AvatarDescriptor.TypeName, SafeLoader.LoadScript<AvatarDescriptor>());
             loader.allowedClasses = GetValidClasses(loader.validScripts);
             return loader;
-        };
+        });
     }
 
     public void OnLogin(User user)

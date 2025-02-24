@@ -159,6 +159,11 @@ namespace Hypernex.CCK.GodotVersion
         {
         }
 
+        public static bool CanLoad(string filePath)
+        {
+            return false;
+        }
+
         public PackedScene LoadFromFile(string filePath)
         {
             Error err = Error.Ok;
