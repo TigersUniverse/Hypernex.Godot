@@ -13,7 +13,7 @@ namespace Hypernex.Game
     {
         public ISceneProvider safeLoader;
         public AvatarDescriptor descriptor;
-        public IKSystem2 ikSystem;
+        public IKSystem ikSystem;
         public Node3D target;
         public List<Node> Objects = new List<Node>();
         public List<ScriptRunner> Runners = new List<ScriptRunner>();
@@ -67,20 +67,22 @@ namespace Hypernex.Game
         {
             if (IsInstanceValid(ikSystem))
                 ikSystem.QueueFree();
-            ikSystem = new IKSystem2();
+            ikSystem = new IKSystem();
             // ikSystem.forwardNode = target;
             ikSystem.humanoid = descriptor.GetSkeleton();
-            // ikSystem.SnapBackStrength = 0f;
-            // ikSystem.minStepHeight = 0f;
-            // ikSystem.maxStepHeight = 0.4f;
-            // ikSystem.minStepLength = -0.4f;
-            // ikSystem.maxStepLength = 0.4f;
+            ikSystem.SnapBackStrength = 0f;
+            ikSystem.minStepHeight = 0f;
+            ikSystem.maxStepHeight = 0.4f;
+            ikSystem.minStepLength = -0.4f;
+            ikSystem.maxStepLength = 0.4f;
+            /*
             ikSystem.footAnimCurve = new Curve();
             ikSystem.footAnimCurve.AddPoint(new Vector2(0f, 0f));
             ikSystem.footAnimCurve.AddPoint(new Vector2(0.5f, 1f));
             ikSystem.footAnimCurve.AddPoint(new Vector2(1f, 0f));
             ikSystem.minStepHeight = 0.2f;
             ikSystem.footMoveSpeed = 4f;
+            */
             // CreateBoneTree();
             ikSystem.head = "Head";
             ikSystem.hips = "Hips";

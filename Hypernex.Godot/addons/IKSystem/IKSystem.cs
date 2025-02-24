@@ -154,6 +154,15 @@ public partial class IKSystem : Node
         return humanoid.GlobalBasis.Scale.Z;
     }
 
+    public void SetHipsPosition(Vector3 pos)
+    {
+        int idx = humanoid.FindBone(hips);
+        var localPos = humanoid.GlobalTransform.AffineInverse() * pos;
+        var xform = humanoid.GetBoneGlobalPose(idx);
+        xform.Origin = localPos;
+        humanoid.SetBoneGlobalPose(idx, xform);
+    }
+
     private void LateUpdate(double delta)
     {
         if (!IsInstanceValid(humanoid))
@@ -194,7 +203,7 @@ public partial class IKSystem : Node
                 Vector2 pos = EvaluateLoop(ref leftLoopState, ref leftTimer, loopSize, speed, 0f, true);
                 float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight) * scaleLength;
                 float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
-                float x = -footDistance * 0.5f * scale;
+                float x = footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
                 float t = 0f;
@@ -218,7 +227,7 @@ public partial class IKSystem : Node
                 Vector2 pos = EvaluateLoop(ref rightLoopState, ref rightTimer, loopSize, speed, 0.5f, true);
                 float y = MapValue(pos.Y, 0f, 1f, minStepHeight * unitScaleHeight, maxStepHeight * unitScaleHeight) * scaleLength;
                 float z = MapValue(pos.X, -1f, 1f, minStepLength * unitScaleLength, maxStepLength * unitScaleLength) * scaleLength;
-                float x = footDistance * 0.5f * scale;
+                float x = -footDistance * 0.5f * scale;
 
                 Vector3 end = Vector3.Zero;
                 float t = 0f;

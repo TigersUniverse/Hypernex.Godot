@@ -57,7 +57,7 @@ namespace Hypernex.Player
             }
             if (voice != null && !Init.IsVRLoaded && root.IsLocal)
             {
-                if (Input.IsActionJustPressed("chat_voice"))
+                if (Input.IsActionJustPressed("chat_voice") && !inputs.textChatOpen)
                     voice.Recording = !voice.Recording;
             }
             if (IsInstanceValid(voice) && IsInstanceValid(voiceMeter))
