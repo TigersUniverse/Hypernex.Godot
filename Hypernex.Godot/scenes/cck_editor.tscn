@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://r2lomnr0qtj5"]
 
-[ext_resource type="Script" path="res://scripts/cck/EditMode.cs" id="1_m3rwt"]
-[ext_resource type="Script" path="res://scripts/cck/SceneEditor.cs" id="2_frvxk"]
-[ext_resource type="Script" path="res://scripts/game/Entity3D.cs" id="3_16yv6"]
+[ext_resource type="Script" uid="uid://cwk2tr7pu7bdy" path="res://scripts/cck/EditMode.cs" id="1_m3rwt"]
+[ext_resource type="Script" uid="uid://drfnusqwlcv0l" path="res://scripts/cck/SceneEditor.cs" id="2_frvxk"]
+[ext_resource type="Script" uid="uid://bhouk5r7s8d6b" path="res://scripts/game/Entity3D.cs" id="3_16yv6"]
 
 [sub_resource type="Theme" id="Theme_75xxj"]
 default_font_size = 12

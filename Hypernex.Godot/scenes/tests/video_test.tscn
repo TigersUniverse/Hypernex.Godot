@@ -1,9 +1,9 @@
 [gd_scene load_steps=6 format=3 uid="uid://jlpobcw81vsn"]
 
-[ext_resource type="Script" path="res://scripts/game/tests/VideoTest.cs" id="1_tlyc4"]
-[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="2_xgmfo"]
-[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="3_f4ogg"]
-[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="4_g05c4"]
+[ext_resource type="Script" uid="uid://jsyvube2qho7" path="res://scripts/game/tests/VideoTest.cs" id="1_tlyc4"]
+[ext_resource type="Script" uid="uid://bxyvnflcekwcj" path="res://addons/FFplay/FFPlayGodot.cs" id="2_xgmfo"]
+[ext_resource type="Script" uid="uid://b7gp2dbqwa7ub" path="res://addons/FFplay/FFTexturePlayer.cs" id="3_f4ogg"]
+[ext_resource type="Script" uid="uid://coxso8iwwphy5" path="res://addons/FFplay/FFAudioPlayer.cs" id="4_g05c4"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_8aond"]
 

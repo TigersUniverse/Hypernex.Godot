@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bh1jifj5n3y82"]
 
-[ext_resource type="Script" path="res://addons/cck/cck_window.gd" id="1_i1s5v"]
+[ext_resource type="Script" uid="uid://duftu12evap24" path="res://addons/cck/cck_window.gd" id="1_i1s5v"]
 
 [node name="CCK" type="Control"]
 layout_mode = 3

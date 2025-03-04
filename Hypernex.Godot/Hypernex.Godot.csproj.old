@@ -1,0 +1,56 @@
+<Project Sdk="Godot.NET.Sdk/4.3.0">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="android\**" />
+    <Compile Remove="addons\**" />
+    <Compile Include="addons\ccksharp\**\*.cs" />
+    <Compile Include="addons\FastIK\**\*.cs" />
+    <Compile Include="addons\IKSystem\**\*.cs" />
+    <Compile Include="addons\FFplay\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="addons\VoiceChat\VoiceChat.csproj" />
+    <ProjectReference Include="addons\Flite\Flite.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="HypernexSharp">
+      <HintPath>addons\HypernexSharp\HypernexSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Hypernex.CCK">
+      <HintPath>addons\Hypernex.CCK\Hypernex.CCK.dll</HintPath>
+    </Reference>
+    <Reference Include="Nexbox">
+      <HintPath>addons\Nexbox\Nexbox.dll</HintPath>
+    </Reference>
+    <Reference Include="Nexport">
+      <HintPath>addons\Nexport\Nexport.dll</HintPath>
+    </Reference>
+    <Reference Include="Hypernex.Networking">
+      <HintPath>addons\Hypernex.Networking\Hypernex.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="Tomlet">
+      <HintPath>addons\Tomlet\Tomlet.dll</HintPath>
+    </Reference>
+    <Reference Include="MessagePack">
+      <HintPath>addons\Nexport\MessagePack.dll</HintPath>
+    </Reference>
+    <Reference Include="MessagePack.Annotations">
+      <HintPath>addons\Nexport\MessagePack.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="CobaltSharp">
+      <HintPath>addons\CobaltSharp\CobaltSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
+    <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
+    <PackageReference Include="YoutubeDLSharp" Version="1.1.1" />
+    <PackageReference Include="MessagePack" Version="3.1.2" />
+    <PackageReference Include="ZstdSharp.Port" Version="0.8.4" />
+  </ItemGroup>
+</Project>

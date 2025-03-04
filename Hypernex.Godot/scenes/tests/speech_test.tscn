@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cwhucrewiej4u"]
 
-[ext_resource type="Script" path="res://scripts/game/tests/FliteTest.cs" id="1_2rytf"]
+[ext_resource type="Script" uid="uid://b1ltiy8564hpe" path="res://scripts/game/tests/FliteTest.cs" id="1_2rytf"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qcebf"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)

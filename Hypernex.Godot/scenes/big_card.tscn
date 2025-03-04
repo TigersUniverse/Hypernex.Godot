@@ -1,11 +1,11 @@
 [gd_scene load_steps=8 format=3 uid="uid://bc42bxyk4uvjk"]
 
-[ext_resource type="Script" path="res://scripts/ui/BigCardTemplate.cs" id="1_3gxw0"]
+[ext_resource type="Script" uid="uid://dmaep0hpef28l" path="res://scripts/ui/BigCardTemplate.cs" id="1_3gxw0"]
 [ext_resource type="PackedScene" uid="uid://ct7xyaxn1p1cf" path="res://scenes/card.tscn" id="2_2xvhd"]
-[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="3_ij3x7"]
+[ext_resource type="Script" uid="uid://bxyvnflcekwcj" path="res://addons/FFplay/FFPlayGodot.cs" id="3_ij3x7"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="3_p0uxf"]
-[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="4_eqq08"]
-[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="5_mksux"]
+[ext_resource type="Script" uid="uid://b7gp2dbqwa7ub" path="res://addons/FFplay/FFTexturePlayer.cs" id="4_eqq08"]
+[ext_resource type="Script" uid="uid://coxso8iwwphy5" path="res://addons/FFplay/FFAudioPlayer.cs" id="5_mksux"]
 
 [sub_resource type="Theme" id="Theme_cbfv0"]
 RichTextLabel/colors/default_color = Color(1, 1, 1, 1)

@@ -1,9 +1,9 @@
 [gd_scene load_steps=15 format=3 uid="uid://b4nrx2xxp1xio"]
 
-[ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_e3jbc"]
-[ext_resource type="Script" path="res://scripts/player/PlayerInputs.cs" id="2_777if"]
-[ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_4k47x"]
-[ext_resource type="Script" path="res://scripts/player/PlayerChat.cs" id="4_r7ubo"]
+[ext_resource type="Script" uid="uid://cbk2y6f4hgnpe" path="res://scripts/game/PlayerRoot.cs" id="1_e3jbc"]
+[ext_resource type="Script" uid="uid://wn7nonlemijj" path="res://scripts/player/PlayerInputs.cs" id="2_777if"]
+[ext_resource type="Script" uid="uid://cvmqop454w464" path="res://scripts/player/PlayerController.cs" id="3_4k47x"]
+[ext_resource type="Script" uid="uid://bgjbj4243t0sf" path="res://scripts/player/PlayerChat.cs" id="4_r7ubo"]
 [ext_resource type="Texture2D" uid="uid://bld874d24tptw" path="res://textures/external/microphone-line-icon.png" id="5_35sqb"]
 [ext_resource type="Texture2D" uid="uid://bsia472ymxhlq" path="res://textures/external/microphone-line-icon-white.png" id="6_3o0os"]
 

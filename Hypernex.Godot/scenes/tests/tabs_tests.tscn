@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bl12grgo3j7vi"]
 
-[ext_resource type="Script" path="res://scripts/ui/generic/TabGroup.cs" id="1_jiyfc"]
-[ext_resource type="Script" path="res://scripts/ui/generic/TabOpenButton.cs" id="2_6r5ps"]
+[ext_resource type="Script" uid="uid://chhtf1176hsr8" path="res://scripts/ui/generic/TabGroup.cs" id="1_jiyfc"]
+[ext_resource type="Script" uid="uid://cv3452pemdsw2" path="res://scripts/ui/generic/TabOpenButton.cs" id="2_6r5ps"]
 
 [node name="TabsTests" type="Control"]
 layout_mode = 3

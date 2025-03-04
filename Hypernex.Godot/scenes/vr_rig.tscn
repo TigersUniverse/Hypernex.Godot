@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=3 uid="uid://d3kcsxyx7aa6i"]
 
-[ext_resource type="Script" path="res://scripts/VRRig.cs" id="1_1xyfp"]
-[ext_resource type="Script" path="res://addons/ccksharp/classes/UICanvas.cs" id="2_lc2vd"]
+[ext_resource type="Script" uid="uid://d1l3o8nn5qs1i" path="res://scripts/VRRig.cs" id="1_1xyfp"]
+[ext_resource type="Script" uid="uid://c1s653dbwjln" path="res://addons/ccksharp/classes/UICanvas.cs" id="2_lc2vd"]
 [ext_resource type="Texture2D" uid="uid://bld874d24tptw" path="res://textures/external/microphone-line-icon.png" id="2_w7nix"]
 [ext_resource type="Texture2D" uid="uid://bsia472ymxhlq" path="res://textures/external/microphone-line-icon-white.png" id="3_rmdkd"]
 

@@ -1,9 +1,9 @@
 [gd_scene load_steps=10 format=3 uid="uid://dyvx634j6ne8i"]
 
-[ext_resource type="Script" path="res://scripts/game/PlayerRoot.cs" id="1_2jxjk"]
-[ext_resource type="Script" path="res://scripts/player/PlayerChat.cs" id="3_hirej"]
+[ext_resource type="Script" uid="uid://cbk2y6f4hgnpe" path="res://scripts/game/PlayerRoot.cs" id="1_2jxjk"]
+[ext_resource type="Script" uid="uid://bgjbj4243t0sf" path="res://scripts/player/PlayerChat.cs" id="3_hirej"]
 [ext_resource type="Texture2D" uid="uid://dk73srccpn0nj" path="res://textures/external/sound-icon.png" id="3_vfepr"]
-[ext_resource type="Script" path="res://scripts/player/PlayerController.cs" id="3_xjfqe"]
+[ext_resource type="Script" uid="uid://cvmqop454w464" path="res://scripts/player/PlayerController.cs" id="3_xjfqe"]
 [ext_resource type="Texture2D" uid="uid://clus3sqi4u28x" path="res://textures/external/sound-icon-white.png" id="4_ei333"]
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_npv2m"]

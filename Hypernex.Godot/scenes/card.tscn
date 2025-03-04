@@ -1,11 +1,11 @@
 [gd_scene load_steps=7 format=3 uid="uid://ct7xyaxn1p1cf"]
 
-[ext_resource type="Script" path="res://scripts/ui/CardTemplate.cs" id="1_41cr0"]
+[ext_resource type="Script" uid="uid://sdvl8np2sh43" path="res://scripts/ui/CardTemplate.cs" id="1_41cr0"]
 [ext_resource type="Texture2D" uid="uid://cuhcp6abu2ly7" path="res://textures/defaults/defaultbanner.jpg" id="2_raub8"]
-[ext_resource type="Script" path="res://addons/FFplay/FFPlayGodot.cs" id="3_ahwr6"]
+[ext_resource type="Script" uid="uid://bxyvnflcekwcj" path="res://addons/FFplay/FFPlayGodot.cs" id="3_ahwr6"]
 [ext_resource type="Texture2D" uid="uid://pr14mfjw31m7" path="res://textures/defaults/defaultpfp.jpg" id="3_pb736"]
-[ext_resource type="Script" path="res://addons/FFplay/FFTexturePlayer.cs" id="5_6p43k"]
-[ext_resource type="Script" path="res://addons/FFplay/FFAudioPlayer.cs" id="5_ob1px"]
+[ext_resource type="Script" uid="uid://b7gp2dbqwa7ub" path="res://addons/FFplay/FFTexturePlayer.cs" id="5_6p43k"]
+[ext_resource type="Script" uid="uid://coxso8iwwphy5" path="res://addons/FFplay/FFAudioPlayer.cs" id="5_ob1px"]
 
 [node name="Card" type="Control" node_paths=PackedStringArray("icon", "background", "label", "videoIcon", "videoBackground", "menu")]
 custom_minimum_size = Vector2(250, 100)

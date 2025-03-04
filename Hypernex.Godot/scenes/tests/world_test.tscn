@@ -1,13 +1,13 @@
 [gd_scene load_steps=17 format=3 uid="uid://blqal6vcg8rus"]
 
-[ext_resource type="Script" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
+[ext_resource type="Script" uid="uid://snh2hmurgpim" path="res://scripts/game/tests/WorldTest.cs" id="1_hscsn"]
 [ext_resource type="ArrayMesh" uid="uid://8fh43rn8e82k" path="res://models/plane.obj" id="3_j1wr1"]
-[ext_resource type="Script" path="res://addons/ccksharp/classes/GrabbableDescriptor.cs" id="3_llqxc"]
-[ext_resource type="Script" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
-[ext_resource type="Script" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
-[ext_resource type="Script" path="res://addons/cck/classes/reverb_zone.gd" id="5_a4oh0"]
-[ext_resource type="Script" path="res://addons/ccksharp/classes/UICanvas.cs" id="6_yh4eb"]
-[ext_resource type="Script" path="res://addons/cck/classes/ui_canvas.gd" id="7_dqm2x"]
+[ext_resource type="Script" uid="uid://d4kpw1k7dawt8" path="res://addons/ccksharp/classes/GrabbableDescriptor.cs" id="3_llqxc"]
+[ext_resource type="Script" uid="uid://bouvegtmqh50r" path="res://addons/cck/classes/world_descriptor.gd" id="3_xf3ip"]
+[ext_resource type="Script" uid="uid://c4nx3silfyukc" path="res://addons/cck/classes/world_script.gd" id="4_fatwa"]
+[ext_resource type="Script" uid="uid://etqogbq8juew" path="res://addons/cck/classes/reverb_zone.gd" id="5_a4oh0"]
+[ext_resource type="Script" uid="uid://c1s653dbwjln" path="res://addons/ccksharp/classes/UICanvas.cs" id="6_yh4eb"]
+[ext_resource type="Script" uid="uid://c2tqtxstvqryh" path="res://addons/cck/classes/ui_canvas.gd" id="7_dqm2x"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sxber"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)

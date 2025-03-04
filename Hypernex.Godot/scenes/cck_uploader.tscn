@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://j14hews4kqtu"]
 
-[ext_resource type="Script" path="res://scripts/ui/CCKController.cs" id="1_r2ofs"]
-[ext_resource type="Script" path="res://scripts/ui/CCKUploadController.cs" id="2_rjuw4"]
+[ext_resource type="Script" uid="uid://7v4o6n8gm5xy" path="res://scripts/ui/CCKController.cs" id="1_r2ofs"]
+[ext_resource type="Script" uid="uid://ecd7u4huhlc7" path="res://scripts/ui/CCKUploadController.cs" id="2_rjuw4"]
 
 [node name="CCKController" type="Control"]
 layout_mode = 3
